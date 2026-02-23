@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magnetfeld einer Spule</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --panel: #111827;
+    --border: #1e293b;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --glow: 0 0 20px rgba(0,212,255,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow-x: hidden;
+  }
+
+  header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(90deg, #0a0e1a 0%, #111827 100%);
+  }
+
+  .header-icon {
+    width: 40px; height: 40px;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--glow);
+  }
+
+  h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
+  h1 span { color: var(--accent); }
+  .subtitle { font-size: 0.75rem; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 2px; }
+
+  main {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    height: calc(100vh - 73px);
+  }
+
+  /* VIZ */
+  .viz-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--bg);
+  }
+
+  .viz-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .viz-card canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 6px;
+  }
+
+  .controls {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 0.65rem;
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .control-group { display: flex; flex-direction: column; gap: 1rem; }
+  .control-item { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .control-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .label-name { font-size: 0.9rem; font-weight: 600; }
+  .label-symbol { font-size: 0.75rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+  .label-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px rgba(0,212,255,0.6);
+    transition: transform 0.1s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+  .result-box {
+    background: rgba(0,212,255,0.05);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .result-row:last-child { border-bottom: none; }
+
+  .result-label { font-size: 0.8rem; color: var(--muted); }
+  .result-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .result-val.big {
+    font-size: 1.3rem;
+    color: #fff;
+    text-shadow: 0 0 15px var(--accent);
+  }
+
+  @media (max-width: 768px) {
+    main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .controls { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+      <path d="M12 8v8M8 12h8"/>
+    </svg>
+  </div>
+  <div>
+    <h1>Magnetfeld <span>einer Spule</span></h1>
+    <div class="subtitle">// Claßen @ Amplonius</div>
+  </div>
+</header>
+
+<main>
+  <aside class="controls">
+    <div>
+      <div class="section-title">Parameter einstellen</div>
+      <div class="control-group">
+
+        <div class="control-item">
+          <div class="control-label">
+            <span class="label-name">Stromstärke <span class="label-symbol">I</span></span>
+            <span class="label-value" id="val-I">2.0 A</span>
+          </div>
+          <input type="range" id="slider-I" min="0.1" max="10" step="0.1" value="2">
+        </div>
+
+        <div class="control-item">
+          <div class="control-label">
+            <span class="label-name">Windungszahl <span class="label-symbol">N</span></span>
+            <span class="label-value" id="val-N">100</span>
+          </div>
+          <input type="range" id="slider-N" min="10" max="500" step="10" value="100">
+        </div>
+
+        <div class="control-item">
+          <div class="control-label">
+            <span class="label-name">Spulenlänge <span class="label-symbol">l</span></span>
+            <span class="label-value" id="val-l">0.20 m</span>
+          </div>
+          <input type="range" id="slider-l" min="0.05" max="0.5" step="0.01" value="0.2">
+        </div>
+
+        <div class="control-item">
+          <div class="control-label">
+            <span class="label-name">Spulenradius <span class="label-symbol">R</span></span>
+            <span class="label-value" id="val-R">3.0 cm</span>
+          </div>
+          <input type="range" id="slider-R" min="0.5" max="10" step="0.5" value="3">
+        </div>
+
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Berechnete Größen</div>
+      <div class="result-box">
+
+        <div class="result-row">
+          <span class="result-label">Magnetfeld B (Zentrum)</span>
+          <span class="result-val big" id="res-B">1.257 mT</span>
+        </div>
+
+      </div>
+    </div>
+
+  </aside>
+
+  <div class="viz-area">
+    <div class="viz-card">
+      <canvas id="coil-canvas" width="500" height="300"></canvas>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const MU0 = 4 * Math.PI * 1e-7;
+
+function calcB(I, N, l) {
+  return MU0 * (N / l) * I;
+}
+
+function formatB(B) {
+  return (B * 1e6).toFixed(1) + ' µT';
+}
+
+let state = { I: 2, N: 100, l: 0.2, R: 0.03 };
+
+const sliderI = document.getElementById('slider-I');
+const sliderN = document.getElementById('slider-N');
+const sliderL = document.getElementById('slider-l');
+const sliderR = document.getElementById('slider-R');
+
+// ── CANVAS ──────────────────────────────────────────────
+function drawCoil() {
+  const canvas = document.getElementById('coil-canvas');
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#080c14';
+  ctx.fillRect(0, 0, W, H);
+
+  // Layout constants
+  const capW   = 18;
+  const padX   = 40;           // space for lead wires outside caps
+  const maxCoilW = W - 2 * (padX + capW);  // maximum coil width (at l=0.5m)
+  const minCoilW = maxCoilW * 0.12;         // minimum coil width (at l=0.05m)
+  // Scale coil width linearly with l
+  const coilW  = minCoilW + (state.l - 0.05) / (0.5 - 0.05) * (maxCoilW - minCoilW);
+  const coilX  = (W - coilW) / 2 - capW;  // center the coil
+  const midY   = H / 2;
+  const coilH  = Math.min(H * 0.72, 2 * state.R * 1800);
+  const halfH  = coilH / 2;
+
+  // Number of visible winding layers (rows of wire)
+  const nRows = Math.max(2, Math.min(40, Math.round(state.N / 6)));
+  // Number of wire columns per row
+  const nCols = Math.max(4, Math.min(60, Math.round(state.N / nRows)));
+
+  const wireD   = coilH / nRows;          // wire diameter in pixels
+  const colStep = coilW / nCols;
+
+  // ── Core body (insulating former) ──
+  const innerX = coilX + capW;
+  const coreGrad = ctx.createLinearGradient(0, midY - halfH, 0, midY + halfH);
+  coreGrad.addColorStop(0,   '#2a1a0a');
+  coreGrad.addColorStop(0.5, '#3d2510');
+  coreGrad.addColorStop(1,   '#2a1a0a');
+  ctx.fillStyle = coreGrad;
+  ctx.fillRect(innerX, midY - halfH, coilW, coilH);
+
+  // ── Winding wires ──
+  for (let row = 0; row < nRows; row++) {
+    const y = midY - halfH + row * wireD + wireD / 2;
+
+    for (let col = 0; col < nCols; col++) {
+      const x = innerX + col * colStep + colStep / 2;
+      const r = wireD * 0.46;
+
+      // Wire body (copper gradient)
+      const wg = ctx.createRadialGradient(x - r*0.3, y - r*0.3, r*0.05, x, y, r);
+      wg.addColorStop(0,   '#f0c060');
+      wg.addColorStop(0.4, '#c88030');
+      wg.addColorStop(0.75,'#8B4513');
+      wg.addColorStop(1,   '#4a2008');
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = wg;
+      ctx.fill();
+
+      // Specular highlight
+      ctx.beginPath();
+      ctx.arc(x - r * 0.28, y - r * 0.28, r * 0.25, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,220,120,0.55)';
+      ctx.fill();
+    }
+  }
+
+  // ── End caps ──
+  const capGrad = (x0) => {
+    const g = ctx.createLinearGradient(x0, 0, x0 + capW, 0);
+    g.addColorStop(0,   '#1a1a1a');
+    g.addColorStop(0.4, '#3a3a3a');
+    g.addColorStop(1,   '#111');
+    return g;
+  };
+  // Left cap
+  ctx.fillStyle = capGrad(coilX);
+  ctx.fillRect(coilX, midY - halfH - 4, capW, coilH + 8);
+  // Right cap
+  ctx.fillStyle = capGrad(coilX + capW + coilW);
+  ctx.fillRect(coilX + capW + coilW, midY - halfH - 4, capW, coilH + 8);
+
+  // Thin border on caps
+  ctx.strokeStyle = '#555';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(coilX, midY - halfH - 4, capW, coilH + 8);
+  ctx.strokeRect(coilX + capW + coilW, midY - halfH - 4, capW, coilH + 8);
+
+  // ── Anschlüsse (connector pins) ──
+  const pinBottomY = midY + halfH + 4;  // start at bottom of cap
+  const pinLen     = 36;
+  const pinR       = 5;
+  const copperWire = '#c88030';
+  const copperTip  = '#b87333';
+
+  // Left connector (goes down)
+  const lPinX = coilX + capW * 0.5;
+  ctx.strokeStyle = copperWire;
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(lPinX, pinBottomY);
+  ctx.lineTo(lPinX, pinBottomY + pinLen);
+  ctx.stroke();
+  // Tip circle
+  const lgL = ctx.createRadialGradient(lPinX - 2, pinBottomY + pinLen - 2, 1, lPinX, pinBottomY + pinLen, pinR);
+  lgL.addColorStop(0, '#f0c060');
+  lgL.addColorStop(0.5, copperTip);
+  lgL.addColorStop(1, '#4a2008');
+  ctx.beginPath();
+  ctx.arc(lPinX, pinBottomY + pinLen, pinR, 0, Math.PI * 2);
+  ctx.fillStyle = lgL;
+  ctx.fill();
+  ctx.strokeStyle = '#7a4010';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Right connector (goes down)
+  const rPinX = coilX + capW + coilW + capW * 0.5;
+  ctx.strokeStyle = copperWire;
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(rPinX, pinBottomY);
+  ctx.lineTo(rPinX, pinBottomY + pinLen);
+  ctx.stroke();
+  // Tip circle
+  const lgR = ctx.createRadialGradient(rPinX - 2, pinBottomY + pinLen - 2, 1, rPinX, pinBottomY + pinLen, pinR);
+  lgR.addColorStop(0, '#f0c060');
+  lgR.addColorStop(0.5, copperTip);
+  lgR.addColorStop(1, '#4a2008');
+  ctx.beginPath();
+  ctx.arc(rPinX, pinBottomY + pinLen, pinR, 0, Math.PI * 2);
+  ctx.fillStyle = lgR;
+  ctx.fill();
+  ctx.strokeStyle = '#7a4010';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.lineCap = 'butt';
+
+
+
+  // ── Dimension label: coil length ──
+  const innerLeft  = coilX + capW;
+  const innerRight = coilX + capW + coilW;
+  const arrowY = midY + halfH + 22;
+  ctx.strokeStyle = 'rgba(100,116,139,0.7)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(innerLeft, arrowY);
+  ctx.lineTo(innerRight, arrowY);
+  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(innerLeft,  arrowY - 5); ctx.lineTo(innerLeft,  arrowY + 5); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(innerRight, arrowY - 5); ctx.lineTo(innerRight, arrowY + 5); ctx.stroke();
+  ctx.fillStyle = 'rgba(100,116,139,0.9)';
+  ctx.font = '12px Space Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('l = ' + state.l.toFixed(2) + ' m', innerLeft + coilW / 2, arrowY + 14);
+
+  // ── Dimension label: radius ──
+  const rArrowX = innerRight - 12;
+  ctx.strokeStyle = 'rgba(100,116,139,0.7)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(rArrowX, midY); ctx.lineTo(rArrowX, midY - halfH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(rArrowX - 4, midY);        ctx.lineTo(rArrowX + 4, midY);        ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(rArrowX - 4, midY - halfH); ctx.lineTo(rArrowX + 4, midY - halfH); ctx.stroke();
+  ctx.fillStyle = 'rgba(100,116,139,0.9)';
+  ctx.font = '12px Space Mono, monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText('R = ' + (state.R * 100).toFixed(1) + ' cm', rArrowX - 6, midY - halfH / 2 + 4);
+}
+// ────────────────────────────────────────────────────────
+
+function updateValues() {
+  state.I = parseFloat(sliderI.value);
+  state.N = parseFloat(sliderN.value);
+  state.l = parseFloat(sliderL.value);
+  state.R = parseFloat(sliderR.value) / 100;
+
+  document.getElementById('val-I').textContent = state.I.toFixed(1) + ' A';
+  document.getElementById('val-N').textContent = Math.round(state.N);
+  document.getElementById('val-l').textContent = state.l.toFixed(2) + ' m';
+  document.getElementById('val-R').textContent = (state.R * 100).toFixed(1) + ' cm';
+
+  const B = calcB(state.I, state.N, state.l);
+  document.getElementById('res-B').textContent = formatB(B);
+
+  drawCoil();
+}
+
+[sliderI, sliderN, sliderL, sliderR].forEach(s => s.addEventListener('input', updateValues));
+
+updateValues();
+</script>
+</body>
+</html>
