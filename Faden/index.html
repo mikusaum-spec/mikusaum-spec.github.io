@@ -1,0 +1,458 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html class="LEIFI_html">
+	<head>
+		<title>Fadenstrahlrohr - Versuch (Simulation)</title>
+		<style>
+html.LEIFI_html {
+	width: 100%;
+	height: 100%;
+	}
+
+body.LEIFI_body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	overflow: hidden;
+	}
+
+div.LEIFI_animation {
+	position: relative;
+	margin: auto;
+	background-color: #FAFAFA;
+	border: 1px solid grey;
+	}
+
+div.LEIFI_leinwand {
+	position: absolute;
+	}
+
+div.LEIFI_steuerung {
+	position: absolute;
+	text-align: center;
+	}
+
+div.LEIFI_2knoepfe {
+	position: relative;
+	margin: 5px auto 5px auto;
+	width: 60px;
+	}
+
+div.LEIFI_3knoepfe {
+	position: relative;
+	margin: 5px auto 5px auto;
+	width: 90px;
+	}
+
+input.LEIFI_knopf_links {
+	float: left;
+	width: 30px;
+	height: auto;
+	}
+
+input.LEIFI_knopf_mitte {
+	margin-left:auto;
+	margin-right:auto;
+	width: 30px;
+	height: auto;
+	}
+
+input.LEIFI_knopf_rechts {
+	float: right;
+	width: 30px;
+	height: auto;
+	}
+
+div.LEIFI_parameter {
+	position: absolute;
+	}
+
+div.LEIFI_parameter div {
+	position: absolute;
+	text-align: center;
+	}
+
+span.LEIFI_span_zentriert {
+	position: absolute;
+	margin-left: 10px;
+	text-align: center;
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	white-space: nowrap;
+	}
+
+span.LEIFI_span {
+	position: absolute;
+	margin-left: 10px;
+	text-align: left;
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	white-space: nowrap;
+	}
+
+input[type="range"].LEIFI_range {
+	position: absolute;
+	margin-left: 10px;
+	}
+
+input[type="range"].LEIFI_range::-ms-tooltip {
+	display: none;
+	}
+
+input[type="checkbox"].LEIFI_checkbox {
+	margin-left: 10px;
+	}
+
+input[type="button"].LEIFI_button {
+	position: absolute;
+	margin-left: 10px;
+	text-align: center;
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	white-space: nowrap;
+	}
+
+button.LEIFI_button {
+	height: 30px;
+	border-radius: 0px;
+	margin-left: 10px;
+	background-color: #CCCCCC;
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	}
+
+input[type="radio"].LEIFI_radio {
+	margin-left: 10px;
+	}
+
+label.LEIFI_label {
+	margin-left: 5px;
+	vertical-align: 2px;
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	white-space: nowrap;
+	}
+
+select.LEIFI_select {
+	position: absolute;
+	margin-left: 10px;
+	margin-top:-3.5px;
+	height: 20px;
+	border-radius: 0px;
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	}
+
+textarea.LEIFI_textarea {
+	position: absolute;
+	margin-left: 10px;	
+	padding: 3px;
+	border-radius: 0px;
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+	}
+
+input[type="text"].LEIFI_text {
+	position: absolute;
+	margin-left: 10px;
+	margin-top:-3.5px;
+	padding-left: 2px;
+	height: 16px;
+	border-radius: 0px;
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: bold;
+	}
+</style>
+	</head>
+	<body class="LEIFI_body">
+		<div class="LEIFI_animation" style="width:800px; height:600px">
+			<div class="LEIFI_parameter" style="left:0px; top:0px; width:200px; height:600px">
+				<div style="top:20px"><span class="LEIFI_span_zentriert" style="width:180px">Heizspannung</span></div>
+				<div style="top:40px"><span class="LEIFI_span_zentriert" id="fsrv_uh_text" style="width:180px"><em>U</em><sub>H</sub></span></div>
+				<div style="top:60px"><input type="range" class="LEIFI_range" id="fsrv_uh" style="width:180px"></div>
+				<div style="top:90px"><span class="LEIFI_span_zentriert" style="width:180px">Beschleunigungsspannung</span></div>
+				<div style="top:110px"><span class="LEIFI_span_zentriert" id="fsrv_ub_text" style="width:180px"><em>U</em><sub>B</sub></span></div>
+				<div style="top:130px"><input type="range" class="LEIFI_range" id="fsrv_ub" style="width:180px"></div>
+				<div style="top:160px"><span class="LEIFI_span_zentriert" style="width:180px">Spulenstrom</span></div>
+				<div style="top:180px"><span class="LEIFI_span_zentriert" id="fsrv_is_text" style="width:180px"><em>I</em><sub>S</sub></span></div>
+				<div style="top:200px"><input type="range" class="LEIFI_range" id="fsrv_is" style="width:180px"></div>
+			</div>
+			<div class="LEIFI_leinwand" style="left:200px; top:0px; width:600px; height:600px"><canvas width="650" height="600" id="fsrv_leinwand" >HTML5-Canvas nicht unterst&uuml;tzt!</canvas></div>
+			<script>
+// Fadenstrahlrohr - Versuch (Simulation)
+// 19.12.2016
+
+// ****************************************************************************
+// * Autor: Thomas Unkelbach für LEIFIphysik.de                               *
+// * Dieses Programm darf - auch in veränderter Form - für nicht-kommerzielle *
+// * Zwecke verwendet und weitergegeben werden, solange dieser Hinweis nicht  *
+// * entfernt wird.                                                           *
+// ****************************************************************************
+
+document.addEventListener("DOMContentLoaded",fadenstrahlrohr_versuch(),false);
+
+function fadenstrahlrohr_versuch() {
+
+var canvas = document.getElementById("fsrv_leinwand");
+var ctx = canvas.getContext("2d");
+
+var uh = document.getElementById("fsrv_uh");
+	uh.min = 0;
+	uh.max = 6;
+	uh.step = 0.1;
+	uh.value = fsrv_uh.min;
+	uh.addEventListener("change", aktualisiere, false);
+	uh.addEventListener("input", aktualisiere, false);
+var uh_text = document.getElementById("fsrv_uh_text");
+
+var ub = document.getElementById("fsrv_ub");
+	ub.min = 0;
+	ub.max = 300;
+	ub.step = 10;
+	ub.value = fsrv_ub.min;
+	ub.addEventListener("change", aktualisiere, false);
+	ub.addEventListener("input", aktualisiere, false);
+var ub_text = document.getElementById("fsrv_ub_text");
+
+var is = document.getElementById("fsrv_is");
+	is.min = 0;
+	is.max = 2.5;
+	is.step = 0.01;
+	is.value = fsrv_is.min;
+	is.addEventListener("change", aktualisiere, false);
+	is.addEventListener("input", aktualisiere, false);
+var is_text = document.getElementById("fsrv_is_text");
+
+var Rechteck = {
+	x: 85,
+	y: 300,
+	breite: 30,
+	hoehe: 100,
+	farbe: "#DDDDDD",
+	randbreite: 1,
+	randfarbe: "#000000",
+	randenden: "round"
+	};
+
+var Feder = {
+	xa: 90,
+	ya: 390,
+	xe: 110,
+	ye: 390,
+	dx: 0,
+	dy: 5,
+	anzahl: 6,
+	farbe: "#000000",
+	breite: 1,
+	enden: "round"
+	};
+
+var AchseHorizontal = {
+	x: 100,
+	y: 300,
+	breite: 400,
+	xanfang: 0,
+	xende: 10,
+	achsenfarbe: "#000000",
+	achsenlinienbreite: 1,
+	achsenlinienenden: "round",
+
+	xstriche: true,
+	xstricheanfang: 0,
+	xstricheende: 9.6,
+	xstricheschrittweite: 0.2,
+	xhoehe: 10,
+
+	xtext1schriftart: "italic bold 12pt Arial",
+	xtext1: "2·r",
+	xtext1xversatz: -50,
+	xtext2schriftart: "normal bold 12pt Arial",
+	xtext2: "in cm",
+	xtext2xversatz: -25,
+	xtextyversatz: -7,
+	xursprung: false,
+	xskala: true,
+	xskalaanfang: 1,
+	xskalaende: 9,
+	xskalaschrittweite: 1,
+	xskalastellen: 0,
+	xskalaxversatz: -5,
+	xskalayversatz: 20,
+
+	eps: 0.01
+	}
+
+var e = 1.602e-19;
+var me = 9.109e-31;
+var mue0 = 4*Math.PI*1e-7;
+var R = 0.15;	// PHYWE
+var N = 130;	// PHYWE
+var k = Math.SQRT2 * R / (Math.sqrt(e/me) * mue0 * N * 8 / Math.sqrt(125));
+
+aktualisiere ();
+
+function aktualisiere() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	
+	uh_text.innerHTML = "<em>U</em><sub>H</sub> = " + uh.value + "V";
+	ub_text.innerHTML = "<em>U</em><sub>B</sub> = " + ub.value + "V";
+	is_text.innerHTML = "<em>I</em><sub>S</sub> = " + is.value + "A";
+
+	zeichneRechteck(ctx,Rechteck);
+	for (var i=-5 ; i<=5 ; i++) {
+		zeichneKreislinieDirekt(ctx,300,300,270 + i*2.5,"#FF8000",1,"#FF8000")
+		}
+	zeichneAchseHorizontal (ctx,AchseHorizontal);
+	if (uh.value <= 3)	
+		Feder.farbe = rgb2farbe(Math.round(uh.value/3*255),Math.round(uh.value/6*255),0);
+	else
+		Feder.farbe = rgb2farbe(255,Math.round(uh.value/6*255),0);
+	zeichneFederHorizontal(ctx,Feder);
+
+	if (uh.value > 0 && ub.value > 0) {
+		if (is.value == 0) {
+			ctx.save();
+ 		     	ctx.beginPath();
+			ctx.arc(300,300,250,Math.PI,0,false);
+			ctx.clip();
+			zeichneStreckeDirekt(ctx,100,300,100,0,"#88CFD7",uh.value/2+ub.value/4000,"round");
+			ctx.restore();
+			}
+		else {
+			var r = k * Math.sqrt(ub.value) / is.value;
+			if ( r > 0.056) {
+				ctx.save();
+			      	ctx.beginPath();
+				ctx.arc(300,300,250,Math.PI,0,false);
+				ctx.clip();
+				zeichneKreislinieDirekt(ctx,100+40*100*r,300,40*100*r,"#88CFD7",uh.value/2+ub.value/4000,"#88CFD7");
+				ctx.restore();
+				}
+			else {
+				ctx.save();
+			      	ctx.beginPath();
+				ctx.arc(300,300,250,0,2*Math.PI,false);
+				ctx.clip();
+				zeichneKreislinieDirekt(ctx,100+40*100*r,300,40*100*r,"#88CFD7",uh.value/2+ub.value/4000,"#88CFD7");
+				ctx.restore();
+				}
+			}
+		}
+	}
+
+function zeichneRechteck(ctx,R) {
+    ctx.beginPath();
+    ctx.rect(R.x, R.y, R.breite, R.hoehe);
+    ctx.fillStyle = R.farbe;
+    ctx.fill();
+    if (R.randbreite > 0){
+        ctx.lineWidth = R.randbreite;
+        ctx.strokeStyle = R.randfarbe;
+	ctx.lineCap = R.randenden;
+        ctx.stroke();
+        }
+    }
+
+function zeichneAchseHorizontal (ctx,A) {
+	var xa = A.x;
+	var xe = A.x + A.breite;
+	var xf = A.breite/(A.xende-A.xanfang);
+	var x0 = xa+Math.abs(A.xanfang)/(Math.abs(A.xanfang)+Math.abs(A.xende))*A.breite;
+	var phi = Math.PI/8;
+
+	ctx.save();
+	ctx.beginPath();
+	ctx.strokeStyle = A.achsenfarbe;
+	ctx.lineWidth = A.achsenlinienbreite;
+	ctx.lineCap = A.achsenlinienenden;
+	ctx.moveTo(xa, A.y);
+	ctx.lineTo(xe, A.y);
+	ctx.moveTo(xe, A.y);
+	ctx.lineTo(xe - A.xhoehe*Math.cos(-phi),A.y - A.xhoehe*Math.sin(-phi));
+	ctx.moveTo(xe, A.y);
+	ctx.lineTo(xe - A.xhoehe*Math.cos(phi),A.y - A.xhoehe*Math.sin(phi));
+	if (A.xstriche) {
+		for (var x = A.xstricheanfang; x <= A.xstricheende; x += A.xstricheschrittweite) {
+			ctx.moveTo(x*xf+x0, A.y-A.xhoehe/2);
+			ctx.lineTo(x*xf+x0, A.y+A.xhoehe/2);
+			}
+		}
+	ctx.fillStyle = A.achsenfarbe;
+	ctx.font = A.xtext1schriftart;
+	ctx.fillText(A.xtext1,xe + A.xtext1xversatz,A.y + A.xtextyversatz);
+	ctx.font = A.xtext2schriftart;
+	ctx.fillText(A.xtext2,xe + A.xtext2xversatz,A.y + A.xtextyversatz);
+	if (A.xskala) {
+		ctx.textAlign = "center";
+		for (var x = A.xskalaanfang; x <= A.xskalaende; x += A.xskalaschrittweite) {
+			if (Math.abs(x) > A.eps) {
+				ctx.fillText(String(x.toFixed(A.xskalastellen)),x*xf+x0,A.y+A.xskalayversatz);
+				}
+			}
+		ctx.textAlign = "left";
+		}
+	if (A.xursprung) {
+		ctx.textAlign = "center";
+		var i = 0.0;
+		ctx.fillText(String(i.toFixed(A.xskalastellen)),x0,A.y + A.xskalayversatz);
+		ctx.textAlign = "left";
+		}
+	ctx.stroke();
+	ctx.restore();
+	}
+
+function zeichneFederHorizontal(ctx,F) {
+    var dx = (F.xe - F.xa - 4 * F.dx) / (F.anzahl * 2);
+    ctx.beginPath();
+    ctx.moveTo(F.xa, F.ya);
+    ctx.lineTo(F.xa + F.dx , F.ya );
+    for (var i = 0; i < F.anzahl; i++) {
+        ctx.lineTo(F.xa + F.dx + (2*i + 0.5) * dx, F.ya + F.dy);
+        ctx.lineTo(F.xa + F.dx + (2*i + 1.5) * dx, F.ya - F.dy);
+        }
+    ctx.lineTo(F.xe + 3 * F.dx, F.ye);  
+    ctx.lineTo(F.xe, F.ye);
+    ctx.strokeStyle = F.farbe;
+    ctx.lineWidth = F.breite;
+    ctx.lineCap = F.enden;
+    ctx.stroke();
+}
+
+function zeichneKreislinieDirekt(ctx,x,y,r,farbe,randbreite,randfarbe) {
+	ctx.beginPath();
+	ctx.arc(x, y, r, 0, 2.0*Math.PI);
+	if (randbreite > 0){
+		ctx.lineWidth = randbreite;
+		ctx.strokeStyle = randfarbe;
+		ctx.stroke();
+		}
+	}
+
+function zeichneStreckeDirekt(ctx,xa,ya,xe,ye,farbe,breite,enden) {
+	ctx.beginPath();
+	ctx.moveTo(xa, ya);
+	ctx.lineTo(xe, ye);
+	ctx.strokeStyle = farbe;
+	ctx.lineWidth = breite;
+	ctx.lineCap = enden;
+	ctx.stroke();
+	}
+
+function rgb2farbe(r,g,b) {
+    if (g !== undefined) 
+        return "#"+ Number(0x1000000 + r*0x10000 + g*0x100 + b).toString(16).substring(1);
+    else 
+        return "#"+ Number(0x1000000 + r[0]*0x10000 + r[1]*0x100 + r[2]).toString(16).substring(1);
+	}
+}
+</script>
+		</div>
+	</body>
+</html>
