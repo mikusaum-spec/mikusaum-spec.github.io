@@ -58,35 +58,35 @@
   }
   canvas{ display:block; width:100%; height:100%; image-rendering: pixelated; border-radius:2px; }
 
-  /* D-pad overlaid directly on the game view, bottom-right.
-     Sized with clamp()/vmin so it scales down on small phone screens
-     instead of staying at a fixed (too large) pixel size. */
+  /* D-pad overlaid directly on the game view, bottom-right */
   #dpad-overlay{
     position:absolute;
-    right: clamp(8px, 2vmin, 14px);
-    bottom: clamp(8px, 2vmin, 14px);
+    right:14px; bottom:14px;
     display:grid;
-    grid-template-columns: repeat(3, clamp(26px, 8vmin, 42px));
-    grid-template-rows: repeat(3, clamp(26px, 8vmin, 42px));
-    gap: clamp(2px, 1vmin, 4px);
-    padding: clamp(4px, 1.5vmin, 8px);
+    grid-template-columns: 42px 42px 42px;
+    grid-template-rows: 42px 42px 42px;
+    gap:4px;
+    padding:8px;
     background: rgba(18,12,24,0.38);
     border: 1px solid rgba(201,162,75,0.35);
-    border-radius: clamp(8px, 3vmin, 14px);
+    border-radius:14px;
     backdrop-filter: blur(2px);
     z-index:10;
   }
   #dpad-overlay .dbtn{
     background: rgba(61,44,85,0.55);
     border: 2px solid rgba(201,162,75,0.45);
-    font-size: clamp(0.65rem, 3vmin, 1rem);
+    font-size:1rem;
     box-shadow: 0 2px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
   }
   #dpad-overlay .dbtn.pressed{
     background: rgba(90,63,124,0.85);
   }
+  #dpad-overlay .dbtn.pressed{
+    background: rgba(90,63,124,0.85);
+  }
   #dpad-overlay .abtn{
-    font-size: clamp(0.65rem, 3vmin, 1rem);
+    font-size:1rem;
   }
 
   .dbtn{
@@ -223,6 +223,8 @@
   .modal-btn.primary{ background: linear-gradient(180deg,#c9a24b,#8f6f2a); color:#221806; border-color:#7a5f20; opacity:0.5; pointer-events:none; }
   .modal-btn.primary.enabled{ opacity:1; pointer-events:auto; }
 
+  #footer-note{ font-size:0.65rem; color:#6b6178; margin-top:auto; padding-top:10px; }
+
   @media (max-width: 720px), (orientation: portrait){
     #stage-area{ flex-direction:column; align-items:center; }
     #canvas-frame{ height:auto; width:min(92vw, 92vh); aspect-ratio:1/1; }
@@ -256,6 +258,7 @@
       <div id="progress-track"><div id="progress-fill"></div></div>
       <div id="progress-label">0 / 5 Aufgaben gelöst</div>
       <div id="task-list"></div>
+      <div id="footer-note">Prototyp für den Physikunterricht · Aufgabentexte sind Platzhalter und lassen sich im Code (Array "TASKS") frei anpassen.</div>
     </div>
   </div>
 </div>
