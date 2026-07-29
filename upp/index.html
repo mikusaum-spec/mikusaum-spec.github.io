@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Das Physik-Labor des Zauberers</title>
+<title>Die Zaubererwerkstatt des großen Amplinis</title>
 <style>
   :root{
     --ink: #e9dfc9;
@@ -404,8 +404,8 @@
 </head>
 <body>
 <div id="wrap">
-  <h1>Das Physik-Labor des Zauberers</h1>
-  <div id="subtitle">Bewege deinen Helden durchs Labor und löse die Aufgaben der Reihe nach · Pfeiltasten/WASD oder Steuerkreuz · A / E / Leertaste für Aktion</div>
+  <h1>Die Zaubererwerkstatt des großen Amplinis</h1>
+  <div id="subtitle">Bewege den Physiker durchs Labor und löse die Aufgaben der Reihe nach · Pfeiltasten/WASD oder Steuerkreuz · A / E / Leertaste für Aktion</div>
 
   <div id="stage-area">
     <div id="canvas-frame">
@@ -463,7 +463,7 @@
       <div id="grid-stage">
         <canvas id="grid-canvas" width="520" height="400"></canvas>
       </div>
-      <div id="grid-hint">Klicke ein leeres Feld, um den Spiegel dorthin zu setzen. Klicke den Spiegel erneut an, um ihn zu drehen.</div>
+      <div id="grid-hint">Klicke ein leeres Feld, um den Spiegel dorthin zu setzen. Klicke den Spiegel erneut an, um ihn zu drehen. Klicke ein weiteres Mal und der Spiegel wird wieder entfernt.</div>
     </div>
     <div id="modal-feedback"></div>
     <div id="modal-actions">
@@ -1376,7 +1376,7 @@ function drawLaserStage1(){
   if(hit) laserSolved = true;
 
   drawMirrorAndTrack(ctx2, true);
-  if(hit) drawLot(ctx2, M, n);
+  drawLot(ctx2, M, n);
 
   // beam: laser -> mirror center
   ctx2.save();
@@ -1401,12 +1401,10 @@ function drawLaserStage1(){
   ctx2.stroke();
   ctx2.restore();
 
-  if(hit){
-    const incAngle = Math.round(vecAngleToNormal(D, n, true));
-    const refAngle = Math.round(vecAngleToNormal(R, n, false));
-    drawAngleArc(ctx2, M, {x:-D.x,y:-D.y}, n, 34, "#e0954a", incAngle+"°");
-    drawAngleArc(ctx2, M, n, R, 34, "#5aa06b", refAngle+"°");
-  }
+  const incAngle = Math.round(vecAngleToNormal(D, n, true));
+  const refAngle = Math.round(vecAngleToNormal(R, n, false));
+  drawAngleArc(ctx2, M, {x:-D.x,y:-D.y}, n, 34, hit ? "#5aa06b" : "#e0954a", incAngle+"°");
+  drawAngleArc(ctx2, M, n, R, 34, hit ? "#5aa06b" : "#c0392b", refAngle+"°");
 
   const ang = Math.atan2(M.y-LASER_GEO.Ly, M.x-LASER_GEO.Lx);
   drawLaserBody(ctx2, LASER_GEO.Lx, LASER_GEO.Ly, ang);
