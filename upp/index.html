@@ -296,6 +296,29 @@
   }
   #grid-canvas{ width:100%; height:100%; display:block; touch-action:none; cursor:pointer; }
   #grid-hint{ font-size:0.72rem; color:#a898bd; text-align:center; max-width:420px; }
+
+  /* Periskop-Puzzle (Aufgabe 4) */
+  #modal-periscope{
+    display:flex; flex-direction:column; align-items:center; gap:12px;
+    margin-bottom:12px;
+  }
+  #peri-stage{
+    position:relative; width:min(100%, 520px); aspect-ratio: 600/400;
+    background: radial-gradient(ellipse at 50% 30%, #241733 0%, #120c1c 80%);
+    border: 2px solid var(--panel-border); border-radius:10px; overflow:hidden;
+  }
+  #peri-canvas{ width:100%; height:100%; display:block; }
+  #peri-controls{
+    display:flex; gap:24px; justify-content:center; flex-wrap:wrap; width:100%;
+  }
+  .peri-mirror-control{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    min-width:180px;
+  }
+  .peri-mirror-label{ font-size:0.75rem; color:var(--gold-bright); }
+  .peri-slider{
+    width:100%; accent-color: var(--gold); cursor:pointer; touch-action:none;
+  }
   #modal-answers{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
   .answer-btn{
     text-align:left; padding:10px 12px; border-radius:8px;
@@ -465,6 +488,21 @@
       </div>
       <div id="grid-hint">Klicke ein leeres Feld, um den Spiegel dorthin zu setzen. Klicke den Spiegel erneut an, um ihn zu drehen. Klicke ein weiteres Mal und der Spiegel wird wieder entfernt.</div>
     </div>
+    <div id="modal-periscope" style="display:none">
+      <div id="peri-stage">
+        <canvas id="peri-canvas" width="600" height="400"></canvas>
+      </div>
+      <div id="peri-controls">
+        <div class="peri-mirror-control">
+          <span class="peri-mirror-label">Spiegel 1 (oben)</span>
+          <input id="peri-slider-1" class="peri-slider" type="range" min="15" max="75" value="20" step="1">
+        </div>
+        <div class="peri-mirror-control">
+          <span class="peri-mirror-label">Spiegel 2 (unten)</span>
+          <input id="peri-slider-2" class="peri-slider" type="range" min="15" max="75" value="65" step="1">
+        </div>
+      </div>
+    </div>
     <div id="modal-feedback"></div>
     <div id="modal-actions">
       <button class="modal-btn" id="modal-close">Schließen</button>
@@ -593,16 +631,10 @@ const TASKS = [
     feedbackOk:"Meisterhaft! Mit vier Spiegeln um die Mauer herum — der Strahl findet trotzdem exakt zum Sensor."
   },
   {
-    id:"spot_4", x:0.217, y:0.523,
-    title:"Aufgabe 4 - Optik",
-    question:"Mit dem Teleskop beobachtet der Zauberer ferne Sterne. Welches optische Bauteil sammelt dabei das Licht und erzeugt ein erstes Bild?",
-    answers:[
-      {text:"Das Objektiv (die große Linse/Spiegel am vorderen Ende)", correct:true},
-      {text:"Das Okular, durch das man schaut", correct:false},
-      {text:"Das Stativ", correct:false}
-    ],
-    feedbackOk:"Richtig — das Objektiv sammelt das Licht und erzeugt ein reelles Zwischenbild, das Okular vergrößert es dann.",
-    feedbackNo:"Nicht ganz — das Bauteil, das das Licht zuerst einfängt, heißt Objektiv."
+    id:"spot_4", x:0.217, y:0.523, type:"periscope",
+    title:"Aufgabe 4 - Periskop",
+    instruction:"Lenke den Lichtstrahl durch das Periskop: Stelle beide Spiegel mit den Reglern so ein, dass der Strahl unten den Sensor trifft.",
+    feedbackOk:"Perfekt — beide Spiegel stehen im richtigen Winkel zum Lot, der Strahl wird zweimal exakt reflektiert und trifft den Sensor."
   },
   {
     id:"spot_5", x:0.498, y:0.702,
@@ -1678,11 +1710,14 @@ const GRID_LEVELS = [
     obstacles:[]
   },
   {
+    // Level 2: ein Hindernis direkt über dem Sensor verhindert, dass ein
+    // einzelner Spiegel (in Laser-Zeile, Sensor-Spalte) den Strahl direkt
+    // von oben hineinlenkt — es sind wirklich zwei Spiegel nötig.
     cols:6, rows:6, cell:52, ox:90, oy:44,
     laser:{ row:2, dir:{dx:1, dy:0} },
     sensor:{ row:4, col:5 },
     maxMirrors:2,
-    obstacles:[]
+    obstacles:[{row:3,col:5}]
   },
   {
     // Level 3: eine 3 Felder hohe Mauer blockiert den direkten Weg — der
@@ -1982,6 +2017,192 @@ function goToGridLevel3(){
   drawGridScene();
 }
 
+/* ============ Periskop-Puzzle (Aufgabe 4) ============ */
+// Feste Positionen im Periskop (in einem eigenen 600x400-Koordinatensystem,
+// wie beim Laser-Puzzle): der Lichteintritt oben rechts, die beiden
+// Spiegel-Drehpunkte, und der Sensor unten links. Zwischen den Spiegeln
+// verläuft der senkrechte "Schacht" des Periskops.
+const PERI = {
+  entry: {x:520, y:100},
+  m1: {x:300, y:100},
+  m2: {x:300, y:300},
+  sensor: {x:110, y:300, r:16}
+};
+const PERI_HIT_TOLERANCE = 10; // wie viele Pixel Abstand zur Ziel-Linie noch als Treffer zählen
+let periAngle1 = 20, periAngle2 = 65; // aktuelle Reglerwerte (Grad) — Start bewusst falsch
+let periAnimId = null;
+let periDashOffset = 0;
+
+// Spiegelt einen Richtungsvektor "d" an einem Spiegel, dessen Normale den
+// Winkel "angleDeg" hat (Standard-Reflexionsformel R = D - 2(D·n)n, wie
+// beim Laser-Puzzle in Aufgabe 2).
+function periReflect(d, angleDeg){
+  const rad = angleDeg * Math.PI/180;
+  const n = { x: Math.cos(rad), y: Math.sin(rad) };
+  const dot = d.x*n.x + d.y*n.y;
+  return { x: d.x - 2*dot*n.x, y: d.y - 2*dot*n.y };
+}
+
+// Prüft, ob ein vom Punkt "from" in Richtung "dir" laufender Strahl nah
+// genug am Zielpunkt "target" vorbeikommt, um als "getroffen" zu zählen
+// (senkrechter Abstand zur Strahllinie < Toleranz, UND das Ziel muss vor
+// einem liegen, nicht hinter einem — daher die "along > 0"-Prüfung).
+function periPassesThrough(from, dir, target){
+  const toT = {x:target.x-from.x, y:target.y-from.y};
+  const along = toT.x*dir.x + toT.y*dir.y;
+  if(along <= 0) return false;
+  const perp = Math.abs(toT.x*dir.y - toT.y*dir.x);
+  return perp < PERI_HIT_TOLERANCE;
+}
+
+// Simuliert den gesamten Lichtweg durch das Periskop, Schritt für Schritt:
+// Eintritt -> Spiegel 1 -> (wenn der Winkel stimmt) Spiegel 2 -> (wenn der
+// Winkel auch dort stimmt) Sensor. Bei jedem Abschnitt wird geprüft, ob der
+// Strahl das nächste Ziel wirklich trifft — wenn nicht, bricht die Simulation
+// an dieser Stelle ab und der Strahl "verschwindet" einfach im Nichts
+// (wird bis zum Bildrand weitergezeichnet), genau wie es beim echten
+// Fehlversuch mit einem Periskop auch passieren würde.
+function tracePeriscope(){
+  const path = [PERI.entry, PERI.m1];
+  const D1 = { x: PERI.m1.x-PERI.entry.x, y: PERI.m1.y-PERI.entry.y };
+  const D1n = normalize2(D1);
+  const R1 = periReflect(D1n, periAngle1);
+
+  if(!periPassesThrough(PERI.m1, R1, PERI.m2)){
+    // Spiegel 1 falsch eingestellt: Strahl verlässt das Periskop irgendwo.
+    path.push(laserSegmentInBounds(PERI.m1, R1, 600, 400));
+    return { path, hit:false };
+  }
+
+  path.push(PERI.m2);
+  const R2 = periReflect(R1, periAngle2);
+  const hit = periPassesThrough(PERI.m2, R2, PERI.sensor);
+  if(hit){
+    path.push(PERI.sensor);
+  } else {
+    // Spiegel 1 korrekt, Spiegel 2 noch nicht: Strahl verfehlt den Sensor.
+    path.push(laserSegmentInBounds(PERI.m2, R2, 600, 400));
+  }
+  return { path, hit };
+}
+
+// Kleiner Helfer: macht aus einem Vektor einen Einheitsvektor (Länge 1).
+function normalize2(v){
+  const l = Math.hypot(v.x, v.y) || 1;
+  return { x: v.x/l, y: v.y/l };
+}
+
+// Zeichnet das komplette Periskop-Rohr (als abgerundete Linie, ähnlich der
+// Zeichnung aus der Sprinteraufgabe), beide Spiegel (als drehbare blaue
+// Balken, deren Winkel live dem Regler folgt) und den simulierten Lichtweg.
+function drawPeriscopeScene(){
+  const canvas = document.getElementById("peri-canvas");
+  if(!canvas) return;
+  const ctx2 = canvas.getContext("2d");
+  ctx2.clearRect(0,0,600,400);
+
+  // Rohr-Umriss (nur als Orientierung, dünn gezeichnet)
+  ctx2.save();
+  ctx2.strokeStyle = "rgba(201,162,75,0.3)";
+  ctx2.lineWidth = 26;
+  ctx2.lineCap = "round";
+  ctx2.lineJoin = "round";
+  ctx2.beginPath();
+  ctx2.moveTo(PERI.entry.x, PERI.entry.y);
+  ctx2.lineTo(PERI.m1.x, PERI.m1.y);
+  ctx2.lineTo(PERI.m2.x, PERI.m2.y);
+  ctx2.lineTo(PERI.sensor.x, PERI.sensor.y);
+  ctx2.stroke();
+  ctx2.restore();
+
+  const { path, hit } = tracePeriscope();
+
+  // Lichtstrahl (wandernde gestrichelte Linie)
+  ctx2.save();
+  ctx2.strokeStyle = hit ? "#5aa06b" : "#e0954a";
+  ctx2.shadowColor = hit ? "#5aa06b" : "#e0954a";
+  ctx2.shadowBlur = 10;
+  ctx2.lineWidth = 3;
+  ctx2.setLineDash([10,7]);
+  ctx2.lineDashOffset = -periDashOffset;
+  ctx2.beginPath();
+  path.forEach((p,i)=>{ if(i===0) ctx2.moveTo(p.x,p.y); else ctx2.lineTo(p.x,p.y); });
+  ctx2.stroke();
+  ctx2.restore();
+
+  // Beide Spiegel als drehbare blaue Balken zeichnen (Länge/Ausrichtung
+  // folgt live dem jeweiligen Regler-Winkel).
+  drawPeriMirror(ctx2, PERI.m1, periAngle1);
+  drawPeriMirror(ctx2, PERI.m2, periAngle2);
+
+  // Sensor + Lot an beiden Spiegeln, damit man den Bezug zum Reflexionsgesetz sieht
+  drawLot(ctx2, PERI.m1, {x:Math.cos(periAngle1*Math.PI/180), y:Math.sin(periAngle1*Math.PI/180)});
+  drawLot(ctx2, PERI.m2, {x:Math.cos(periAngle2*Math.PI/180), y:Math.sin(periAngle2*Math.PI/180)});
+  drawSensor(ctx2, PERI.sensor, hit);
+
+  // "Weiter" nur klickbar, solange der Sensor GERADE JETZT getroffen wird.
+  taskCompleted = hit;
+  modalContinue.classList.toggle("enabled", hit);
+  if(hit){
+    modalFeedback.textContent = activeTask.feedbackOk;
+    modalFeedback.className = "ok";
+  } else {
+    modalFeedback.textContent = "";
+    modalFeedback.className = "";
+  }
+}
+
+// Zeichnet einen einzelnen drehbaren Spiegel als kurzen blauen Balken,
+// mittig um seinen Drehpunkt "center", ausgerichtet quer zur Normalen
+// (also um 90° gedreht zum Winkel "angleDeg").
+function drawPeriMirror(ctx2, center, angleDeg){
+  const surfRad = (angleDeg+90) * Math.PI/180;
+  const dx = Math.cos(surfRad)*30, dy = Math.sin(surfRad)*30;
+  ctx2.save();
+  ctx2.strokeStyle = "#4a6fa5";
+  ctx2.lineWidth = 9;
+  ctx2.lineCap = "round";
+  ctx2.beginPath();
+  ctx2.moveTo(center.x-dx, center.y-dy);
+  ctx2.lineTo(center.x+dx, center.y+dy);
+  ctx2.stroke();
+  ctx2.strokeStyle = "#173a63";
+  ctx2.globalAlpha = 0.35;
+  ctx2.stroke();
+  ctx2.restore();
+}
+
+function periAnimLoop(){
+  periDashOffset = (periDashOffset + 0.6) % 17;
+  drawPeriscopeScene();
+  periAnimId = requestAnimationFrame(periAnimLoop);
+}
+function stopPeriAnim(){
+  if(periAnimId){ cancelAnimationFrame(periAnimId); periAnimId = null; }
+}
+
+let periListenersBound = false;
+// Bereitet das Periskop-Puzzle vor, jedes Mal wenn Aufgabe 4 geöffnet wird:
+// setzt beide Regler auf bewusst falsche Startwerte zurück und startet die
+// Animationsschleife. Die Regler-Handler werden nur einmal registriert.
+function initPeriscopeTask(task){
+  periAngle1 = 20;
+  periAngle2 = 65;
+  periDashOffset = 0;
+  const s1 = document.getElementById("peri-slider-1");
+  const s2 = document.getElementById("peri-slider-2");
+  s1.value = periAngle1;
+  s2.value = periAngle2;
+
+  if(!periListenersBound){
+    periListenersBound = true;
+    s1.addEventListener("input", ()=>{ periAngle1 = parseInt(s1.value,10); drawPeriscopeScene(); });
+    s2.addEventListener("input", ()=>{ periAngle2 = parseInt(s2.value,10); drawPeriscopeScene(); });
+  }
+  stopPeriAnim();
+  periAnimLoop();
+}
+
 /* ============ Modal / task logic ============ */
 // Referenzen auf alle HTML-Elemente des Aufgabenfensters (Modal), damit wir
 // sie im Code leicht ansprechen können (Text ändern, ein-/ausblenden, ...).
@@ -1994,6 +2215,7 @@ const modalDragdrop = document.getElementById("modal-dragdrop");
 const modalImages = document.getElementById("modal-images");
 const modalLaser = document.getElementById("modal-laser");
 const modalGridmirror = document.getElementById("modal-gridmirror");
+const modalPeriscope = document.getElementById("modal-periscope");
 const modalFeedback = document.getElementById("modal-feedback");
 const modalContinue = document.getElementById("modal-continue");
 const modalClose = document.getElementById("modal-close");
@@ -2018,6 +2240,8 @@ function openTaskModal(task){
   stopLaserAnim();
   modalGridmirror.style.display = "none";
   stopGridAnim();
+  modalPeriscope.style.display = "none";
+  stopPeriAnim();
 
   if(task.type === "match"){
     modalEl.classList.add("wide");
@@ -2041,6 +2265,14 @@ function openTaskModal(task){
     modalDragdrop.innerHTML = "";
     modalGridmirror.style.display = "flex";
     initGridTask(task);
+  } else if(task.type === "periscope"){
+    modalEl.classList.add("wide");
+    modalQuestion.textContent = task.instruction;
+    modalAnswers.style.display = "none";
+    modalDragdrop.style.display = "none";
+    modalDragdrop.innerHTML = "";
+    modalPeriscope.style.display = "flex";
+    initPeriscopeTask(task);
   } else if(task.type === "info"){
     modalEl.classList.add("wide");
     modalQuestion.textContent = task.instruction;
@@ -2285,6 +2517,7 @@ modalContinue.addEventListener("click", ()=>{
   renderSidebar();
   stopLaserAnim();
   stopGridAnim();
+  stopPeriAnim();
   overlay.classList.remove("show");
   activeTask = null;
 });
@@ -2293,6 +2526,7 @@ modalContinue.addEventListener("click", ()=>{
 modalClose.addEventListener("click", ()=>{
   stopLaserAnim();
   stopGridAnim();
+  stopPeriAnim();
   overlay.classList.remove("show");
   activeTask = null;
 });
