@@ -316,9 +316,18 @@
     min-width:180px;
   }
   .peri-mirror-label{ font-size:0.75rem; color:var(--gold-bright); }
+  .peri-slider-row{ display:flex; align-items:center; gap:8px; width:100%; }
   .peri-slider{
-    width:100%; accent-color: var(--gold); cursor:pointer; touch-action:none;
+    flex:1; accent-color: var(--gold); cursor:pointer; touch-action:none;
   }
+  .peri-btn{
+    width:32px; height:32px; flex-shrink:0; border-radius:8px;
+    background: linear-gradient(180deg, #3d2c55, #241934);
+    border: 2px solid var(--panel-border); color: var(--gold-bright);
+    font-size:1.1rem; line-height:1; cursor:pointer;
+    -webkit-tap-highlight-color:transparent; touch-action:none;
+  }
+  .peri-btn:active{ background: linear-gradient(180deg, #5a3f7c, #2f2148); }
   #modal-answers{ display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
   .answer-btn{
     text-align:left; padding:10px 12px; border-radius:8px;
@@ -495,11 +504,19 @@
       <div id="peri-controls">
         <div class="peri-mirror-control">
           <span class="peri-mirror-label">Spiegel 1 (oben)</span>
-          <input id="peri-slider-1" class="peri-slider" type="range" min="15" max="75" value="20" step="1">
+          <div class="peri-slider-row">
+            <button id="peri-dec-1" class="peri-btn" aria-label="Spiegel 1 kleiner">−</button>
+            <input id="peri-slider-1" class="peri-slider" type="range" min="0" max="90" value="20" step="1">
+            <button id="peri-inc-1" class="peri-btn" aria-label="Spiegel 1 größer">+</button>
+          </div>
         </div>
         <div class="peri-mirror-control">
           <span class="peri-mirror-label">Spiegel 2 (unten)</span>
-          <input id="peri-slider-2" class="peri-slider" type="range" min="15" max="75" value="65" step="1">
+          <div class="peri-slider-row">
+            <button id="peri-dec-2" class="peri-btn" aria-label="Spiegel 2 kleiner">−</button>
+            <input id="peri-slider-2" class="peri-slider" type="range" min="0" max="90" value="65" step="1">
+            <button id="peri-inc-2" class="peri-btn" aria-label="Spiegel 2 größer">+</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2028,7 +2045,7 @@ const PERI = {
   m2: {x:300, y:300},
   sensor: {x:110, y:300, r:16}
 };
-const PERI_HIT_TOLERANCE = 10; // wie viele Pixel Abstand zur Ziel-Linie noch als Treffer zählen
+const PERI_HIT_TOLERANCE = PERI.sensor.r; // Toleranz = sichtbarer Sensor-Radius, damit "sieht wie Treffer aus" auch wirklich zählt
 let periAngle1 = 20, periAngle2 = 65; // aktuelle Reglerwerte (Grad) — Start bewusst falsch
 let periAnimId = null;
 let periDashOffset = 0;
@@ -2062,28 +2079,124 @@ function periPassesThrough(from, dir, target){
 // an dieser Stelle ab und der Strahl "verschwindet" einfach im Nichts
 // (wird bis zum Bildrand weitergezeichnet), genau wie es beim echten
 // Fehlversuch mit einem Periskop auch passieren würde.
+const PERI_TUBE_HALF_WIDTH = 18; // halbe Innenbreite des Rohrschachts zwischen Spiegel 1 und 2
+
+// Verfolgt den Strahl durch den senkrechten Rohrschacht zwischen Spiegel 1
+// (oben) und Spiegel 2 (unten, feste Position). Der Schacht hat feste
+// Wände links/rechts (PERI_TUBE_HALF_WIDTH von der Mittelachse entfernt).
+// Trifft der Strahl zuerst eine dieser Wände, bricht er dort ab (blocked).
+// Erreicht er zuerst die Höhe von Spiegel 2, innerhalb der Rohrbreite,
+// wird er dort reflektiert.
+// Berechnet den Schnittpunkt zwischen dem Strahl (start + t*dir, t>0) und der
+// echten, geneigten Fläche von Spiegel 2 (eine Linie durch PERI.m2, deren
+// Richtung vom aktuellen Regler-Winkel abhängt) — Standard-Geradenschnitt
+// über die Kreuzprodukt-Formel. Gibt null zurück, wenn der Strahl die
+// Spiegelfläche gar nicht (mehr) erreicht (z.B. parallel oder hinter ihm).
+function periMirrorLineHit(start, dir, mirrorCenter, mirrorAngleDeg){
+  const surfRad = (mirrorAngleDeg+90) * Math.PI/180;
+  const s = { x: Math.cos(surfRad), y: Math.sin(surfRad) };
+  const denom = dir.x*s.y - dir.y*s.x;
+  if(Math.abs(denom) < 1e-9) return null; // Strahl läuft parallel zur Spiegelfläche
+  const t = ((mirrorCenter.x-start.x)*s.y - (mirrorCenter.y-start.y)*s.x) / denom;
+  if(t <= 0) return null;
+  return t;
+}
+
+// Verfolgt den Strahl durch den senkrechten Rohrschacht zwischen Spiegel 1
+// (oben) und Spiegel 2 (unten, feste Position, aber schräg gestellt). Es
+// wird verglichen, was der Strahl ZUERST erreicht: eine der Rohrwände
+// links/rechts, oder die echte (geneigte) Fläche von Spiegel 2 — je nachdem,
+// welcher Punkt auf dem Strahl näher liegt (kleineres t).
+function traceShaft(start, dir){
+  const cx = PERI.m2.x;
+  const wallLeft = cx - PERI_TUBE_HALF_WIDTH, wallRight = cx + PERI_TUBE_HALF_WIDTH;
+
+  // Ein kleiner Epsilon-Schwellenwert statt "dir.x > 0" verhindert, dass
+  // winzige Rundungsfehler (z.B. 0.0000000000000002 statt exakt 0) durch
+  // Division fast durch Null zu absurd großen/unendlichen Koordinaten führen.
+  const EPS = 1e-6;
+  let tWall = Infinity;
+  if(dir.x > EPS) tWall = (wallRight - start.x) / dir.x;
+  else if(dir.x < -EPS) tWall = (wallLeft - start.x) / dir.x;
+
+  const tMirror = periMirrorLineHit(start, dir, PERI.m2, periAngle2);
+
+  if(tMirror !== null && tMirror < tWall){
+    return { point: {x: start.x+dir.x*tMirror, y: start.y+dir.y*tMirror}, blocked:false };
+  }
+  if(tWall < Infinity){
+    const p = {x: start.x+dir.x*tWall, y: start.y+dir.y*tWall};
+    // Sicherheitsnetz: sollte der Punkt trotzdem außerhalb des sichtbaren
+    // Bereichs liegen, stattdessen sauber am Bildrand abbrechen.
+    if(p.x >= -50 && p.x <= 650 && p.y >= -50 && p.y <= 450){
+      return { point: p, blocked:true };
+    }
+  }
+  // Strahl trifft weder Wand noch Spiegel in sinnvoller Entfernung (z.B. weil
+  // er nahezu parallel zur Spiegelfläche verläuft) — sauber am Bildrand abbrechen.
+  return { point: laserSegmentInBounds(start, dir, 600, 400), blocked:true };
+}
+
+// Verfolgt den Strahl durch den waagrechten Austritts-Schacht NACH Spiegel 2
+// in Richtung Sensor. Auch dieser Abschnitt hat Wände oben/unten
+// (PERI_TUBE_HALF_WIDTH von der Mittelhöhe entfernt) — driftet der Strahl
+// zu weit nach oben oder unten, bevor er die Rohröffnung erreicht, bricht
+// er dort ab, statt einfach ungehindert weiterzufliegen.
+const PERI_EXIT_MOUTH_X = PERI.m2.x - 150; // ab hier verlässt das Rohr den Schacht in den offenen Raum
+
+function traceExitCorridor(start, dir){
+  const cy = PERI.m2.y;
+  const wallTop = cy - PERI_TUBE_HALF_WIDTH, wallBottom = cy + PERI_TUBE_HALF_WIDTH;
+  const EPS = 1e-6;
+
+  let tWall = Infinity;
+  if(dir.y > EPS) tWall = (wallBottom - start.y) / dir.y;
+  else if(dir.y < -EPS) tWall = (wallTop - start.y) / dir.y;
+
+  let tMouth = Infinity;
+  if(dir.x < -EPS) tMouth = (PERI_EXIT_MOUTH_X - start.x) / dir.x;
+
+  if(tWall < tMouth){
+    const p = {x: start.x+dir.x*tWall, y: start.y+dir.y*tWall};
+    if(p.x >= -50 && p.x <= 650 && p.y >= -50 && p.y <= 450){
+      return { point: p, blocked:true };
+    }
+  }
+  return { point:null, blocked:false }; // Rohröffnung erreicht, Strahl fliegt frei weiter
+}
+
 function tracePeriscope(){
   const path = [PERI.entry, PERI.m1];
   const D1 = { x: PERI.m1.x-PERI.entry.x, y: PERI.m1.y-PERI.entry.y };
   const D1n = normalize2(D1);
-  const R1 = periReflect(D1n, periAngle1);
+  const R1 = periReflect(D1n, periAngle1); // Reflexionsgesetz an Spiegel 1
 
-  if(!periPassesThrough(PERI.m1, R1, PERI.m2)){
-    // Spiegel 1 falsch eingestellt: Strahl verlässt das Periskop irgendwo.
-    path.push(laserSegmentInBounds(PERI.m1, R1, 600, 400));
-    return { path, hit:false };
+  // Der Strahl läuft nach Spiegel 1 geradlinig in der WIRKLICHEN
+  // Reflexionsrichtung weiter — trifft er dabei zuerst die Rohrwand, endet
+  // er dort und wird NICHT reflektiert (kein Spiegel dort). Nur wenn er
+  // innerhalb der Rohrbreite die Höhe von Spiegel 2 erreicht, wird er dort
+  // nach dem Reflexionsgesetz erneut reflektiert.
+  const shaft = traceShaft(PERI.m1, R1);
+  path.push(shaft.point);
+  if(shaft.blocked){
+    return { path, hit:false, reflectPoint2: null };
   }
 
-  path.push(PERI.m2);
-  const R2 = periReflect(R1, periAngle2);
-  const hit = periPassesThrough(PERI.m2, R2, PERI.sensor);
+  const R2 = periReflect(R1, periAngle2); // Reflexionsgesetz an Spiegel 2
+
+  const exit = traceExitCorridor(shaft.point, R2);
+  if(exit.blocked){
+    path.push(exit.point);
+    return { path, hit:false, reflectPoint2: shaft.point };
+  }
+
+  const hit = periPassesThrough(shaft.point, R2, PERI.sensor);
   if(hit){
     path.push(PERI.sensor);
   } else {
-    // Spiegel 1 korrekt, Spiegel 2 noch nicht: Strahl verfehlt den Sensor.
-    path.push(laserSegmentInBounds(PERI.m2, R2, 600, 400));
+    path.push(laserSegmentInBounds(shaft.point, R2, 600, 400));
   }
-  return { path, hit };
+  return { path, hit, reflectPoint2: shaft.point };
 }
 
 // Kleiner Helfer: macht aus einem Vektor einen Einheitsvektor (Länge 1).
@@ -2104,7 +2217,7 @@ function drawPeriscopeScene(){
   // Rohr-Umriss (nur als Orientierung, dünn gezeichnet)
   ctx2.save();
   ctx2.strokeStyle = "rgba(201,162,75,0.3)";
-  ctx2.lineWidth = 26;
+  ctx2.lineWidth = 36;
   ctx2.lineCap = "round";
   ctx2.lineJoin = "round";
   ctx2.beginPath();
@@ -2115,7 +2228,7 @@ function drawPeriscopeScene(){
   ctx2.stroke();
   ctx2.restore();
 
-  const { path, hit } = tracePeriscope();
+  const { path, hit, reflectPoint2 } = tracePeriscope();
 
   // Lichtstrahl (wandernde gestrichelte Linie)
   ctx2.save();
@@ -2130,15 +2243,19 @@ function drawPeriscopeScene(){
   ctx2.stroke();
   ctx2.restore();
 
-  // Beide Spiegel als drehbare blaue Balken zeichnen (Länge/Ausrichtung
-  // folgt live dem jeweiligen Regler-Winkel).
+  // Beide Spiegel sind fest im Rohr montiert und werden immer an derselben
+  // Stelle gezeichnet — nur ihr Winkel folgt live dem jeweiligen Regler.
   drawPeriMirror(ctx2, PERI.m1, periAngle1);
   drawPeriMirror(ctx2, PERI.m2, periAngle2);
 
   // Sensor + Lot an beiden Spiegeln, damit man den Bezug zum Reflexionsgesetz sieht
   drawLot(ctx2, PERI.m1, {x:Math.cos(periAngle1*Math.PI/180), y:Math.sin(periAngle1*Math.PI/180)});
-  drawLot(ctx2, PERI.m2, {x:Math.cos(periAngle2*Math.PI/180), y:Math.sin(periAngle2*Math.PI/180)});
+  drawLot(ctx2, reflectPoint2 || PERI.m2, {x:Math.cos(periAngle2*Math.PI/180), y:Math.sin(periAngle2*Math.PI/180)});
   drawSensor(ctx2, PERI.sensor, hit);
+
+  // Aktuell eingestellten Winkel direkt neben jedem Spiegel anzeigen.
+  drawAngleLabel(ctx2, PERI.m1.x+52, PERI.m1.y-28, Math.round(periAngle1)+"°", false);
+  drawAngleLabel(ctx2, PERI.m2.x+52, PERI.m2.y-28, Math.round(periAngle2)+"°", false);
 
   // "Weiter" nur klickbar, solange der Sensor GERADE JETZT getroffen wird.
   taskCompleted = hit;
@@ -2198,6 +2315,20 @@ function initPeriscopeTask(task){
     periListenersBound = true;
     s1.addEventListener("input", ()=>{ periAngle1 = parseInt(s1.value,10); drawPeriscopeScene(); });
     s2.addEventListener("input", ()=>{ periAngle2 = parseInt(s2.value,10); drawPeriscopeScene(); });
+    // +/- Tasten neben den Reglern für präzises Schritt-für-Schritt-Einstellen
+    // (praktisch, weil bei Toleranz 0 nur der exakte Grad-Wert zählt).
+    document.getElementById("peri-dec-1").addEventListener("click", ()=>{
+      periAngle1 = Math.max(0, Math.min(90, periAngle1-1)); s1.value = periAngle1; drawPeriscopeScene();
+    });
+    document.getElementById("peri-inc-1").addEventListener("click", ()=>{
+      periAngle1 = Math.max(0, Math.min(90, periAngle1+1)); s1.value = periAngle1; drawPeriscopeScene();
+    });
+    document.getElementById("peri-dec-2").addEventListener("click", ()=>{
+      periAngle2 = Math.max(0, Math.min(90, periAngle2-1)); s2.value = periAngle2; drawPeriscopeScene();
+    });
+    document.getElementById("peri-inc-2").addEventListener("click", ()=>{
+      periAngle2 = Math.max(0, Math.min(90, periAngle2+1)); s2.value = periAngle2; drawPeriscopeScene();
+    });
   }
   stopPeriAnim();
   periAnimLoop();
