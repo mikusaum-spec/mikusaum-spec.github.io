@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>KOLLOQUIUM-TRAINER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --shell:#c9c7b3;
+    --shell-hi:#dbd9c8;
+    --shell-lo:#9a9884;
+    --shell-shadow:#5f5d51;
+    --bezel:#37363c;
+    --bezel-lo:#201f24;
+    --screen-0:#9bbc0f;
+    --screen-1:#8bac0f;
+    --screen-2:#306230;
+    --screen-3:#0f380f;
+    --maroon:#7a2848;
+    --maroon-lo:#551a32;
+    --power:#e0483e;
+    --normal:#a8a878;
+    --poison:#a040a0;
+    --electric:#f0c020;
+    --fighting:#c03028;
+    --psychic:#f85888;
+    --water:#6890f0;
+    --grass:#78c850;
+    --ground:#e0c068;
+    --font-pixel:'Press Start 2P', monospace;
+    --font-dlg:'VT323', monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:radial-gradient(circle at 50% 0%, #4a4a52, #1b1b1f 70%);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-dlg);
+    padding:18px 10px 30px;
+  }
+  .gb{
+    width:100%;
+    max-width:340px;
+    background:linear-gradient(160deg, var(--shell-hi), var(--shell) 40%, var(--shell-lo) 100%);
+    border-radius:20px 20px 40px 20px;
+    padding:13px 12px 16px;
+    box-shadow:0 10px 0 var(--shell-shadow), 0 18px 30px rgba(0,0,0,.55);
+    position:relative;
+  }
+  .gb-top{
+    display:flex;align-items:center;gap:8px;
+    padding:2px 6px 14px 4px;
+  }
+  .power-dot{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--power);
+    box-shadow:0 0 6px var(--power), inset 0 0 2px #fff5;
+  }
+  .gb-brand{
+    font-family:var(--font-pixel);
+    font-size:10px;
+    letter-spacing:.5px;
+    color:#4a4838;
+  }
+  .gb-brand span{color:var(--maroon);}
+
+  .bezel{
+    background:linear-gradient(160deg,var(--bezel),var(--bezel-lo));
+    border-radius:9px 9px 26px 9px;
+    padding:10px 9px 13px;
+    box-shadow:inset 0 2px 4px #0008, inset 0 -2px 6px #fff2;
+  }
+  .screen{
+    background:var(--screen-0);
+    border:3px solid var(--bezel-lo);
+    border-radius:3px;
+    padding:8px 8px 10px;
+    min-height:300px;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    image-rendering:pixelated;
+  }
+  .screen::after{
+    content:"";
+    position:absolute;inset:0;
+    background:repeating-linear-gradient(rgba(15,56,15,.06) 0 1px, transparent 1px 3px);
+    pointer-events:none;
+  }
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--font-pixel);
+    font-size:8px;
+    color:var(--screen-3);
+    margin-bottom:8px;
+  }
+  .badge{
+    padding:4px 6px;
+    border:2px solid var(--screen-3);
+    border-radius:4px;
+    background:var(--normal);
+    color:#1c1c10;
+  }
+  .badge[data-cat="Chemie"]{background:var(--poison);color:#fff;}
+  .badge[data-cat="Physik"]{background:var(--electric);color:#2a1e00;}
+  .badge[data-cat="Mathematik"]{background:var(--fighting, #c03028);color:#fff;}
+  .badge[data-cat="Sport"]{background:var(--grass, #78c850);color:#123008;}
+  .counter{opacity:.85;}
+  .qcode{
+    font-family:var(--font-pixel);
+    font-size:8px;
+    color:var(--screen-3);
+    border:2px solid var(--screen-3);
+    border-radius:4px;
+    padding:4px 5px;
+    opacity:.9;
+  }
+
+  .dialogue-wrap{
+    flex:1;
+    display:flex;flex-direction:column;
+    justify-content:space-between;
+    gap:6px;
+  }
+  .dialogue-box{
+    border:3px solid var(--screen-3);
+    border-radius:4px;
+    background:var(--screen-1);
+    padding:10px 10px 20px;
+    min-height:96px;
+    position:relative;
+    cursor:pointer;
+  }
+  .dialogue-text{
+    margin:0;
+    color:var(--screen-3);
+    font-size:19px;
+    line-height:1.3;
+    white-space:pre-wrap;
+    hyphens:auto;
+    -webkit-hyphens:auto;
+    overflow-wrap:break-word;
+  }
+  .cursor{
+    position:absolute;
+    right:10px;bottom:6px;
+    color:var(--screen-3);
+    font-size:14px;
+    opacity:0;
+  }
+  .cursor.show{opacity:1;animation:blink 1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  .answer-box{
+    border:3px solid var(--screen-3);
+    border-radius:4px;
+    background:var(--screen-1);
+    padding:0 10px;
+    max-height:0;
+    overflow:hidden;
+    opacity:0;
+    transition:max-height .3s ease, opacity .25s ease, padding .3s ease;
+  }
+  .answer-box.open{
+    padding:8px 10px 10px;
+    opacity:1;
+  }
+  .answer-box ul{margin:0;padding-left:18px;}
+  .answer-box li{
+    color:var(--screen-3);
+    font-size:17px;
+    line-height:1.32;
+    margin-bottom:4px;
+    hyphens:auto;
+    -webkit-hyphens:auto;
+    overflow-wrap:break-word;
+  }
+  .answer-box li::marker{content:"♦ ";}
+
+  .caption{
+    text-align:center;
+    font-family:var(--font-pixel);
+    font-size:6px;
+    color:var(--screen-3);
+    opacity:.55;
+    margin-top:6px;
+    letter-spacing:.5px;
+  }
+
+  .menu-row{
+    display:flex;gap:6px;margin-top:10px;
+  }
+  .gb-btn{
+    flex:1;
+    font-family:var(--font-pixel);
+    font-size:8px;
+    color:#f4f1e6;
+    background:linear-gradient(180deg, var(--maroon), var(--maroon-lo));
+    border:none;
+    border-radius:6px;
+    padding:10px 5px;
+    box-shadow:0 3px 0 #3a1220, 0 5px 8px #0006;
+    letter-spacing:.5px;
+  }
+  .gb-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #3a1220;}
+  .gb-btn.secondary{
+    background:linear-gradient(180deg,#5c5c66,#38383f);
+    box-shadow:0 3px 0 #1c1c20, 0 5px 8px #0006;
+  }
+  .gb-btn.secondary:active{box-shadow:0 1px 0 #1c1c20;}
+
+  /* --- controls --- */
+  .controls{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:14px;padding:0 4px;
+  }
+  .dpad{
+    position:relative;width:62px;height:62px;
+  }
+  .dpad-btn{
+    position:absolute;
+    background:linear-gradient(180deg,#3c3c42,#232327);
+    box-shadow:inset 0 1px 1px #fff3, 0 2px 0 #111;
+    border:none;padding:0;cursor:pointer;
+  }
+  .dpad-up{left:22px;top:0;width:18px;height:22px;border-radius:4px 4px 0 0;}
+  .dpad-down{left:22px;top:40px;width:18px;height:22px;border-radius:0 0 4px 4px;}
+  .dpad-left{left:0;top:22px;width:22px;height:18px;border-radius:4px 0 0 4px;}
+  .dpad-right{left:40px;top:22px;width:22px;height:18px;border-radius:0 4px 4px 0;}
+  .dpad-btn:active{background:linear-gradient(180deg,#2a2a2f,#18181b);}
+  .dpad-center{
+    position:absolute;left:22px;top:22px;width:18px;height:18px;
+    background:#18181b;border-radius:3px;
+  }
+
+  .ab-wrap{
+    display:flex;align-items:flex-end;gap:10px;
+    transform:rotate(-18deg);
+  }
+  .round-btn{
+    width:34px;height:34px;border-radius:50%;
+    background:linear-gradient(180deg,#9a2a4c,var(--maroon-lo));
+    box-shadow:0 4px 0 #3a1220, inset 0 1px 2px #fff4;
+    color:#f4f1e6;font-family:var(--font-pixel);font-size:9px;
+    border:none;
+  }
+  .round-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #3a1220;}
+  .round-btn.b{width:29px;height:29px;font-size:8px;}
+
+  .meta-row{
+    display:flex;justify-content:center;gap:20px;margin-top:12px;
+  }
+  .meta-btn{
+    font-family:var(--font-pixel);font-size:6.5px;color:#4a4838;
+    background:linear-gradient(180deg,#b4b29e,#8f8d79);
+    border:none;border-radius:9px;
+    padding:5px 11px;
+    transform:rotate(-18deg);
+    box-shadow:0 2px 0 #5f5d51;
+  }
+  .meta-btn:active{transform:rotate(-18deg) translateY(2px);box-shadow:none;}
+
+  /* --- overlay menu --- */
+  .overlay{
+    position:absolute;inset:0;
+    background:var(--screen-0);
+    border:3px solid var(--screen-3);
+    display:none;
+    flex-direction:column;
+    padding:10px;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .overlay.open{display:flex;}
+  .overlay h3{
+    font-family:var(--font-pixel);
+    font-size:9px;color:var(--screen-3);
+    margin:2px 0 10px;
+  }
+  .overlay-hint{
+    font-family:var(--font-dlg);
+    font-size:14px;color:var(--screen-3);
+    opacity:.75;
+    margin:-4px 0 8px;
+  }
+  .menu-item{
+    font-family:var(--font-dlg);
+    font-size:19px;color:var(--screen-3);
+    padding:7px 4px;
+    border-bottom:2px dotted var(--screen-3);
+    display:flex;align-items:center;gap:10px;
+    cursor:pointer;
+  }
+  .menu-item.parent{font-weight:bold;}
+  .menu-item.sub{
+    padding-left:22px;
+    font-size:17px;
+    border-bottom:1px dotted color-mix(in srgb, var(--screen-3) 55%, transparent);
+  }
+  .menu-item.sub .checkbox{width:15px;height:15px;}
+  .checkbox{
+    flex:none;
+    width:18px;height:18px;
+    border:2px solid var(--screen-3);
+    border-radius:2px;
+    background:var(--screen-0);
+    position:relative;
+  }
+  .menu-item.checked .checkbox{background:var(--screen-3);}
+  .menu-item.checked .checkbox::after{
+    content:"";
+    position:absolute;left:3px;top:-1px;
+    width:5px;height:9px;
+    border-right:3px solid var(--screen-0);
+    border-bottom:3px solid var(--screen-0);
+    transform:rotate(40deg);
+  }
+  .menu-item.disabled{opacity:.4;cursor:not-allowed;}
+  .overlay-close{
+    margin-top:auto;
+    align-self:center;
+    font-family:var(--font-pixel);
+    font-size:9px;
+    color:var(--screen-0);
+    background:var(--screen-3);
+    border:none;border-radius:4px;
+    padding:10px 16px;
+  }
+
+  @media (max-width:360px){
+    .dialogue-text{font-size:17px;}
+    .answer-box li{font-size:15.5px;}
+  }
+</style>
+</head>
+<body>
+<div class="gb">
+  <div class="gb-top">
+    <div class="power-dot"></div>
+    <div class="gb-brand">KOLLOQUIUM <span>★</span> TRAINER</div>
+  </div>
+
+  <div class="bezel">
+    <div class="screen" id="screen">
+      <div class="topbar">
+        <span class="badge" id="badge" data-cat="Allgemein">ALLGEMEIN</span>
+        <span class="qcode" id="qcode">ALL1</span>
+        <span class="counter" id="counter">Karte 1/60</span>
+      </div>
+
+      <div class="dialogue-wrap">
+        <div class="dialogue-box" id="dialogueBox">
+          <p class="dialogue-text" id="questionText"></p>
+          <div class="cursor" id="cursor">▼</div>
+        </div>
+
+        <div class="answer-box" id="answerBox">
+          <ul id="answerList"></ul>
+        </div>
+      </div>
+
+      <div class="caption">DOT MATRIX &nbsp;·&nbsp; PRÜFUNGS-EDITION</div>
+
+      <div class="overlay" id="overlay">
+        <h3>KATEGORIEN</h3>
+        <div class="overlay-hint">Mind. 1 Kästchen muss an sein</div>
+        <div class="menu-item parent checked" data-group="ALL"><span class="checkbox"></span>ALLGEMEIN (alle)</div>
+        <div class="menu-item sub checked" data-key="ALL-Basis"><span class="checkbox"></span>Basis</div>
+        <div class="menu-item sub checked" data-key="ALL-U"><span class="checkbox"></span>U · Unterrichten</div>
+        <div class="menu-item sub checked" data-key="ALL-E"><span class="checkbox"></span>E · Erziehen</div>
+        <div class="menu-item sub checked" data-key="ALL-L"><span class="checkbox"></span>L · Leisten</div>
+        <div class="menu-item sub checked" data-key="ALL-B"><span class="checkbox"></span>B · Beraten</div>
+        <div class="menu-item sub checked" data-key="ALL-S"><span class="checkbox"></span>S · System Schule</div>
+        <div class="menu-item checked" data-key="Chemie"><span class="checkbox"></span>CHEMIE</div>
+        <div class="menu-item checked" data-key="Physik"><span class="checkbox"></span>PHYSIK</div>
+        <div class="menu-item checked" data-key="Mathematik"><span class="checkbox"></span>MATHEMATIK</div>
+        <div class="menu-item checked" data-key="Sport"><span class="checkbox"></span>SPORT</div>
+        <button class="overlay-close" id="overlayClose">▶ FERTIG</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="menu-row">
+    <button class="gb-btn" id="actionBtn">▶ ANTWORT ZEIGEN</button>
+    <button class="gb-btn secondary" id="skipBtn">◀ B ZURÜCK</button>
+  </div>
+
+  <div class="controls">
+    <div class="dpad">
+      <button class="dpad-btn dpad-up" id="dpadUp" aria-label="Antwort einklappen"></button>
+      <button class="dpad-btn dpad-down" id="dpadDown" aria-label="Antwort zeigen"></button>
+      <button class="dpad-btn dpad-left" id="dpadLeft" aria-label="Letzte Frage"></button>
+      <button class="dpad-btn dpad-right" id="dpadRight" aria-label="Nächste Frage"></button>
+      <div class="dpad-center"></div>
+    </div>
+    <div class="ab-wrap">
+      <button class="round-btn b" id="btnB">B</button>
+      <button class="round-btn" id="btnA">A</button>
+    </div>
+  </div>
+
+  <div class="meta-row">
+    <button class="meta-btn" id="btnSelect">SELECT</button>
+    <button class="meta-btn" id="btnStart">START</button>
+  </div>
+</div>
+
+<script>
+const DATA = [
+{code:"ALL1",c:"Allgemein",sub:"Basis",q:"Was verstehen Sie unter kompetenzorientiertem Unterricht?",a:["Kompetenzbegriff nach Weinert: Fähigkeiten, Wissen und Bereitschaften zur Bewältigung von Anforderungssituationen","Kernlehrpläne NRW: Output- statt Inputorientierung","Kompetenzbereiche: Sach-, Methoden-, Sozial-, Urteilskompetenz","Handlungsprodukte statt reiner Wissensabfrage, AFB I–III als Progressionslogik"]},
+{code:"ALL2",c:"Allgemein",sub:"Basis",q:"Wie gestalten Sie eine binnendifferenzierte Unterrichtsstunde?",a:["Differenzierung nach Umfang, Niveau, Zeit, Hilfestellung (Scaffolding)","Gestufte Lernaufgaben und Wahlaufgaben einsetzen","Diagnostik vor Differenzierung (z. B. Diagnosebögen, Lernstandserhebung)","Rechtlich verankert im Anspruch auf individuelle Förderung (§ 1 SchulG NRW)"]},
+{code:"ALL3",c:"Allgemein",sub:"Basis",q:"Welche Rolle spielt der Medienkompetenzrahmen NRW in Ihrem Unterricht?",a:["Verbindliche Grundlage: gemeinsame Vorgabe von Schulministerium und Medienberatung NRW","Sechs Kompetenzbereiche (u. a. Bedienen/Anwenden, Produzieren, Problemlösen)","Integration digitaler Tools fachspezifisch, nicht additiv (z. B. Simulationen, digitale Messwerterfassung)","Medienkritik und Quellenbewertung als fester Bestandteil"]},
+{code:"ALL4",c:"Allgemein",sub:"Basis",q:"Wie gehen Sie mit Unterrichtsstörungen um?",a:["Präventiv: durchdachte Unterrichtsgestaltung und Klassenführung","Unterstützend: Feedback, klare Klassenregeln, Schülersprechstunden","Grenzziehend: Androhung von Konsequenzen, Wiedergutmachung, Elterninfo","Pädagogisch/didaktisch-methodisch: direkte Maßnahmen, verbindliche Klassenregeln","Institutionell: kollegiale Fallberatung, Ordnungsmaßnahmen"]},
+{code:"ALL5",c:"Allgemein",sub:"Basis",q:"Wie sichern Sie Leistungsbewertung transparent und fair?",a:["Rechtsgrundlage: § 48 SchulG NRW, APO-SI/APO-GOSt, schulinterne Leistungskonzepte","Kriterien vorab transparent machen (Bewertungsraster, Erwartungshorizonte)","Verhältnis schriftliche/sonstige Leistung beachten","Vielfalt der Überprüfungsformen (Tests, Präsentationen, Projekte)"]},
+{code:"ALL6",c:"Allgemein",sub:"Basis",q:"Was bedeutet Inklusion für Ihren Fachunterricht?",a:["Recht auf inklusive Bildung im Schulgesetz NRW verankert","Individuelle Förderpläne, Nachteilsausgleich vs. Zieldifferenz","Kooperation mit Sonderpädagog:innen und multiprofessionellen Teams","Universal Design for Learning als Planungsprinzip"]},
+{code:"ALL7",c:"Allgemein",sub:"Basis",q:"Wie fördern Sie eine positive Feedback- und Fehlerkultur?",a:["Fehler als Lernchance kommunizieren, kognitive Aktivierung fördern","Feedback zählt laut Hattie zu den wirksamsten Einflussfaktoren auf Lernerfolg","Kriteriengeleitetes, konstruktives Feedback (Sandwich-Prinzip kritisch reflektiert)","Formatives Feedback konsequent von summativer Bewertung trennen"]},
+{code:"ALL8",c:"Allgemein",sub:"Basis",q:"Wie beziehen Sie Eltern in den schulischen Prozess ein?",a:["Elternsprechtage, schriftliche Rückmeldungen, digitale Kommunikationswege","Transparenz über Anforderungen und Bewertungsmaßstäbe","Erziehungspartnerschaft statt Einbahnkommunikation","Elternmitwirkung im Rahmen des Schulgesetzes NRW (Klassen-/Schulpflegschaft)"]},
+{code:"ALL9",c:"Allgemein",sub:"Basis",q:"Was macht für Sie eine gelungene Unterrichtsstunde aus?",a:["Konkretisierung der Merkmale guten Unterrichts (vgl. Hilbert Meyer) auf eine einzelne Stunde","Klare Lernzielorientierung und roter Faden","Aktivierung aller Schüler:innen, hoher Anteil echter Lernzeit","Reflexionsphase bzw. Sicherung am Stundenende"]},
+{code:"ALL10",c:"Allgemein",sub:"Basis",q:"Wie verstehen Sie Ihre Rolle als Lehrkraft und Klassenleitung?",a:["Lernbegleiter:in statt reiner Wissensvermittler:in","Vorbildfunktion, Erziehungsauftrag neben Bildungsauftrag (§ 2 SchulG NRW)","Teamarbeit im Kollegium, Mitgestaltung von Schulentwicklung","Selbstreflexion und kontinuierliche Professionalisierung"]},
+{code:"ALL11",c:"Allgemein",sub:"Basis",q:"Wie setzen Sie Lernstandsdiagnostik ein, um Ihren Unterricht zu planen?",a:["Diagnosebögen, Eingangstests, informelle Beobachtung nutzen","Konkrete Fördermaßnahmen aus Diagnoseergebnissen ableiten","Kontinuierliche vs. punktuelle Diagnostik unterscheiden (Lernverlauf im Blick behalten)","Klare Abgrenzung Diagnostik – Bewertung: Diagnostik dient der Förderung, nicht der Note"]},
+{code:"ALL12",c:"Allgemein",sub:"Basis",q:"Wie fördern Sie selbstreguliertes Lernen bei Ihren Schüler:innen?",a:["Metakognitive Strategien vermitteln (Planen, Überwachen, Bewerten)","Lerntagebücher und Selbsteinschätzungsbögen einsetzen","Verantwortung schrittweise übergeben (Scaffolding gezielt abbauen)","Wahlmöglichkeiten bei Aufgaben und Lerntempo einräumen"]},
+{code:"ALL13",c:"Allgemein",sub:"Basis",q:"Welche Bedeutung hat sprachsensibler Fachunterricht für Sie?",a:["Trennung von Alltags-, Bildungs- und Fachsprache bewusst machen","Sprachliche Hürden bei Textaufgaben und Operatoren mitdenken","Scaffolding-Techniken einsetzen (vgl. Gibbons): Wortspeicher, Formulierungshilfen, Satzmuster","Besondere Relevanz für Schüler:innen mit Deutsch als Zweitsprache"]},
+{code:"ALL14",c:"Allgemein",sub:"Basis",q:"Wie gehen Sie mit Heterogenität und Mehrsprachigkeit in der Klasse um?",a:["Heterogenität als Regelfall begreifen, nicht als Ausnahme (Leitlinie Vielfalt NRW)","Ressourcenorientierten statt defizitorientierten Blick auf Mehrsprachigkeit einnehmen","Differenzierte Materialien und flexible Sozialformen einsetzen","Zusammenarbeit mit Sprachförderkräften und Fachkonferenzen suchen"]},
+{code:"ALL15",c:"Allgemein",sub:"Basis",q:"Welche Rolle spielt Berufs- und Studienorientierung (StuBo) in Ihrem Fach?",a:["Landesprogramm „Kein Abschluss ohne Anschluss“ (KAoA) als verbindlicher Rahmen","Anknüpfung an MINT-Berufsfelder im Fachunterricht","Zusammenarbeit mit StuBo-Koordination und außerschulischen Partnern","Anwendungsbezüge sichtbar machen (z. B. Praktika, Berufsfelder, Studiengänge)"]},
+{code:"ALL16",c:"Allgemein",sub:"Basis",q:"Wie gehen Sie mit Leistungsdruck und Prüfungsangst bei Schüler:innen um?",a:["Transparente Erwartungen und realistische Anforderungen kommunizieren","Fehlerkultur etablieren, die Ängste reduziert statt verstärkt","Übungsformate zur Prüfungsvorbereitung nutzen (z. B. Probeklausuren)","Gespräch suchen, ggf. Beratungslehrkräfte einbinden"]},
+{code:"ALL17",c:"Allgemein",sub:"Basis",q:"Wie gestalten Sie die Zusammenarbeit im Kollegium/in der Fachkonferenz?",a:["Mitarbeit an schulinternen Lehrplänen und Leistungskonzepten","Kollegiale Hospitation und Feedback als Professionalisierungsinstrument nutzen","Teamteaching und Materialaustausch pflegen","Konstruktiv mit unterschiedlichen fachdidaktischen Positionen umgehen"]},
+{code:"ALL18",c:"Allgemein",sub:"Basis",q:"Wie stehen Sie zur eigenen Fort- und Weiterbildung als Lehrkraft?",a:["Fortbildung als Teil der Dienstpflicht verstehen, nicht als Kür","Regelmäßige Teilnahme an Fachfortbildungen (z. B. Kompetenzteams NRW)","Eigene Unterrichtspraxis kontinuierlich reflektieren und weiterentwickeln","Offenheit für neue fachdidaktische Entwicklungen zeigen (z. B. KI im Unterricht)"]},
+{code:"ALL19",c:"Allgemein",sub:"Basis",q:"Wie berücksichtigen Sie Datenschutz beim Einsatz digitaler Medien?",a:["Auswahl datenschutzkonformer, schulisch freigegebener Tools (Dienstgeräte, Schulplattformen)","Keine privaten Accounts/Geräte für dienstliche Zwecke nutzen","Schüler:innen aktiv für Datenschutz im Netz sensibilisieren","Einwilligungen bei Fotos/Videos einholen, DSGVO-konform dokumentieren"]},
+{code:"ALL20",c:"Allgemein",sub:"Basis",q:"Wie gehen Sie mit der eigenen Belastung und Selbstfürsorge im Lehrerberuf um?",a:["Realistische Prioritätensetzung und aktives Zeitmanagement","Klare Abgrenzung von Berufs- und Privatleben","Kollegialen Austausch als Unterstützungsressource nutzen","Eigene Rolle reflektieren, um Überforderung frühzeitig vorzubeugen"]},
+{code:"ALL21",c:"Allgemein",sub:"Basis",q:"Was unterscheidet geschlossene von offenen Aufgabenformaten?",a:["Geschlossene Aufgaben: vorgegebene Antwortalternativen (Multiple Choice, Zuordnung, Wahr/Falsch), eindeutig auswertbar","Offene Aufgaben: freie Antwortkonstruktion, Bewertung anhand von Kriterienrastern/Erwartungshorizont","Halboffene Formate als Zwischenstufe (Lückentext, Kurzantwort)","Wahl des Formats richtet sich nach Kompetenzziel und angestrebter AFB-Stufe"]},
+{code:"ALL22",c:"Allgemein",sub:"Basis",q:"Wann setzen Sie geschlossene Aufgabenformate im Unterricht sinnvoll ein?",a:["Objektive, zeitökonomische Überprüfung von Reproduktionswissen (AFB I)","Gut geeignet für Selbstkontrolle und schnelle Lernstandsdiagnosen","Einsatz in großen Lerngruppen oder digitalen Testformaten sinnvoll","Grenze beachten: geringe Aussagekraft über Transfer- und Urteilskompetenz"]},
+{code:"ALL23",c:"Allgemein",sub:"Basis",q:"Wie gestalten Sie offene, kompetenzorientierte Aufgabenstellungen?",a:["Problemorientierte, authentische Fragestellungen mit Transferanforderung","Klarer Erwartungshorizont mit Kriterien statt einer einzigen Musterlösung","Spielraum für individuelle Lösungswege und Argumentationen","Besonders geeignet für AFB II/III (Anwendung, Beurteilung)"]},
+{code:"ALL24",c:"Allgemein",sub:"Basis",q:"Wie sichern Sie eine faire, kriteriengeleitete Bewertung offener Aufgaben?",a:["Bewertungsraster/Punkteschemata vorab entwickeln","Transparenz der Kriterien gegenüber Schüler:innen","Kollegiale Abstimmung/Doppelkorrektur bei Unsicherheiten","Rückbindung an Vorgaben aus Kernlehrplan bzw. Zentralabitur"]},
+{code:"ALL25",c:"Allgemein",sub:"Basis",q:"Wie kombinieren Sie geschlossene und offene Aufgaben in einer Klassenarbeit?",a:["Aufbau nach AFB-Stufung: reproduktiv-geschlossen → transferorientiert-offen","Ausgewogenes Verhältnis je nach Jahrgangsstufe und Kompetenzerwartung","Vermeidung reiner Reproduktion, aber auch Überforderung durch zu viele offene Anteile","Nutzung unterschiedlicher Formate zur Absicherung verschiedener Kompetenzbereiche"]},
+{code:"ALL26",c:"Allgemein",sub:"Basis",q:"Wie fördern Sie Portfolioarbeit oder alternative Leistungsnachweise?",a:["Lernprozesse dokumentieren statt nur punktuelle Momentaufnahmen zu bewerten","Selbstreflexion und Eigenverantwortung gezielt fördern","Prozess und Produkt kriteriengeleitet bewerten","Als Ergänzung, nicht als Ersatz klassischer Leistungsüberprüfungen einsetzen"]},
+{code:"ALL27",c:"Allgemein",sub:"Basis",q:"Wie gehen Sie mit digitalen Prüfungs- und Übungsformaten um?",a:["Nutzung von Lernplattformen für formative Selbsttests","Automatisierte Rückmeldung bei geschlossenen Formaten als Entlastung","Kritische Prüfung von Datenschutz und Chancengleichheit","Kombination mit analogen Formaten zur Absicherung von Kompetenzbereichen"]},
+{code:"ALL28",c:"Allgemein",sub:"Basis",q:"Wie gestalten Sie Hausaufgaben lernwirksam?",a:["Klaren Bezug zum Unterrichtsinhalt und realistischen Umfang sicherstellen","Verbindliche Besprechung bzw. Sicherung im Folgeunterricht einplanen","Nach Niveau differenzieren, wo sinnvoll","Funktion transparent machen: Übung, Vorbereitung oder Vertiefung"]},
+{code:"ALL29",c:"Allgemein",sub:"Basis",q:"Wie fördern Sie kooperative Lernformen wie Gruppenarbeit oder Think-Pair-Share?",a:["Klare Rollen- und Aufgabenverteilung zur Vermeidung von Trittbrettfahren","Förderung von Sozial- und Kommunikationskompetenz","Strukturierte Phasen: Einzelarbeit – Austausch – Präsentation","Reflexion des Gruppenprozesses als Teil der Methodenkompetenz"]},
+{code:"ALL30",c:"Allgemein",sub:"Basis",q:"Wie reflektieren Sie den eigenen Unterricht systematisch?",a:["Kollegiale Hospitation und strukturierte Unterrichtsnachbesprechung","Nutzung von Feedbackinstrumenten (Schülerfeedback, Selbstevaluation)","Abgleich von Planung und tatsächlichem Verlauf","Ableitung konkreter Konsequenzen für künftige Unterrichtsplanung"]},
+{code:"ALL31",c:"Allgemein",sub:"Basis",q:"Welche Aufsichtspflicht hat eine Lehrkraft, und wie kommen Sie ihr nach?",a:["Aufsichtspflicht ergibt sich aus Schulgesetz NRW und Aufsichtserlass","Aktive, vorausschauende und kontinuierliche Aufsicht in Pausen, auf Fahrten, im Unterricht","Umfang richtet sich nach Alter, Reife und Gefährdungspotenzial der Situation","Verletzung der Aufsichtspflicht kann dienst- und haftungsrechtliche Folgen haben"]},
+{code:"ALL32",c:"Allgemein",sub:"Basis",q:"Welche Ordnungsmaßnahmen sieht das Schulgesetz NRW vor, und wann kommen sie zum Einsatz?",a:["Gestufte Maßnahmen nach § 53 SchulG NRW: von Überweisung in eine Parallelklasse bis zur Verweisung von allen Schulen","Zulässig nur bei ernstlicher Gefährdung der Sicherheit oder nachhaltiger, schwerer Unterrichtsstörung","Erzieherische Maßnahmen haben grundsätzlich Vorrang, Verhältnismäßigkeit beachten","Entscheidung trifft die Schulleitung nach Anhörung, nicht die einzelne Lehrkraft"]},
+{code:"ALL33",c:"Allgemein",sub:"Basis",q:"Welche Rechte haben Eltern nach dem Schulgesetz NRW?",a:["Mitwirkung in Klassenpflegschaft, Schulpflegschaft und Schulkonferenz","Recht auf Information über den Leistungsstand ihres Kindes","Recht auf Beratung, z. B. zur Schullaufbahn","Beteiligung an schulischen Entscheidungen im Rahmen der Schulmitwirkung"]},
+{code:"ALL34",c:"Allgemein",sub:"Basis",q:"Wie gehen Sie mit Datenschutz im Umgang mit Schülerdaten um (DSGVO)?",a:["Nur dienstlich notwendige Daten erheben und speichern","Zugriff auf Noten- und Gesundheitsdaten auf Berechtigte beschränken","Keine Weitergabe von Daten über unsichere Kommunikationswege","Einwilligung der Eltern bei Fotos/Veröffentlichungen einholen"]},
+{code:"ALL35",c:"Allgemein",sub:"Basis",q:"Was bedeutet Handlungsorientierung im Unterricht?",a:["Lernende aktiv und selbsttätig in den Lernprozess einbeziehen","Kopf-, Herz- und Handarbeit verbinden (nach Gudjons)","Produktorientierung: Ergebnisse sichtbar und nutzbar machen","Beispiele: Experimente, Projekte, Rollenspiele"]},
+{code:"ALL36",c:"Allgemein",sub:"Basis",q:"Welche Bedeutung hat Hatties Forschung („Visible Learning“) für Ihren Unterricht?",a:["Effektstärken zeigen, welche Faktoren Lernerfolg besonders begünstigen","Lehrkraft-Schüler-Beziehung und Feedback wirken besonders stark","Kritische Rezeption: Kontextabhängigkeit der Befunde beachten","Ableitung: kontinuierliches, konstruktives Feedback als zentrales Element"]},
+{code:"ALL37",c:"Allgemein",sub:"Basis",q:"Wie gehen Sie mit Mobbing in der Klasse um?",a:["Sofort intervenieren, Vorfall dokumentieren","Betroffene schützen, Täter:innen klar mit Konsequenzen konfrontieren","Klassenklima langfristig stärken (z. B. No Blame Approach)","Schulsozialarbeit bzw. Beratungslehrkräfte einbeziehen"]},
+{code:"ALL38",c:"Allgemein",sub:"Basis",q:"Welche Bedeutung hat der Ganztag für Ihre Unterrichtsplanung?",a:["Rhythmisierung des Schultags berücksichtigen (Konzentrationsphasen)","Verzahnung von Unterricht, Übungs- und Freizeitphasen","Hausaufgaben ggf. in Lernzeiten integrieren","Kooperation mit außerunterrichtlichem Personal (OGS, Betreuung)"]},
+{code:"ALL39",c:"Allgemein",sub:"Basis",q:"Wie gestalten Sie Phasenübergänge im Unterricht lernwirksam?",a:["Klare, transparente Übergänge ankündigen","Rituale zur Orientierung nutzen (Signale, feste Abläufe)","Kognitive Aktivierung durch Sicherung vor dem Übergang","Zeitmanagement realistisch planen, Pufferzeiten einbauen"]},
+{code:"ALL40",c:"Allgemein",sub:"Basis",q:"Was verstehen Sie unter individueller Förderung im Sinne des Schulgesetzes NRW?",a:["Gesetzlich verankerter Anspruch jedes Kindes (§ 1 SchulG NRW)","Diagnosegestützte, passgenaue Fördermaßnahmen","Förderpläne für Schüler:innen mit besonderem Bedarf","Zusammenspiel von Fordern und Fördern"]},
+{code:"ALL41",c:"Allgemein",sub:"Basis",q:"Was unterscheidet Integration von Inklusion?",a:["Integration: Menschen mit Behinderung/Einschränkung werden in ein bestehendes System eingepasst; die Einschränkung bleibt bestimmendes Merkmal","Inklusion: Diversity-Ansatz – alle Kinder sind verschieden, keine Unterteilung in Gruppen","Inklusion passt das System an die Bedürfnisse der Menschen an, nicht umgekehrt","Ziel: Barrieren gesellschaftlicher, institutioneller und struktureller Art beseitigen, Partizipation aller steigern"]},
+{code:"ALL42",c:"Allgemein",sub:"Basis",q:"Was wissen Sie über Konzentrationsspannen und Schulstress bei Schüler:innen?",a:["Richtwerte Konzentrationsspanne: 7–10 Jahre ca. 20 Min., 10–12 Jahre ca. 25 Min., 12–15 Jahre ca. 30 Min.","Indikatoren für Konzentrationsmängel: Ablenkbarkeit, Zerstreutheit, kognitive Impulsivität, mangelnde Ausdauer","Schulstress zeigt sich physiologisch-vegetativ, kognitiv-emotional und im Verhalten (Unruhe, Aggressivität)","Bewältigung: klare Unterrichtsstruktur, Wechsel von An-/Entspannung, realistische Hausaufgaben, ritualisierte Klassenarbeiten"]},
+{code:"ALL43",c:"Allgemein",sub:"Basis",q:"Welche Mitwirkungsgremien gibt es in der Schule, und wie sind sie zusammengesetzt?",a:["Klassenpflegschaft: Eltern, Klassenlehrkraft, Klassensprecher:in (ab Kl. 7 stimmberechtigt)","Klassenkonferenz, Fachkonferenz, Lehrerkonferenz sowie Teilkonferenz (u. a. für Ordnungsmaßnahmen 1–3 zuständig)","SV, Schulpflegschaft und Lehrerrat vertreten jeweils Schüler-, Eltern- bzw. Kollegiumsinteressen","Schulkonferenz (§ 65/66): Lehrer:Eltern:Schüler im Verhältnis 1:1:1, oberstes Mitwirkungsgremium"]},
+{code:"ALL44",c:"Allgemein",sub:"Basis",q:"Welche genaue Stufenfolge sehen die Ordnungsmaßnahmen im Schulgesetz NRW vor, und wer entscheidet?",a:["Erzieherische Einwirkungen (z. B. Ermahnung, Nacharbeit) haben grundsätzlich Vorrang","Ordnungsmaßnahmen in fester Reihenfolge: schriftlicher Verweis, Überweisung in Parallelklasse, vorübergehender Ausschluss, Androhung/Entlassung von der Schule, Androhung/Verweisung von allen Schulen","Entscheidung bei den ersten Stufen: Teilkonferenz nach Anhörung der Schülerin/des Schülers","Entscheidung bei den letzten Stufen: Lehrerkonferenz"]},
+{code:"ALL45",c:"Allgemein",sub:"Basis",q:"Was regelt die Allgemeine Dienstordnung (ADO)?",a:["Fasst Rechte und Pflichten aus öffentlichem Dienstrecht und Schulrecht für das pädagogische Personal zusammen","Konkretisiert Aufgaben im Rahmen des Bildungs- und Erziehungsauftrags","Regelt u. a. pädagogische Freiheit, Unterrichtsplanung, Arbeitszeit, Vertretungsunterricht, Mehrarbeit","Fundstelle: BASS 21-02 Nr. 4"]},
+{code:"ALL46",c:"Allgemein",sub:"Basis",q:"Wie ist die APO-GOSt aufgebaut?",a:["Verordnung über den Bildungsgang und die Abiturprüfung in der gymnasialen Oberstufe","Regelt Unterricht in der Sek II an Gymnasien in NRW sowie die Abiturprüfungen","Teil 1 „Bildungsgang in der gymnasialen Oberstufe“ (§§ 1–19)","Teil 2 „Ordnung der Abiturprüfung“ (§§ 20–44)"]},
+{code:"ALL47",c:"Allgemein",sub:"Basis",q:"Welche konkreten Regelungen aus der BASS sollten Sie im Schulalltag kennen?",a:["Hausaufgaben: Kl. 5/6 max. 90 Min./Tag, Kl. 7–10 max. 120 Min./Tag; keine HA von Freitag auf Montag","Hitzefrei ab 27 °C, unzulässig unter 25 °C; kein Hitzefrei in der Oberstufe","Klassenarbeiten innerhalb von 3 Wochen korrigieren, besprechen und zurückgeben","Eltern haben keinen individuellen Anspruch auf den Notenspiegel"]},
+{code:"ALL48",c:"Allgemein",sub:"Basis",q:"Wie läuft die Organisation einer Klassen-/Studienfahrt nach dem Wandererlass konkret ab?",a:["Lehrkraft bringt Vorschlag ein, Klassenpflegschaft entscheidet über Ziel, Programm, Dauer und Kosten","Genehmigung durch die Schulleitung, Antrag möglichst zu Schuljahresbeginn, spätestens 6 Wochen vorher","Bei mehr als 5 Schultagen muss ein Teil in die Ferien fallen","Teilnahme ist für Lehrkräfte dienstliche und für Schüler:innen grundsätzlich verpflichtend"]},
+{code:"ALL49",c:"Allgemein",sub:"Basis",q:"Welche Erscheinungsformen von Mobbing zwischen Lehrkraft und Schüler:in sowie beim Cybermobbing kennen Sie?",a:["LuL–SuS: Bloßstellen, abschätzige Gesten/Blicke, Spitznamen, Ignorieren, Verletzung der Intimsphäre","Cybermobbing: absichtliches, wiederholtes Beleidigen/Bedrohen/Bloßstellen über digitale Kanäle","Besondere Gefahr: schnelle, kaum widerrufliche Verbreitung, Anonymität, ständiger Zugriff","Prävention: Anti-Mobbing-Programme, Move-up-Training"]},
+{code:"ALL50",c:"Allgemein",sub:"Basis",q:"Welche konkreten Präventionsprogramme gegen Mobbing kennen Sie?",a:["Klassenrat (nach Rademacher): wöchentliche Stunde zur selbstbestimmten Regelung von Klassenangelegenheiten","Soziales Lernen: Förderung sozialer Kompetenz in Kommunikation und Umgang mit Gefühlen","Buddy-Programm: Peer-Lernen, gegenseitige Unterstützung unter Schüler:innen","Übergeordnetes Ziel: Demokratieerziehung, offenes und faires Miteinander"]},
+{code:"ALL51",c:"Allgemein",sub:"Basis",q:"Was beschreibt das SAMR-Modell zur Integration digitaler Medien im Unterricht?",a:["Substitution: analoge Materialien werden 1:1 digital ersetzt, ohne funktionale Verbesserung","Augmentation: digitale Grundfunktionen verbessern die Aufgabenbearbeitung","Modification: Aufgaben werden so umgestaltet, dass digitale Werkzeuge notwendig werden","Redefinition: neue Aufgabenformen, die ohne digitale Unterstützung nicht möglich wären"]},
+{code:"ALL52",c:"Allgemein",sub:"Basis",q:"Welche vier Ebenen der Medienkompetenz kennen Sie?",a:["Medienkritik, Medienkunde, Mediennutzung, Mediengestaltung","Der Medienkompetenzrahmen NRW gliedert dies weiter in sechs Kompetenzbereiche mit 24 Teilkompetenzen"]},
+
+{code:"CH1",c:"Chemie",q:"Erläutern Sie die Basiskonzepte des Chemieunterrichts in NRW.",a:["Struktur-Eigenschaft, Chemische Reaktion, Energie, Gleichgewicht, Donator-Akzeptor","Vernetzung über Jahrgangsstufen hinweg (Spiralcurriculum)","Verankerung im Kernlehrplan SI und SII","Beispiel: Redoxreaktionen als Donator-Akzeptor-Konzept durchgängig nutzen"]},
+{code:"CH2",c:"Chemie",q:"Wie führen Sie Schüler:innen an das Teilchenmodell heran?",a:["Stufenmodell der Atommodelle (Dalton → Bohr → Orbitalmodell)","Anschlussfähigkeit an Alltagsvorstellungen, bewusster Bruch mit Fehlvorstellungen","Visualisierung und Grenzen von Modellen thematisieren","Sukzessive Erweiterung der Modellkomplexität je nach Jahrgangsstufe"]},
+{code:"CH3",c:"Chemie",q:"Welche Sicherheitsaspekte sind beim Experimentieren zentral?",a:["RiSU (Richtlinien zur Sicherheit im Unterricht) als Rechtsgrundlage","Gefährdungsbeurteilung vor jedem Experiment","Schülerversuch vs. Lehrerdemonstrationsversuch je nach Gefahrenstufe","Entsorgung, PSA (Schutzbrille etc.), Notfallmanagement"]},
+{code:"CH4",c:"Chemie",q:"Wie gehen Sie mit typischen Schülerfehlvorstellungen in der Chemie um?",a:["Diagnose vorab (z. B. „Verbrennung = Vernichtung von Stoff“)","Cognitive Conflict / gezielte Gegenexperimente","Sprachsensibler Umgang mit Fachbegriffen (Alltags- vs. Fachsprache)","Wiederholtes Anknüpfen über mehrere Unterrichtseinheiten"]},
+{code:"CH5",c:"Chemie",q:"Wie setzen Sie Kontextorientierung im Chemieunterricht um?",a:["Anknüpfung an lebensweltliche Phänomene (z. B. Akkus, Waschmittel)","Fachliche Durchdringung des Kontexts sicherstellen, nicht nur Motivation","Rückbindung an Basiskonzepte nach Kontexterarbeitung","Beispiel: Klimawandel als Kontext für Redoxchemie/Energetik"]},
+{code:"CH6",c:"Chemie",q:"Wie bereiten Sie auf die Abiturprüfung im Fach Chemie vor?",a:["Orientierung an Vorgaben für das Zentralabitur NRW","Operatorenschulung (AFB I–III), Aufgabenformate trainieren","Fachsprachliche Präzision in Reinformulierungen einüben","Regelmäßige Klausuren im Format der Abiturprüfung"]},
+{code:"CH7",c:"Chemie",q:"Wie integrieren Sie Nachhaltigkeit / Green Chemistry in den Unterricht?",a:["Zwölf Prinzipien der Green Chemistry als Orientierungsrahmen","Bewertungskompetenz fördern (Chancen-Risiken-Abwägung)","Beispiele: Kreislaufwirtschaft, alternative Lösemittel","Verbindung zu gesellschaftlicher Verantwortung und BNE"]},
+{code:"CH8",c:"Chemie",q:"Wie fördern Sie das experimentelle Arbeiten als Erkenntnisweg?",a:["Naturwissenschaftlicher Erkenntnisprozess: Hypothese – Versuch – Auswertung","Offene vs. geschlossene Experimente je nach Kompetenzstand","Protokollführung als Methodenkompetenz","Fehleranalyse als Teil der Auswertung"]},
+{code:"CH9",c:"Chemie",q:"Wie unterscheiden sich Anforderungen in SI und SII fachlich?",a:["SI: phänomenologisch-beschreibend, Grundlegung von Basiskonzepten","SII: quantitativ-mathematisch, vertiefte Modellbildung (z. B. Gleichgewichte)","Zunehmende Abstraktion und Fachsprache","Vorbereitung auf wissenschaftspropädeutisches Arbeiten"]},
+{code:"CH10",c:"Chemie",q:"Wie beurteilen Sie den Einsatz digitaler Werkzeuge im Chemieunterricht?",a:["Digitale Messwerterfassung (z. B. pH-Wert-Sensoren)","Simulationen für nicht durchführbare/gefährliche Experimente","Molekülbaukästen/Visualisierungssoftware für Teilchenebene","Kritische Reflexion: Ersatz vs. Ergänzung des Realexperiments"]},
+{code:"CH11",c:"Chemie",q:"Wie führen Sie Schüler:innen an das Säure-Base-Konzept heran?",a:["Stufung: Alltagsbegriff „sauer/basisch“ → Arrhenius → Brønsted-Konzept","Donator-Akzeptor-Prinzip als verbindendes Basiskonzept","Experimentelle Zugänge (Indikatoren, Titration) vor Formalisierung","Grenzen früherer Modelle explizit thematisieren"]},
+{code:"CH12",c:"Chemie",q:"Wie vermitteln Sie das chemische Gleichgewicht?",a:["Dynamisches Gleichgewicht von statischem Zustand abgrenzen","Alltagsanaloga kritisch reflektiert einsetzen (Grenzen benennen)","Prinzip von Le Chatelier experimentell erarbeiten","Vernetzung mit Basiskonzept Energie und Reaktionsgeschwindigkeit"]},
+{code:"CH13",c:"Chemie",q:"Wie führen Sie in die Elektrochemie ein?",a:["Anknüpfung an Redoxkonzept (Donator-Akzeptor von Elektronen)","Schrittweise Erarbeitung: Galvanische Zelle → Elektrolyse","Alltagsbezug: Batterien, Akkus, Korrosion","Fachsprachliche Präzision (Kathode/Anode, Oxidation/Reduktion)"]},
+{code:"CH14",c:"Chemie",q:"Welche Bedeutung hat Stöchiometrie für die Rechenkompetenz der Schüler:innen?",a:["Verknüpfung von Teilchenebene und Stoffebene (Mol-Konzept)","Schrittweiser Aufbau vom qualitativen zum quantitativen Verständnis","Typische Rechenfehler antizipieren und gezielt üben","Bezug zu Basiskonzept Struktur-Eigenschaft und chemische Reaktion"]},
+{code:"CH15",c:"Chemie",q:"Wie gehen Sie mit der Gefahrstoffkennzeichnung (GHS) im Unterricht um?",a:["Einführung der GHS-Piktogramme als fester Bestandteil der Sicherheitserziehung","Umgang mit Sicherheitsdatenblättern altersgerecht vermitteln","Verknüpfung mit Bewertungskompetenz (Risikoabschätzung)","Vorbildfunktion der Lehrkraft im sicheren Umgang mit Chemikalien"]},
+{code:"CH16",c:"Chemie",q:"Wie führen Sie grundlegende Konzepte der organischen Chemie ein?",a:["Ausgangspunkt: Struktur-Eigenschafts-Beziehungen (funktionelle Gruppen)","Stoffklassenkonzept zur Systematisierung nutzen","Alltagsbezüge (Kunststoffe, Biomoleküle) zur Motivation","Modellhafte Darstellung von Molekülstrukturen (Kalottenmodelle, Software)"]},
+{code:"CH17",c:"Chemie",q:"Wie fördern Sie Bewertungskompetenz am Beispiel von Chemikalien im Alltag?",a:["Nutzen-Risiko-Abwägung an konkreten Fallbeispielen (z. B. Mikroplastik)","Multiperspektivität: ökologisch, ökonomisch, gesellschaftlich","Argumentationsschema zur strukturierten Urteilsbildung","Förderung eigenständiger, fachlich fundierter Stellungnahmen"]},
+{code:"CH18",c:"Chemie",q:"Welche Rolle spielt die Wissenschaftsgeschichte im Chemieunterricht?",a:["Historische Entwicklung von Atommodellen als Beispiel für Erkenntnisfortschritt","Vermittlung von Nature of Science (vorläufiger Charakter von Modellen)","Motivation durch Einblicke in Forschungsprozesse","Bezug zu gesellschaftlicher Bedeutung chemischer Entdeckungen"]},
+{code:"CH19",c:"Chemie",q:"Wie sichern Sie den Übergang von SI zu SII fachlich ab?",a:["Diagnose des Vorwissens am Anfang der Einführungsphase","Wiederholende Vertiefung zentraler Basiskonzepte","Erhöhung der fachsprachlichen und mathematischen Anforderungen schrittweise","Vorbereitung auf wissenschaftspropädeutisches Arbeiten in der Qualifikationsphase"]},
+{code:"CH20",c:"Chemie",q:"Wie evaluieren und optimieren Sie Ihre eigenen Chemie-Unterrichtsreihen?",a:["Reflexion anhand von Lernerfolgskontrollen und Schülerfeedback","Abgleich mit Kernlehrplanvorgaben und Kompetenzerwartungen","Kollegiale Fallberatung und Hospitationen nutzen","Kontinuierliche Anpassung von Materialien und Methoden"]},
+{code:"CH21",c:"Chemie",q:"Nennen Sie ein Beispiel für eine geschlossene Aufgabe im Chemieunterricht.",a:["Zuordnungsaufgabe: Stoffe zu Stoffklassen oder funktionellen Gruppen zuordnen","Multiple-Choice zur Unterscheidung von Reaktionstypen (Oxidation/Reduktion)","Wahr/Falsch-Aussagen zu historischen Atommodellen","Einsatz z. B. als Einstiegsdiagnose oder kurzer Wiederholungstest"]},
+{code:"CH22",c:"Chemie",q:"Nennen Sie ein Beispiel für eine offene Aufgabe im Chemieunterricht.",a:["Bewertungsaufgabe: Nutzen-Risiko-Abwägung eines Kunststoffs oder Konservierungsstoffs","Eigenständige Planung eines Experiments zu einer chemischen Fragestellung","Deutung unbekannter Beobachtungsdaten mithilfe von Basiskonzepten","Bewertung anhand von Kriterien wie Fachsprache und Argumentationstiefe"]},
+{code:"CH23",c:"Chemie",q:"Wie gestalten Sie eine Chemie-Klausur mit gestuften Aufgabenformaten?",a:["Aufbau entlang AFB I–III: Reproduktion, Anwendung, Beurteilung","Verpflichtender und wählbarer Aufgabenteil je nach Kursstufe","Verknüpfung von Experiment, Fachsprache und Rechenanteilen","Orientierung an Vorgaben des Zentralabiturs für die Oberstufe"]},
+{code:"CH24",c:"Chemie",q:"Wie prüfen Sie experimentelle Kompetenzen in Klassenarbeiten oder Prüfungen?",a:["Praktische Prüfungsteile mit Beobachtungs- und Auswertungsaufgaben","Bewertung von Versuchsplanung, Durchführung und Protokoll","Nutzung von Bildern/Videos realer Experimente als Ersatz bei Zeitdruck","Kriteriengeleitete Bewertungsbögen für Fairness und Vergleichbarkeit"]},
+{code:"CH25",c:"Chemie",q:"Wie setzen Sie Concept Maps oder Advance Organizer im Chemieunterricht ein?",a:["Visualisierung von Zusammenhängen zwischen Basiskonzepten","Aktivierung und Sichtbarmachen von Vorwissen zu Beginn einer Reihe","Förderung vernetzten Denkens statt isolierten Faktenwissens","Einsatz auch als Wiederholungs- oder Diagnoseinstrument"]},
+{code:"CH26",c:"Chemie",q:"Wie fördern Sie das Lesen und Verstehen chemischer Fachtexte?",a:["Lesestrategien (z. B. Fünf-Schritt-Lesemethode) fachspezifisch einüben","Umgang mit Fachsprache und Symbolsprache gezielt thematisieren","Textentlastende Materialien für heterogene Lerngruppen","Verknüpfung von Text, Experiment und Modellebene"]},
+{code:"CH27",c:"Chemie",q:"Wie führen Sie in die Reaktionsgeschwindigkeit und Kinetik ein?",a:["Experimentelle Erarbeitung einflussnehmender Faktoren (Konzentration, Temperatur)","Teilchenmodell zur Erklärung auf submikroskopischer Ebene nutzen","Grafische Auswertung von Messreihen (Konzentration-Zeit-Diagramme)","Vernetzung mit Basiskonzept Energie (Aktivierungsenergie)"]},
+{code:"CH28",c:"Chemie",q:"Welche Rolle spielt Analytik im Chemieunterricht?",a:["Qualitative Nachweisreaktionen zur Identifikation von Stoffen","Quantitative Analyseverfahren in der Oberstufe (z. B. Titration)","Förderung von Genauigkeit und methodischem Vorgehen","Anwendungsbezug zu Lebensmittel- oder Umweltanalytik"]},
+{code:"CH29",c:"Chemie",q:"Wie gehen Sie mit Entsorgung und Nachhaltigkeit im Chemie-Praktikum um?",a:["Sachgerechte Entsorgung nach Gefahrstoffverordnung als fester Praxisbestandteil","Vermeidung/Reduktion von Chemikalienmengen (Mikromaßstab-Experimente)","Sensibilisierung für Ressourcenschonung im Experimentalunterricht","Vorbildfunktion der Lehrkraft im verantwortungsvollen Umgang"]},
+{code:"CH30",c:"Chemie",q:"Wie fördern Sie Modellkompetenz im Umgang mit chemischen Reaktionsgleichungen?",a:["Unterscheidung zwischen Stoff-, Teilchen- und Symbolebene bewusst machen","Schrittweiser Aufbau vom Wortschema zur formalen Reaktionsgleichung","Übungsformate zum Ausgleichen/Aufstellen von Gleichungen","Rückbindung an Basiskonzept Erhaltung der Masse/Atome"]},
+{code:"CH31",c:"Chemie",q:"Wie fördern Sie naturwissenschaftliche Erkenntnisgewinnung als eigenständige Kompetenz?",a:["Hypothesengeleitetes Vorgehen einüben (Frage – Vermutung – Versuch – Auswertung)","Systematische Variation von Einflussgrößen","Reflexion über Aussagekraft und Grenzen von Experimenten","Vergleich mit historischen Forschungsprozessen"]},
+{code:"CH32",c:"Chemie",q:"Welche Kompetenzen vermitteln Sie im Umgang mit chemischen Modellen?",a:["Unterscheidung von Modellebenen (Stoff-, Teilchen-, Symbolebene)","Bewusstsein für Gültigkeitsbereiche und Grenzen von Modellen schaffen","Modellwechsel als Fortschritt der Erkenntnis begreifen","Eigenständige Anwendung von Modellen auf neue Fragestellungen üben"]},
+{code:"CH33",c:"Chemie",q:"Bei einem Schülerversuch platzt plötzlich ein Reagenzglas. Wie reagieren Sie konkret?",a:["Ruhe bewahren und Experiment sofort stoppen","Betroffene Schüler:innen von der Gefahrenquelle wegführen","Verletzungen prüfen, Erste-Hilfe-Maßnahmen einleiten","Splitter und Chemikalienreste fachgerecht entsorgen","Vorfall dokumentieren und Sicherheitsbelehrung nachholen"]},
+{code:"CH34",c:"Chemie",q:"Ein Schüler möchte ohne Schutzbrille experimentieren. Wie reagieren Sie?",a:["Versuch konsequent unterbinden, bis Schutzausrüstung getragen wird","Sicherheitsregeln nach RiSU noch einmal verdeutlichen","Konsequent, aber ruhig durchsetzen, ohne bloßzustellen","Ersatzbrille bereitstellen, wenn vorhanden"]},
+{code:"CH35",c:"Chemie",q:"Ihre Klasse erhält bei einem offenen Experiment widersprüchliche Messergebnisse. Wie gehen Sie vor?",a:["Ergebnisse zunächst wertfrei sammeln und visualisieren","Mögliche Fehlerquellen gemeinsam mit der Klasse diskutieren","Zur Wiederholung bzw. Kontrolle des Versuchs anregen","Widerspruch als Ausgangspunkt für den Erkenntnisprozess nutzen"]},
+{code:"CH36",c:"Chemie",q:"Ein Schüler zweifelt an, dass Atome „echt“ sind, da man sie nicht sehen kann. Wie gehen Sie darauf ein?",a:["Modellcharakter naturwissenschaftlicher Erkenntnis erläutern","Indirekte Nachweismethoden vorstellen (z. B. Rastertunnelmikroskopie)","Unterscheidung zwischen Modell und Realität thematisieren","Frage als produktiven Anlass für Wissenschaftstheorie nutzen"]},
+{code:"CH37",c:"Chemie",q:"Ein Schüler möchte einen eigenen, nicht abgesprochenen Versuch mit brennbaren Stoffen durchführen. Wie reagieren Sie?",a:["Versuch sofort unterbinden","Gefährdungspotenzial sachlich erklären","Auf verbindliche Genehmigungspflicht laut RiSU hinweisen","Alternativen im geplanten Rahmen anbieten"]},
+{code:"CH38",c:"Chemie",q:"Wie erziehen Sie konkret im Chemieunterricht?",a:["Verantwortung und Sorgfalt im Umgang mit Geräten und Chemikalien einfordern","Verbindliche Regeln beim Experimentieren, sicheres Planen und Durchführen","Vorbildfunktion und Fachsprache konsequent vorleben","Offene Fehlerkultur und respektvollen Umgang untereinander fördern","Umwelt- und Ressourcenbewusstsein, sachgerechter Umgang mit Gefahrstoffen"]},
+{code:"CH39",c:"Chemie",q:"Welche Rolle spielt Sprachsensibilität im Chemieunterricht?",a:["Chemie als Naturwissenschaft besitzt eine eigene Fachsprache","Fachtermini wie Fremdwörter einführen und einüben","Unterscheidung zwischen Alltagsbegriff und Fachbegriff verdeutlichen (z. B. „Salz“)","Wortspeicher und sprachliche Hilfen zur Unterstützung einsetzen"]},
+{code:"CH40",c:"Chemie",q:"Welche Unterrichtsverfahren sind Ihnen aus dem Chemieunterricht bekannt?",a:["Forschend-entwickelndes Unterrichtsverfahren","Historisch-problemorientierter Unterricht","Chemie im Kontext (CHIK)","Kontextorientierter Unterricht allgemein"]},
+{code:"CH41",c:"Chemie",q:"Wie führen Sie das Donator-Akzeptor-Prinzip fachlich korrekt ein?",a:["Zunächst an Redoxreaktionen (Elektronenübertragung) einführen","Analogie zu Säure-Base-Reaktionen (Protonenübertragung) ziehen","Als übergreifendes Basiskonzept in der Sek II vertiefen","Grenzen der Analogie kritisch reflektieren"]},
+{code:"CH42",c:"Chemie",q:"Wie gehen Sie mit der Entsorgung von Chemikalienresten nach RiSU vor?",a:["Trennung nach Gefahrstoffklassen laut Entsorgungsplan der Schule","Bereitgestellte Sammelbehälter nutzen, keine Ausgüsse für Gefahrstoffe","Größere Mengen für die Fachschaft dokumentieren","Schüler:innen für sachgerechte Entsorgung sensibilisieren"]},
+{code:"CH43",c:"Chemie",q:"Wie vermitteln Sie das Prinzip von Le Chatelier anschaulich?",a:["Störung eines Gleichgewichts experimentell demonstrieren (z. B. Iod-Stärke, Cobalt-Komplex)","Systematische Variation von Konzentration, Druck, Temperatur","Vorhersage der Gleichgewichtsverschiebung begründen lassen","Alltagsbeispiele (z. B. Ammoniaksynthese) zur Vertiefung nutzen"]},
+{code:"CH44",c:"Chemie",q:"Welche Bedeutung hat die Fachkonferenz bei der Auswahl von Lehrmitteln in Chemie?",a:["Beschluss über Schulbücher und Lernmittel im Rahmen der Lernmittelfreiheit","Abstimmung mit dem schulinternen Curriculum","Berücksichtigung von Sicherheitsaspekten bei Experimentiermaterial","Regelmäßige Überprüfung auf Aktualität"]},
+{code:"CH45",c:"Chemie",q:"Wie gehen Sie mit dem Themenfeld Klimawandel im Chemieunterricht um?",a:["Fachliche Grundlage über Treibhauseffekt und Strahlungsbilanz erklären","Verknüpfung mit den Basiskonzepten Energie und chemische Reaktion","Bewertungskompetenz fördern (Handlungsoptionen abwägen)","Aktualitätsbezug über Fachkonferenzbeschlüsse absichern"]},
+{code:"CH46",c:"Chemie",q:"Wie führen Sie den Redoxbegriff historisch-genetisch ein?",a:["Historische Entwicklung vom Sauerstoffübertragungs- zum Elektronenübertragungskonzept","Grenzen älterer Modelle an Beispielen aufzeigen","Erweiterung auf das allgemeine Donator-Akzeptor-Prinzip","Nature-of-Science-Aspekt: Modelle entwickeln sich weiter"]},
+{code:"CH47",c:"Chemie",q:"Wie binden Sie die Arbeit mit dem Periodensystem kompetenzorientiert ein?",a:["PSE als Ordnungsprinzip auf Basis der Elektronenkonfiguration erarbeiten","Perioden und Hauptgruppen mit Eigenschaftstrends verknüpfen","Vorhersagen von Eigenschaften unbekannter Elemente üben","Historische Bedeutung (Mendelejew) thematisieren"]},
+{code:"CH48",c:"Chemie",q:"Wie gehen Sie mit Schülerfragen zu radioaktiven Stoffen im Chemieunterricht um?",a:["Fachliche Abgrenzung zu Kernphysik/-chemie klären","Sicherheits- und Strahlenschutzaspekte altersgerecht vermitteln","Alltagsbezüge aufgreifen (Rauchmelder, Medizin)","Bei Bedarf auf Physikunterricht bzw. Fachkolleg:innen verweisen"]},
+{code:"CH49",c:"Chemie",q:"Welche Rolle spielt Chemie in gesellschaftlichen Debatten (z. B. Mikroplastik, PFAS)?",a:["Aktuelle fachliche Grundlagen altersgerecht aufbereiten","Multiperspektivische Bewertung (ökologisch, gesundheitlich, ökonomisch)","Quellenkritik bei Medienberichten fördern","Bezug zum Basiskonzept Struktur-Eigenschaft herstellen"]},
+{code:"CH50",c:"Chemie",q:"Wie sichern Sie die Vergleichbarkeit von Chemie-Klausuren innerhalb der Fachschaft?",a:["Gemeinsame Erwartungshorizonte in der Fachkonferenz entwickeln","Aufgabenformate und Punktevergabe absprechen","Parallelarbeiten bei gleichen Kursen erwägen","Ergebnisse fachschaftsintern reflektieren"]},
+
+{code:"PH1",c:"Physik",q:"Erläutern Sie die Basiskonzepte des Physikunterrichts in NRW.",a:["Materie, Wechselwirkung, System, Struktur der Materie, Energie","Vernetzung über Themenfelder hinweg (Mechanik, E-Lehre, Quantenphysik)","Spiralcurriculum: Wiederaufgriff auf steigendem Abstraktionsniveau","Verankerung im Kernlehrplan SI/SII"]},
+{code:"PH2",c:"Physik",q:"Wie führen Sie Schüler:innen an die Modellbildung in der Physik heran?",a:["Unterscheidung Phänomen – Modell – Realität explizit machen","Grenzen von Modellen aufzeigen (z. B. Massepunkt-Modell)","Schrittweise Erweiterung/Verfeinerung von Modellen","Reflexion über Gültigkeitsbereiche"]},
+{code:"PH3",c:"Physik",q:"Wie gehen Sie mit typischen Schülerfehlvorstellungen in der Physik um?",a:["Diagnose vorab (z. B. „Kraft = Ursache für Bewegung, nicht für Änderung“)","Cognitive-Conflict-Experimente zur Konfrontation mit Alltagsvorstellungen","Sprachliche Präzisierung von Alltags- vs. Fachbegriffen","Längerfristige Verankerung durch wiederholten Rückbezug"]},
+{code:"PH4",c:"Physik",q:"Welche Rolle spielt Mathematisierung im Physikunterricht?",a:["Physikalische Zusammenhänge in formaler Sprache abbilden","Stufenweiser Übergang von qualitativ zu quantitativ","Verknüpfung mit Fach Mathematik curricular abstimmen","Gefahr: Formel ohne Verständnis – konzeptuelles Verständnis sichern"]},
+{code:"PH5",c:"Physik",q:"Welche Sicherheitsaspekte sind beim Experimentieren in der Physik zentral?",a:["RiSU als Rechtsgrundlage, Gefährdungsbeurteilung","Besondere Vorsicht bei Hochspannung, Strahlung, Laser","Schüler- vs. Demonstrationsversuch je nach Gefährdungspotenzial","Notfallmanagement und Schutzmaßnahmen"]},
+{code:"PH6",c:"Physik",q:"Wie bewerten Sie den Umgang mit Messfehlern und Messunsicherheiten?",a:["Unterscheidung systematische vs. zufällige Fehler","Fehlerrechnung altersgerecht einführen (SI qualitativ, SII quantitativ)","Reflexion der Messgenauigkeit als Teil der Erkenntnismethode","Bedeutung für naturwissenschaftliches Arbeiten allgemein"]},
+{code:"PH7",c:"Physik",q:"Wie integrieren Sie moderne Physik (z. B. Quantenphysik) in der Oberstufe?",a:["Vorgaben Zentralabitur NRW als curriculare Grundlage","Abkehr vom klassischen Anschaulichkeitsideal thematisieren","Einsatz von Visualisierungen/Simulationen","Bezug zu Anwendungen (z. B. Quantentechnologien) für Relevanz"]},
+{code:"PH8",c:"Physik",q:"Wie setzen Sie digitale Werkzeuge im Physikunterricht ein?",a:["Digitale Messwerterfassung und Sensorik (z. B. Smartphone-Experimente)","Simulationen für nicht zugängliche Phänomene (z. B. Atommodelle, Felder)","Auswertungssoftware zur Datenanalyse/Grafikerstellung","Kritische Reflexion: Simulation ergänzt, ersetzt aber nicht das Realexperiment"]},
+{code:"PH9",c:"Physik",q:"Wie bereiten Sie auf die Abiturprüfung im Fach Physik vor?",a:["Orientierung an Vorgaben für das Zentralabitur NRW","Operatorenschulung (AFB I–III), Aufgabenformate trainieren","Verknüpfung von Experiment, Theorie und Mathematisierung in Klausuren","Wissenschaftspropädeutisches Arbeiten als Ziel der SII"]},
+{code:"PH10",c:"Physik",q:"Wie fördern Sie Experimentalkompetenz als eigenständige Kompetenz?",a:["Schrittweise Öffnung: von geleiteten zu offenen Experimenten","Hypothesenbildung, Versuchsplanung, Auswertung als Teilkompetenzen","Reflexion über Methoden der Erkenntnisgewinnung (Nature of Science)","Fehleranalyse und Optimierung von Versuchsaufbauten als Lernanlass"]},
+{code:"PH11",c:"Physik",q:"Wie vermitteln Sie das Basiskonzept Energie als durchgängiges Prinzip?",a:["Energieerhaltung als roter Faden über alle Themenfelder hinweg","Energieformen und -umwandlung experimentell erarbeiten","Abgrenzung von Alltagsbegriff „Energieverbrauch“ zu physikalischem Konzept","Vernetzung mit Basiskonzept Wechselwirkung und System"]},
+{code:"PH12",c:"Physik",q:"Wie führen Sie Schüler:innen an Kraft und Bewegung heran?",a:["Schrittweise Ablösung der aristotelischen Alltagsvorstellung","Newtonsche Gesetze experimentell und schrittweise erarbeiten","Unterscheidung Geschwindigkeit – Beschleunigung – Kraft konsequent sichern","Grafische Darstellungen (t-s-, t-v-, t-a-Diagramme) zur Verständnissicherung"]},
+{code:"PH13",c:"Physik",q:"Welche typischen Fehlvorstellungen zeigen sich in der Elektrizitätslehre?",a:["„Verbrauchsvorstellung“ von Strom statt Kreislaufprinzip","Fehlvorstellung, dass Strom im Leiter „aufgebraucht“ wird","Gezielte Gegenexperimente und Analogien (mit Grenzen reflektiert) einsetzen","Sukzessiver Aufbau von Stromstärke-, Spannungs- und Widerstandsbegriff"]},
+{code:"PH14",c:"Physik",q:"Wie führen Sie in die Optik und das Wellenmodell des Lichts ein?",a:["Stufung: Strahlenoptik → Wellenmodell → Quantenmodell (Dualismus)","Experimente zu Beugung/Interferenz als Grenze des Teilchenmodells","Modellwechsel bewusst als Erkenntnisfortschritt thematisieren","Alltagsbezüge (Regenbogen, Brille, Kamera) zur Motivation nutzen"]},
+{code:"PH15",c:"Physik",q:"Welche Bedeutung haben Astronomie/Astrophysik im Physikunterricht?",a:["Anknüpfung an hohes Schülerinteresse als Motivationsanker","Verknüpfung mit Basiskonzepten Wechselwirkung und Energie","Einordnung aktueller Forschung (z. B. Exoplaneten, Gravitationswellen)","Förderung von Modellverständnis anhand nicht direkt beobachtbarer Phänomene"]},
+{code:"PH16",c:"Physik",q:"Wie stellen Sie Technikbezug und Anwendungsorientierung im Physikunterricht her?",a:["Alltags- und Technikkontexte als Ausgangspunkt der Erarbeitung","Rückbindung an physikalische Grundprinzipien nach Kontexterarbeitung","Beispiele: Elektromotor, Sensorik, erneuerbare Energien","Förderung von Technikbewertungskompetenz (Chancen/Risiken)"]},
+{code:"PH17",c:"Physik",q:"Wie führen Sie Größen und Einheiten (SI-System) korrekt ein?",a:["Konsequente Verwendung von Basisgrößen und SI-Einheiten von Beginn an","Sensibilisierung für Größengleichungen vs. reine Zahlenrechnung","Einheitenanalyse als Kontrollinstrument bei Rechnungen nutzen","Alltagsrelevanz von Maßeinheiten verdeutlichen"]},
+{code:"PH18",c:"Physik",q:"Wie vertiefen Sie die Fehleranalyse bei physikalischen Experimenten in der SII?",a:["Quantitative Fehlerrechnung (absolute/relative Unsicherheit)","Unterscheidung systematischer und zufälliger Fehler vertiefen","Fehlerfortpflanzung bei komplexeren Messreihen thematisieren","Kritische Diskussion der Aussagekraft von Messergebnissen"]},
+{code:"PH19",c:"Physik",q:"Wie gestalten Sie interdisziplinäre Bezüge zwischen Physik, Chemie und Biologie?",a:["Gemeinsame Basiskonzepte identifizieren (z. B. Energie, Struktur-Eigenschaft)","Fächerübergreifende Projekte (z. B. Energieversorgung, Biophysik)","Absprachen in Fachkonferenzen zur Vermeidung von Redundanzen","Förderung eines vernetzten naturwissenschaftlichen Weltbildes"]},
+{code:"PH20",c:"Physik",q:"Wie fördern Sie das Interesse von Mädchen und die Gendergerechtigkeit im MINT-Unterricht?",a:["Diverse Rollenvorbilder und Anwendungsbeispiele einbeziehen","Reflexion eigener unbewusster Erwartungshaltungen","Kooperative, forschend-entdeckende Lernformen stärken Beteiligung aller","Teilnahme an MINT-Förderprogrammen und Wettbewerben anregen"]},
+{code:"PH21",c:"Physik",q:"Nennen Sie ein Beispiel für eine geschlossene Aufgabe im Physikunterricht.",a:["Multiple-Choice zu Größen und Einheiten im SI-System","Zuordnung von Diagrammen zu passenden Bewegungsarten","Rechenaufgabe mit eindeutigem Zahlenergebnis","Einsatz zur schnellen Lernstandsdiagnose oder Selbstkontrolle"]},
+{code:"PH22",c:"Physik",q:"Nennen Sie ein Beispiel für eine offene Aufgabe im Physikunterricht.",a:["Deutung eines unbekannten Diagramms oder Messwertsatzes","Eigenständige Entwicklung eines Experiments zur Überprüfung einer Hypothese","Bewertung einer technischen Anwendung (z. B. Energieversorgung)","Beurteilung anhand eines Kriterienrasters statt einer einzigen Musterlösung"]},
+{code:"PH23",c:"Physik",q:"Wie gestalten Sie eine Physik-Klausur mit gestuften Aufgabenformaten?",a:["Aufbau entlang AFB I–III: Reproduktion, Anwendung, Beurteilung","Verknüpfung von Experiment, Theorie und Mathematisierung","Verpflichtender und wählbarer Aufgabenteil je nach Kursstufe","Orientierung an Vorgaben des Zentralabiturs für die Oberstufe"]},
+{code:"PH24",c:"Physik",q:"Wie prüfen Sie experimentelle Kompetenzen in Klassenarbeiten oder Prüfungen?",a:["Praktische Prüfungsteile mit Beobachtungs- und Auswertungsaufgaben","Bewertung von Versuchsplanung, Durchführung und Fehleranalyse","Nutzung von Messdaten/Videos realer Experimente bei Zeit- oder Sicherheitsproblemen","Kriteriengeleitete Bewertungsbögen für Fairness und Vergleichbarkeit"]},
+{code:"PH25",c:"Physik",q:"Wie setzen Sie Simulationen zur Modellbildung gezielt ein?",a:["Zugang zu nicht direkt beobachtbaren Phänomenen (z. B. Felder, Teilchenbewegung)","Variieren von Parametern zur Untersuchung von Zusammenhängen","Kritische Reflexion: Simulation als Modell mit eigenen Grenzen","Ergänzung, nicht Ersatz des Realexperiments"]},
+{code:"PH26",c:"Physik",q:"Wie fördern Sie das Lesen und Interpretieren von Diagrammen und Graphen?",a:["Systematische Einführung in Achsen, Einheiten und Steigungsbedeutung","Verknüpfung von grafischer, sprachlicher und formaler Darstellung","Übung im Wechsel zwischen Diagrammtypen (t-s, t-v, t-a)","Fehleranalyse bei Fehlinterpretationen gezielt aufgreifen"]},
+{code:"PH27",c:"Physik",q:"Wie führen Sie in Schwingungen und Wellen ein?",a:["Experimentelle Erarbeitung an einfachen Systemen (Federpendel, Wasserwellen)","Grundgrößen (Frequenz, Amplitude, Wellenlänge) schrittweise einführen","Mathematisierung schrittweise ergänzen (harmonische Schwingung)","Alltagsbezüge (Schall, Licht) zur Motivation nutzen"]},
+{code:"PH29",c:"Physik",q:"Wie nutzen Sie außerschulische Lernorte wie Schülerlabore?",a:["Zugang zu Geräten und Experimenten jenseits schulischer Möglichkeiten","Motivationssteigerung durch authentische Forschungssituationen","Sorgfältige curriculare Einbindung vor und nach dem Besuch","Förderung von Berufs- und Studienorientierung im MINT-Bereich"]},
+{code:"PH30",c:"Physik",q:"Wie fördern Sie Modellkompetenz im Umgang mit physikalischen Formeln und Gesetzen?",a:["Unterscheidung zwischen Phänomen, Modell und mathematischer Beschreibung","Herleitung von Formeln aus Experimenten statt reiner Vorgabe","Gültigkeitsbereiche und Grenzen von Gesetzen thematisieren","Übung im Wechsel zwischen sprachlicher, grafischer und formaler Darstellung"]},
+{code:"PH31",c:"Physik",q:"Wie vermitteln Sie den Prozess naturwissenschaftlicher Erkenntnisgewinnung in der Physik?",a:["Hypothesengeleitetes Vorgehen einüben (Frage – Vermutung – Experiment – Auswertung)","Systematisches Variieren von Einflussgrößen","Reflexion über Reichweite und Grenzen von Experimenten","Bezug zu historischen Entdeckungsprozessen herstellen"]},
+{code:"PH32",c:"Physik",q:"Welche Kompetenzen vermitteln Sie im Umgang mit physikalischen Modellen?",a:["Unterscheidung zwischen Phänomen, Modell und Realität","Bewusstsein für Gültigkeitsbereiche und Vereinfachungen schaffen","Modellwechsel als Erkenntnisfortschritt begreifen (z. B. Atommodelle)","Anwendung von Modellen auf neue Situationen üben"]},
+{code:"PH33",c:"Physik",q:"Bei einem Hochspannungsversuch bemerken Sie ein beschädigtes Kabel. Was tun Sie konkret?",a:["Versuch sofort abbrechen und Stromkreis unterbrechen","Beschädigtes Material aus dem Unterricht entfernen","Schüler:innen auf sicheren Abstand hinweisen","Ersatzgerät nutzen oder Versuch verschieben","Vorfall der Sammlungsleitung bzw. Fachschaft melden"]},
+{code:"PH34",c:"Physik",q:"Ein Schüler möchte während des Praktikums eigenständig, ohne Genehmigung, mit dem Lasergerät experimentieren. Wie reagieren Sie?",a:["Versuch sofort unterbinden","Gefährdungspotenzial (Augenschäden) sachlich erklären","Auf Laserklasse, Genehmigungspflicht und Fachaufsicht laut RiSU hinweisen","Alternativen im betreuten Rahmen anbieten"]},
+{code:"PH35",c:"Physik",q:"Eine Messreihe liefert einen deutlichen Ausreißer. Wie gehen Sie im Unterricht damit um?",a:["Ausreißer nicht kommentarlos streichen","Mögliche Fehlerquellen gemeinsam diskutieren","Zur Wiederholung der Messung anregen","Umgang mit Ausreißern als Teil der Fehleranalyse thematisieren"]},
+{code:"PH36",c:"Physik",q:"Ein Schüler sagt: „Elektronen sind einfach kleine Kugeln, die um den Kern kreisen.“ Wie klären Sie das?",a:["Modellcharakter des Bohrschen Atommodells erläutern","Historische Entwicklung der Atommodelle aufzeigen","Grenzen des Kugelmodells anhand moderner Nachweise thematisieren","Unterscheidung zwischen Modell und Realität verdeutlichen"]},
+{code:"PH37",c:"Physik",q:"Wie erziehen Sie konkret im Physikunterricht?",a:["Verantwortung und Sorgfalt im Umgang mit Geräten und elektrischen Anlagen einfordern","Verbindliche Regeln beim Experimentieren, sicheres Planen und Durchführen","Vorbildfunktion und exakten Sprachgebrauch (Größen, Einheiten) vorleben","Offene Fehlerkultur und respektvollen Umgang untereinander fördern","Sorgfältigen, ressourcenschonenden Umgang mit Material und Energie fördern"]},
+{code:"PH38",c:"Physik",q:"Welche Rolle spielt Sprachsensibilität im Physikunterricht?",a:["Physik als Naturwissenschaft besitzt eine eigene Fachsprache (Größen, Einheiten, Formeln)","Fachtermini wie Fremdwörter einführen und einüben","Unterscheidung zwischen Alltagsbegriff und Fachbegriff verdeutlichen (z. B. „Kraft“, „Arbeit“)","Wortspeicher und sprachliche Hilfen zur Unterstützung einsetzen"]},
+{code:"PH39",c:"Physik",q:"Welche Unterrichtsverfahren sind Ihnen aus dem Physikunterricht bekannt?",a:["Forschend-entwickelndes Unterrichtsverfahren","Historisch-problemorientierter Unterricht","Physik im Kontext (piko)","Kontextorientierter Unterricht allgemein"]},
+{code:"PH40",c:"Physik",q:"Wie führen Sie den Energieerhaltungssatz experimentell ein?",a:["Umwandlungsketten an einfachen Systemen zeigen (z. B. Fadenpendel)","Energieformen vor und nach dem Versuch quantifizieren","Reale Verluste (Reibung, Wärme) thematisieren","Basiskonzept Energie als übergreifendes Prinzip verankern"]},
+{code:"PH41",c:"Physik",q:"Wie gehen Sie mit dem Themenfeld erneuerbare Energien im Physikunterricht um?",a:["Physikalische Grundlagen (Wirkungsgrad, Energieumwandlung) erarbeiten","Vergleich verschiedener Energiequellen anhand von Kenndaten","Bewertungskompetenz fördern (Vor- und Nachteile abwägen)","Aktualitätsbezug zur Energiewende herstellen"]},
+{code:"PH42",c:"Physik",q:"Wie vermitteln Sie das Konzept der Trägheit (1. Newtonsches Gesetz)?",a:["Alltagserfahrungen (Anfahren, Bremsen) als Ausgangspunkt nutzen","Experimente zur Trägheit (z. B. Tischtuchtrick, Luftkissenbahn)","Abgrenzung von der aristotelischen Alltagsvorstellung","Formale Fassung schrittweise einführen"]},
+{code:"PH43",c:"Physik",q:"Wie führen Sie in die Halbleiterphysik/Elektronik ein?",a:["Anknüpfung an bekannte Stromkreise und Bauteile","Modellvorstellung von Ladungsträgern in Halbleitern vereinfachen","Alltagsbezüge nutzen (Diode, Solarzelle, Transistor)","Vertiefung in der Qualifikationsphase mit dem Bändermodell"]},
+{code:"PH44",c:"Physik",q:"Wie binden Sie historische Experimente (z. B. Millikan, Rutherford) in den Unterricht ein?",a:["Nachvollzug der Fragestellung und Versuchsidee","Bedeutung für die Entwicklung physikalischer Modelle herausarbeiten","Nature-of-Science-Aspekt: Erkenntnisfortschritt durch Experiment","Ggf. vereinfachte Nachbau-Experimente oder Simulationen nutzen"]},
+{code:"PH45",c:"Physik",q:"Welche Rolle spielt Astrophysik/Kosmologie im Rahmen des Zentralabiturs?",a:["Verankerung in den Vorgaben zum Zentralabitur NRW prüfen","Verknüpfung mit den Basiskonzepten Wechselwirkung und Energie","Aktuelle Forschung einbeziehen (z. B. Gravitationswellen)","Modellcharakter kosmologischer Theorien betonen"]},
+{code:"PH46",c:"Physik",q:"Wie gehen Sie mit Schülerfragen zu Zeitdilatation/Relativitätstheorie um?",a:["Fachliche Grenzen des Schulcurriculums transparent machen","Grundidee anschaulich vereinfachen, ohne falsche Vorstellungen zu erzeugen","Auf vertiefende Angebote verweisen (AG, Wettbewerbe)","Verknüpfung mit Basiskonzept Wechselwirkung, wo möglich"]},
+{code:"PH47",c:"Physik",q:"Wie sichern Sie die Vergleichbarkeit von Physik-Klausuren innerhalb der Fachschaft?",a:["Gemeinsame Erwartungshorizonte in der Fachkonferenz entwickeln","Aufgabenformate und Punktevergabe absprechen","Parallelarbeiten bei gleichen Kursen erwägen","Ergebnisse fachschaftsintern reflektieren"]},
+{code:"PH48",c:"Physik",q:"Welche Bedeutung hat die Fachkonferenz bei der Auswahl von Lehrmitteln in Physik?",a:["Beschluss über Schulbücher und Lernmittel im Rahmen der Lernmittelfreiheit","Abstimmung mit dem schulinternen Curriculum","Berücksichtigung von Sicherheitsaspekten bei Experimentiermaterial","Regelmäßige Überprüfung auf Aktualität"]},
+{code:"PH49",c:"Physik",q:"Wie fördern Sie den Umgang mit Größenordnungen und Abschätzungen (Fermi-Aufgaben)?",a:["Realistische Abschätzung physikalischer Größen ohne exakte Messung üben","Fermi-Aufgaben als offenes Aufgabenformat einsetzen","Modellbildungs- und Schätzkompetenz fördern","Alltagsbezüge als Einstieg nutzen (z. B. Anzahl Klavierstimmer in einer Stadt)"]},
+
+{code:"U-O1",c:"Allgemein",sub:"U",q:"Welche Bedeutung hat die Berücksichtigung von Heterogenität für die Planung von Unterricht?",a:["Heterogenität ist im NRW-Schulsystem Regelfall, nicht Ausnahme (Leitlinie Vielfalt)","Lernvoraussetzungen, Leistungsniveaus, Sprachkompetenzen und Interessen unterscheiden sich in jeder Lerngruppe","Erfordert differenzierte Zugänge, offene Aufgabenformate und binnendifferenzierte Materialien","Ziel: alle SuS auf ihrem jeweiligen Niveau fördern","Grundlage für Chancengerechtigkeit im Sinne des Schulgesetzes NRW"]},
+{code:"U-O2",c:"Allgemein",sub:"U",q:"Welche Methoden eignen sich zur Aktivierung heterogener Lerngruppen?",a:["Kooperative Lernformen","Stationenlernen mit gestuften Anforderungsniveaus","Digitale Tools","Offene Aufgabenformate mit mehreren Lösungswegen"]},
+{code:"U-O8",c:"Allgemein",sub:"U",q:"Welche didaktischen Modelle kennen Sie?",a:["Bildungstheoretische Didaktik (Klafki): Leitfragen zur Bedeutung des Inhalts (u. a. exemplarische, Gegenwarts- und Zukunftsbedeutung)","Berliner Modell (Heimann/Otto/Schulz): empirisch-analytisches Entscheidungsmodell","Hamburger Modell (Schulz): erweitert um Perspektiv-, Umriss- und Prozessplanung","Handlungsorientiertes Unterrichtskonzept (Hilbert Meyer): Kopf- und Handarbeit in Balance"]},
+{code:"U-O9",c:"Allgemein",sub:"U",q:"Was verstehen Sie unter Problemorientierung im Unterricht, und wie erreichen Sie diese?",a:["Unterricht geht von einem Problem aus statt von geordnetem Fertigwissen (vgl. Bönsch)","Ablauf: Problemstellung – Strukturierung – Lösung – Präsentation – Transfer","Schüler:innen übernehmen einen aktiven Part, Lehrkraft unterstützt","Fördert entdeckendes Lernen und Transferfähigkeit"]},
+{code:"U-O10",c:"Allgemein",sub:"U",q:"Welche Ansätze für Classroom Management kennen Sie?",a:["Low-Profile-Ansatz (Helmke): Antizipation – Ablenkung – Reaktion, um den Unterrichtsfluss zu erhalten","Kounin: u. a. Allgegenwärtigkeit, Reibungslosigkeit, Gruppenmobilisierung","Evertson: proaktives, vorausplanendes Classroom Management (u. a. klare Regeln und Prozeduren)","Gemeinsames Ziel: möglichst viel echte, störungsarme Lernzeit"]},
+{code:"U-O11",c:"Allgemein",sub:"U",q:"Welchen Stellenwert hat Helmkes Angebots-Nutzungs-Modell für Sie?",a:["Unterricht als „Angebot“ der Lehrkraft, dessen Nutzung von Schülervoraussetzungen abhängt","Lehrkraft und Schüler:innen als Koproduzenten des Lernerfolgs","Verdeutlicht: „den guten Unterricht an sich“ gibt es nicht","Klassenführung als zentraler, aber nicht alleiniger Erfolgsfaktor"]},
+{code:"U-O12",c:"Allgemein",sub:"U",q:"Wie hängen Motivierung und langfristige Leistungsmotivation zusammen?",a:["Methodenvielfalt im Einstieg wirkt meist nur kurzfristig-extrinsisch","Ziel: internalisierte, selbstbestimmte Motivation (vgl. Ryan & Deci)","Kausalattribuierungen beeinflussen Motivation (Erfolg/Misserfolg auf sich oder Umstände zurückführen)","Binnendifferenzierung schafft langfristig tragfähigere Motivation"]},
+{code:"U-O13",c:"Allgemein",sub:"U",q:"Welche Arten der Methodenkonzeption kennen Sie?",a:["Geschlossene Konzeption (Ausubel): starke Lehrerlenkung, rezeptives Lernen","Offene Konzeption (Bruner): hohe Schüleraktivität, entdeckendes Lernen im Vordergrund","Beide Pole haben je nach Lernziel ihre Berechtigung"]},
+{code:"U-O14",c:"Allgemein",sub:"U",q:"Nutzen Sie Rituale im Unterricht, und warum?",a:["Rituale geben Sicherheit und einen vertrauten Rahmen","Erleichtern Orientierung und reduzieren Schülerängste","Schaffen Freiräume, da Abläufe nicht neu ausgehandelt werden müssen","Vereinfachen die Unterrichtsplanung"]},
+{code:"U-O15",c:"Allgemein",sub:"U",q:"Welche Gelingensbedingungen sind beim kooperativen Lernen (Think-Pair-Share) zu beachten?",a:["Denken: Einzelarbeit mit klarem Arbeitsauftrag und Zeitvorgabe","Austauschen: strukturierter Vergleich in Partner- bzw. Kleingruppenarbeit","Vorstellen: Ergebnispräsentation und Sicherung im Plenum","Positive Abhängigkeit und individuelle Verantwortlichkeit sicherstellen (vgl. Brüning/Saum)"]},
+{code:"U-O16",c:"Allgemein",sub:"U",q:"Welche Merkmale der Professionalität von Lehrkräften nennt Helmke?",a:["Kognitive Merkmale: Wissen und Kompetenzen","Berufserfahrung","Überzeugungen über das Selbst (Lehrererwartungen) und über Lehren/Lernen","Motivationale Merkmale: Enthusiasmus, Zielorientierung","Emotionale Merkmale: Belastungsfähigkeit, Reflexionsfähigkeit (Risiko: Burnout)"]},
+{code:"U-O17",c:"Allgemein",sub:"U",q:"Nennen Sie die zehn Merkmale guten Unterrichts nach Hilbert Meyer im Überblick.",a:["Klare Strukturierung, hoher Anteil echter Lernzeit, lernförderliches Klima","Inhaltliche Klarheit, sinnstiftendes Kommunizieren, Methodenvielfalt","Individuelles Fördern, intelligentes Üben","Transparente Leistungserwartungen, vorbereitete Umgebung"]},
+{code:"U-O18",c:"Allgemein",sub:"U",q:"Was zeigt die Hattie-Studie, und welche Kritik gibt es daran?",a:["Höchster Einfluss auf Lernerfolg: Lehrkraft und Curricula; niedrigster: Schule und häusliches Umfeld","Besonders wirksam: reziprokes Lernen, Lernstrategien; wenig wirksam: Hausaufgaben, leistungshomogene Kleingruppen","Kritik: keine Gewichtung der 138 Faktoren, nur Korrelations- statt Experimentalstudien","Fazit: abwechslungsreicher Unterricht mit vorbereiteter Lernumgebung wirkt besonders stark"]},
+{code:"U-O19",c:"Allgemein",sub:"U",q:"Was ist das Problem des klassischen Lernziel-Konzepts, und wie grenzt sich Kompetenzorientierung davon ab?",a:["Lernzielorientierung verengt sich oft auf kognitiven Wissenserwerb statt intelligenter Anwendung","Fokussiert Ergebnisse, vernachlässigt Reflexion des Lernprozesses","Kompetenzformulierungen zielen auf Anwendung, integrieren Sach-, Methoden-, Selbst- und Sozialkompetenz","Kompetenzaufbau ist ein längerfristiger, eingeübter Prozess"]},
+{code:"U-O20",c:"Allgemein",sub:"U",q:"Welche Schritte durchlaufen Sie bei der Planung einer Unterrichtsstunde?",a:["Lernziel bzw. Kompetenz aus dem Kernlehrplan festlegen","Lerngruppe analysieren (Vorkenntnisse, Bedingungen)","Didaktische Reduktion der Sachstruktur vornehmen","Arbeitsweg sowie Methoden, Medien und Sozialform passend zur Lerngruppe wählen","Planung bleibt ein flexibler Prozess mit Rückbezug und Revision, keine starre Abfolge"]},
+{code:"U-O21",c:"Allgemein",sub:"U",q:"Welche Funktionen erfüllt ein guter Unterrichtseinstieg, und wie gestalten Sie einen Unterrichtsausstieg?",a:["Einstieg: Fragehaltung und Neugier wecken, Transparenz über den Verlauf schaffen, Vorwissen aktivieren","Ausstieg (vgl. Sturm 2016): Gelerntes sichern, Einstiegsfrage gemeinsam beantworten","Selbstreflexion, positive Verstärkung, Überleitung zur Folgestunde ermöglichen","Rituale (z. B. kurze Wiederholungsspiele) als wiederkehrenden Abschluss nutzen"]},
+{code:"U-O22",c:"Allgemein",sub:"U",q:"Welche drei Ebenen der Unterrichtsmethodik unterscheidet Meyer?",a:["Makromethoden: z. B. Projektarbeit, Freiarbeit, Frontalunterricht","Mesomethoden: Sozialformen, Handlungsmuster, Verlaufsformen (Einstieg – Erarbeitung – Sicherung)","Mikromethoden: konkrete Handlungen wie Zeigen, Erzählen, Vormachen","Ziel und Methode müssen zueinander passen"]},
+{code:"U-O23",c:"Allgemein",sub:"U",q:"Welche Kriterien für gelingendes kooperatives Lernen nennen Johnson und Johnson?",a:["Positive Abhängigkeit: „Wir brauchen einander.“","Direkte Unterstützung und Verbindlichkeit (jede:r kann drankommen)","Soziale Fähigkeiten: rücksichtsvoller Umgang miteinander","Eigene Evaluation der Gruppenarbeit durch die Gruppe selbst"]},
+{code:"U-O24",c:"Allgemein",sub:"U",q:"Wie unterscheiden sich intrinsische und extrinsische Lernmotivation, und wodurch kann eine Lehrkraft demotivieren?",a:["Intrinsisch: Ziel liegt in der Handlung selbst (Freude, Interesse, Neugier)","Extrinsisch: Ziel liegt außerhalb der Handlung (z. B. Note, Belohnung)","Demotivierend wirken: Einengen von Spielräumen, massive Kontrolle, unklare Ziele, fehlende Einbindung","Auch eine demotivierte Lehrkraft selbst wirkt demotivierend auf die Klasse"]},
+{code:"U-O25",c:"Allgemein",sub:"U",q:"Was kennzeichnet effektives Lob im Unterricht?",a:["Effektiv: sparsam, spontan, variabel, informiert über den Wert der Leistung","Effektiv: bezieht sich auf individuellen Fortschritt, schreibt Erfolg der Anstrengung zu","Ineffektiv: gewohnheitsmäßig, global, unabhängig von echter Leistung","Tadel: nie die Persönlichkeit infrage stellen, möglichst in Lob einbetten"]},
+{code:"U-O26",c:"Allgemein",sub:"U",q:"Was besagen Watzlawicks Axiome menschlicher Kommunikation?",a:["Man kann nicht nicht kommunizieren","Jede Kommunikation hat einen Inhalts- und einen Beziehungsaspekt","Kommunikationsabläufe werden durch die Interpunktion der Partner geprägt","Kommunikation nutzt digitale und analoge Modalitäten","Kommunikation ist symmetrisch oder komplementär (Lehrer-Schüler-Beziehung: komplementär)"]},
+{code:"U-O27",c:"Allgemein",sub:"U",q:"Was versteht man unter sprachsensiblem Unterricht und Bildungssprache?",a:["Fachsprache konzentriert sich auf das Fachgebiet und wird in festen Kontexten präzise verwendet","Bildungssprache steht zwischen Alltagssprache und Fachsprache (vgl. Feilke)","Alltagssprachliche Äußerungen im Fachunterricht in Bildungs- bzw. Fachsprache überführen","Ziel: Schüler:innen zunehmend zur Bildungssprache befähigen"]},
+{code:"U-O28",c:"Allgemein",sub:"U",q:"Was verstehen Sie unter dem Referenzrahmen Schulqualität NRW?",a:["Bündelt Vorstellungen von „guter Schule“ und „gutem Unterricht“ aus Forschung und Bildungspolitik","Zeigt anhand von Kriterien auf, was Schulqualität in zentralen Bereichen bedeutet","Bietet Schulen einen verbindlichen Orientierungsrahmen für Schul- und Unterrichtsentwicklung","Zeigt auch Eltern und Schüler:innen Mitwirkungsmöglichkeiten auf"]},
+{code:"U-O3",c:"Allgemein",sub:"U",q:"Welche allgemeinen und schulspezifischen Rahmenvorgaben berücksichtigen Sie beim Unterrichten?",a:["Kernlehrplan des Landes NRW","Schulinternes Curriculum","BASS (Bereinigte Amtliche Sammlung der Schulvorschriften NRW)","Beschlüsse der Fachkonferenz"]},
+{code:"U-O4",c:"Allgemein",sub:"U",q:"Was verstehen Sie unter gutem Unterricht? (nach Hilbert Meyer)",a:["Klare Strukturierung und inhaltliche Klarheit (Zielorientierung)","Hoher Anteil echter Lernzeit","Lernförderliches Klima durch gutes Classroom Management","Methodenvielfalt passend zum Lerngegenstand, individuelles Fördern","Transparente Leistungserwartungen, intelligentes Üben, vorbereitete Umgebung"]},
+{code:"U-O5",c:"Allgemein",sub:"U",q:"Welche Möglichkeiten gibt es, das Vorwissen von Lernenden zu diagnostizieren?",a:["Diagnose durch die Lehrkraft, in Gruppen oder als Selbsteinschätzung","Punktuell zu Schuljahresbeginn oder fortlaufend an Schlüsselstellen","Standardisierte Verfahren wie Tests oder Selbsteinschätzungsbögen","Kollegial abgestimmte Weitergabe von Informationen (z. B. bei Klassenwechsel)","Lerntagebücher als kontinuierliches Diagnoseinstrument"]},
+{code:"U-O6",c:"Allgemein",sub:"U",q:"„Sprache ist Aufgabe des Deutschlehrers“ – nehmen Sie dazu Stellung.",a:["Deutschlehrkraft trägt zentrale Verantwortung für Grammatik, Rechtschreibung, Literatur","Sprachliche Bildung ist fächerübergreifende Aufgabe aller Lehrkräfte","Jede Lehrkraft muss sprachliches Vorbild im eigenen Fachunterricht sein","Fachsprache und Bildungssprache werden im jeweiligen Fach mitvermittelt"]},
+{code:"U-O7",c:"Allgemein",sub:"U",q:"Welche Sozialformen kennen Sie, und wann setzen Sie sie ein?",a:["Plenum, Einzel-, Partner- und Gruppenarbeit","Moderiertes bzw. gelenktes Unterrichtsgespräch","Schülervortrag und Lehrervortrag (Frontalunterricht)","Wahl der Sozialform richtet sich nach Lernziel und Aufgabentyp"]},
+{code:"U-N1",c:"Allgemein",sub:"U",q:"In einer neunten Klasse zeigen sich deutliche Leistungsunterschiede. Wie differenzieren Sie konkret?",a:["Pflichtaufgaben als gemeinsame Basis","Zusatz/Transfer für Leistungsstarke","Gestufte Hilfen","Gruppenarbeit mit rollenbasierter Aufgabenverteilung"]},
+{code:"U-N2",c:"Allgemein",sub:"U",q:"Ein Schüler mit Migrationshintergrund hat Schwierigkeiten mit der Fachsprache. Was tun Sie konkret?",a:["Fachbegriffe visuell und ggf. mehrsprachig unterstützen (Wortspeicher)","Vereinfachte Formulierungen parallel zur Fachsprache anbieten","Satzbausteine bereitstellen","Partnerarbeit mit sprachlich stärkerem Mitschüler (Lesetandem)"]},
+{code:"U-N3",c:"Allgemein",sub:"U",q:"Ihrer Klasse wird ein geflüchteter Schüler zugewiesen, dessen Deutschkenntnisse unterhalb des alterstypischen Niveaus liegen. Wie gehen Sie damit um?",a:["Auf schulinterne Vorgehensweise zurückgreifen (z. B. DAZ-Kurse, individuelle Sprachförderung)","Sprachsensibilität im Unterricht besonders beachten","Angepasstes, sprachlich entlastetes Material vorbereiten","Schüler beim Experimentieren so weit wie möglich einbeziehen, ohne Gefährdung"]},
+{code:"U-N4",c:"Allgemein",sub:"U",q:"Wie sichern Sie nachhaltige Lernerträge in Ihrem Unterricht?",a:["Inhalte vernetzen statt isoliert vermitteln","Regelmäßige Zusammenfassungen und gezielte Wiederholungen einplanen","Gezielte Übungsphasen und individuelle Lernhilfen anbieten","Lernkontrollen auch zur Selbstkontrolle der Schüler:innen nutzen"]},
+{code:"U-N5",c:"Allgemein",sub:"U",q:"Ist das Filmen von Schüler:innen im Unterricht erlaubt?",a:["Nur mit schriftlicher Einverständniserklärung der Eltern","Zusätzlich Absprache mit der Schulleitung erforderlich","Zweckbindung und Datenschutz beachten (DSGVO)"]},
+{code:"U-N6",c:"Allgemein",sub:"U",q:"Wie verhalten Sie sich als Lehrkraft im Klassenraum bei einem Amoklauf?",a:["Tür verschließen bzw. verbarrikadieren, von Fenstern und Türen fernhalten","Notfallnummer bzw. schulinternen Alarm auslösen","Bei sicherer Gelegenheit kontrollierte Flucht abseits des Täterwegs erwägen","Ruhe bewahren und beruhigend auf die Klasse einwirken, Panik vermeiden"]},
+{code:"U-N7",c:"Allgemein",sub:"U",q:"Was muss ich im Hinblick auf jede Schülerin bzw. jeden Schüler wissen, um kompetenzorientiert Unterricht planen zu können?",a:["Individuelle Lernausgangslagen und Entwicklungsstände kennen","Begabungen, Potenziale und mögliche Lernbarrieren erfassen","Migrations- und sprachsensible Aspekte berücksichtigen","Diagnostische Erkenntnisse gezielt in die Unterrichtsplanung einfließen lassen"]},
+{code:"U-N8",c:"Allgemein",sub:"U",q:"Wie überprüfen Sie die Qualität Ihres Unterrichts, und wie leiten Sie daraus Entwicklungsziele ab?",a:["Schülerfeedback systematisch einholen und auswerten","Eigene Unterrichtsplanung und -durchführung reflektieren","Ergebnisse mit Kolleg:innen besprechen (kollegiale Hospitation)","Konkrete, überprüfbare Entwicklungsziele für künftigen Unterricht ableiten"]},
+{code:"U-N9",c:"Allgemein",sub:"U",q:"Wie verhalten Sie sich bei sehr vielen Wortmeldungen?",a:["Meldekette einführen, um allen Beteiligten Raum zu geben","Nachfragen, ob noch wesentliche Ergänzungen fehlen","Ergebnisse strukturiert an der Tafel sammeln"]},
+{code:"U-N10",c:"Allgemein",sub:"U",q:"Wie reagieren Sie bei fehlender Resonanz nach einer Frage oder einem Impuls?",a:["Hilfeimpuls geben (z. B. Teilfrage, Beispiel)","Kurze Murmelphase (ca. 30 Sekunden) zur Aktivierung einbauen"]},
+{code:"U-N11",c:"Allgemein",sub:"U",q:"Schüler:innen formulieren sehr früh und eigenständig das Stundenergebnis. Wie gehen Sie damit um?",a:["Aussage an der Tafel sichern (z. B. als Einstiegsimpuls)","Schülerthese als zu überprüfende Hypothese in den weiteren Unterrichtsverlauf einbauen"]},
+{code:"U-N12",c:"Allgemein",sub:"U",q:"Sollten Sie Redebeiträge von Schüler:innen kommentieren?",a:["Richtige Antworten wertschätzend würdigen","Falsche Antworten nicht direkt als „falsch“ benennen, sondern offen aufnehmen („Interessant – das nehmen wir mit“)"]},
+{code:"U-N13",c:"Allgemein",sub:"U",q:"Wann und wie unterbrechen Sie ein Unterrichtsgespräch?",a:["Bei thematischer Abdrift in eine andere Richtung","Bei zu vielen ähnlichen Wortmeldungen ohne neuen Erkenntnisgewinn","Bei fachlich falschen oder problematischen Aussagen (z. B. diskriminierende Inhalte)"]},
+{code:"U-N14",c:"Allgemein",sub:"U",q:"Nennen Sie Formulierungsvorschläge zur Beendigung eines Unterrichtsgesprächs.",a:["„Hat noch jemand eine neue Idee?“","„Wie könnten wir das jetzt überprüfen?“ / „Wo besteht weiterer Untersuchungsbedarf?“","Ergebnisse gemeinsam zusammenfassen lassen statt selbst vorzugeben"]},
+{code:"U-N15",c:"Allgemein",sub:"U",q:"Wie reagieren Sie, wenn Schüler:innen im Gespräch thematisch abschweifen?",a:["Gespräch bestimmt, aber wertschätzend unterbrechen","Klaren Hinweis auf den Themenbezug geben und zum Kernanliegen zurückführen"]},
+{code:"U-N16",c:"Allgemein",sub:"U",q:"Lässt ein kurzer Blick in eine Klasse (z. B. Frontalunterricht im Vorbeigehen) Rückschlüsse auf die Unterrichtsqualität zu?",a:["Nein – eine Sozialform ist dann günstig, wenn sie zielführend im Hinblick auf die Kompetenzerreichung ist","Auch Frontalunterricht kann Selbstständigkeit fordern (Fragen stellen, Vorträge halten, Beobachtungsaufträge)","Eine punktuelle Momentaufnahme erlaubt keinen Schluss auf die Regelmäßigkeit der eingesetzten Methoden"]},
+
+{code:"E-O1",c:"Allgemein",sub:"E",q:"Wie lässt sich Demokratieerziehung im Schulalltag konkret verankern?",a:["Mitbestimmung im Klassenrat und in der SV fördern","Debatten und Diskussionsformate einsetzen","Perspektivwechsel im Unterricht ermöglichen","Vorbildfunktion der Lehrkraft wahrnehmen","Klassenregeln gemeinsam entwickeln"]},
+{code:"E-O2",c:"Allgemein",sub:"E",q:"Wie kann Erziehung im Fachunterricht gelingen, ohne den fachlichen Lernprozess zu verdrängen?",a:["Erziehung über die Unterrichtskultur vermitteln","Respektvollen Umgang und Feedbackregeln fördern","Faire Zusammenarbeit in Gruppen einfordern","Fehler als Lernchance nutzen","Fachliche Inhalte mit gesellschaftlichen Bezügen verknüpfen"]},
+{code:"E-O3",c:"Allgemein",sub:"E",q:"Welche Rolle spielen außerunterrichtliche Angebote (z. B. AGs, Projekte, Klassenfahrten) für die erzieherische Arbeit?",a:["AGs und Projekte als Raum für Verantwortungsübernahme und soziale Kompetenzen nutzen","Klassenfahrten/Exkursionen als Lernfeld für Eigenverantwortung und Gruppenherausforderungen","Verantwortung übertragen, z. B. als Projektorganisator:in","Positive Schulatmosphäre und gegenseitigen Respekt fördern"]},
+{code:"E-O4",c:"Allgemein",sub:"E",q:"Wie nutzen Sie außerunterrichtliche Situationen, um das soziale Verhalten der Schüler zu fördern?",a:["Konfliktlösung/Mediation in Pausen oder auf Klassenfahrten aktiv begleiten","Teamarbeit in AGs und gemeinsamen Projekten fördern","Führungsrollen übertragen (z. B. Klassensprecher:in, Streitschlichter:in)","Einsatz für die Gemeinschaft ermöglichen (Schulfeste, Sozialprojekte)"]},
+{code:"E-O5",c:"Allgemein",sub:"E",q:"Wie können Sie außerhalb des Unterrichts erzieherisch wirksam werden?",a:["Pausenaufsicht: beobachten, bei Konflikten deeskalierend eingreifen","Außerschulische Aktivitäten für Teamarbeit und Rücksichtnahme nutzen","Projekte/AGs zur praktischen Werteerfahrung nutzen (z. B. Spendenaktion)","Verantwortung übertragen (z. B. Patenschaften für jüngere Schüler:innen)"]},
+{code:"E-O6",c:"Allgemein",sub:"E",q:"Welche Rolle spielt die Schulsozialarbeit in Ihrer Erziehungsarbeit, und wie arbeiten Sie mit ihr zusammen?",a:["Frühzeitige Einbindung bei sozialen oder familiären Schwierigkeiten","Gemeinsame Entwicklung von Unterstützungsmaßnahmen (z. B. soziale Trainings)","Netzwerk zu externen Partnern nutzen (Jugendamt, Beratungsstellen)","Vertraulichkeit wahren, transparente Information von Schüler:innen und Eltern"]},
+{code:"E-O7",c:"Allgemein",sub:"E",q:"Welchen Bildungs- und Erziehungsauftrag haben Sie als Lehrkraft?",a:["Recht der Lernenden auf Bildung, Erziehung und individuelle Förderung (Schulgesetz NRW)","Erziehung im Geist von Menschlichkeit, Demokratie, Freiheit und Toleranz","Partnerschaftliches Zusammenwirken von Schule und Elternhaus","Förderung von Selbstständigkeit, Persönlichkeitsentfaltung, Verantwortungsbewusstsein","Ziel: Lernfreude erhalten und Strategien für lebenslanges Lernen vermitteln"]},
+{code:"E-O8",c:"Allgemein",sub:"E",q:"Was unterscheidet Werte von Normen in der Werteerziehung?",a:["Werte sind Erkenntnisinhalte bzw. innere Einstellungen mit Normcharakter","Werte werden durch Überzeugung, nicht durch Zwang aufrechterhalten","Normen sind daraus abgeleitete, konkrete Handlungsanweisungen","Normen werden durch Belohnung bzw. Strafe durchgesetzt; Werte müssen selbst erlebt werden"]},
+{code:"E-O9",c:"Allgemein",sub:"E",q:"Welche fünf zentralen Aspekte der Werteerziehung nennen die Kernlehrpläne?",a:["Persönlichkeitsbildung","Soziales und gesellschaftliches Leben (u. a. Gewaltprävention)","Gesundheit und Umwelt","Kulturelle Bildung sowie Schulleben und Schulkultur"]},
+{code:"E-O10",c:"Allgemein",sub:"E",q:"Wie beschreiben Seidel sowie Haag und Streber das Konzept der Klassenführung?",a:["Seidel: Klassenführung als „Umgang mit Störungen“, Ziel ist aktives Lernverhalten","Effektive Klassenführung als Basisvoraussetzung neben diagnostischer und fachlicher Kompetenz","Haag/Streber: Beziehungsgeflecht aus Kommunikation, Organisation und Regulation des Unterrichts","Evertson: Die Lehrkraft trägt nicht allein die Verantwortung, auch Schüler:innen tragen Teilverantwortung"]},
+{code:"E-O11",c:"Allgemein",sub:"E",q:"Welche Merkmale kennzeichnen eine Schulklasse als Gruppe, und was bewirkt das Klassenklima?",a:["Gruppenmerkmale: Wir-Gefühl, interne Rollenstrukturen, formelle Mitgliedschaft (nicht frei wählbar)","Klassenklima umfasst vier Dimensionen: Lehrer-Schüler-Beziehung, Schülerbeziehungen, Unterrichtsqualität, Lernhaltungen","Positives Klima stärkt Selbstkonzept, vermindert Schulangst und Störverhalten","Positiv beeinflussbar durch transparentes Lehrerhandeln und Mitbestimmung (z. B. Klassenrat)"]},
+{code:"E-O12",c:"Allgemein",sub:"E",q:"Wodurch entstehen Konflikte in der Schule, und welche präventiven Faktoren kennen Sie?",a:["Konflikte entstehen bei unterschiedlichen Interessen, Werten oder Zielen der Beteiligten","Treten zwischen Schüler:innen, mit Lehrkräften, Eltern oder im Kollegium auf","Präventionsfaktoren: störungsfreie Unterrichtssteuerung, hohe Schüleraktivierung, intellektuelle Herausforderung","Konfliktlösung idealerweise ohne Gewinner/Verlierer, mit aktivem Zuhören und Ich-Botschaften"]},
+{code:"E-N1",c:"Allgemein",sub:"E",q:"Zwei Schüler geraten während der Gruppenarbeit in Streit. Wie reagieren Sie?",a:["Arbeitsphase ruhig und bestimmt unterbrechen","Schüler räumlich trennen, beide Seiten anhören","Sachverhalt zunächst ohne Bewertung klären","Ausführliches Gespräch nach der Stunde führen","Unterricht für die Klasse fortsetzen"]},
+{code:"E-N2",c:"Allgemein",sub:"E",q:"Ein Schüler äußert sich diskriminierend. Wie reagieren Sie?",a:["Aussage sofort unterbinden","Verdeutlichen, warum die Äußerung nicht akzeptabel ist","Betroffene Person einbeziehen","Konsequenzen nach Schulordnung umsetzen bzw. ankündigen","Nachgespräch zur Aufarbeitung führen"]},
+{code:"E-N3",c:"Allgemein",sub:"E",q:"Wie gehen Sie vor, wenn Sie den Schulpsychologen einbinden möchten?",a:["Verhalten bzw. Lernprobleme beobachten und dokumentieren","Erziehungsberechtigte informieren und Einverständnis einholen","Fall über die Schulleitung anmelden","An Gesprächen teilnehmen, Empfehlungen im Unterricht umsetzen"]},
+{code:"E-N4",c:"Allgemein",sub:"E",q:"Welche Möglichkeiten der Intervention bei Unterrichtsstörungen kennen Sie?",a:["Ermahnen (Gebot statt Verbot formulieren), Aufrufen ohne Bloßstellung","Umsetzen erst nach reiflicher Überlegung (wird oft als starke Strafe empfunden)","Erwünschtes Verhalten belohnen, ggf. Vertrag mit dem/der Schüler:in","Auszeit geben, wenn sie mit Problemlösung verbunden ist; ggf. Hilfe von Kolleg:innen holen"]},
+{code:"E-N5",c:"Allgemein",sub:"E",q:"Eine Schülerin berichtet Ihnen, dass sie von ihrem Sportlehrer belästigt wird. Wie gehen Sie vor?",a:["Ruhig und wertschätzend mit der Schülerin sprechen: was, wann, wo genau vorgefallen ist","Keinesfalls direkt mit der beschuldigten Lehrkraft sprechen, um die Schülerin nicht zusätzlicher Drucksituation auszusetzen","Rücksprache mit der (eigenen bzw. anderen) Klassenleitung halten","Informationen an die Schulleitung weitergeben, die den Fall weiter aufklärt"]},
+
+{code:"L-O1",c:"Allgemein",sub:"L",q:"Welche Funktion erfüllt eine transparente Leistungsbewertung?",a:["Bewertungskriterien offenlegen, Erwartungshorizonte und Kompetenzraster nutzen","Lernfortschritte sichtbar machen","Realistische Selbsteinschätzung ermöglichen","Akzeptanz von Bewertungen erhöhen","Selbstständiges Lernen und gezieltes Arbeiten an Schwächen fördern"]},
+{code:"L-O2",c:"Allgemein",sub:"L",q:"Wie unterscheiden sich formative und summative Leistungsüberprüfung?",a:["Formativ: lernbegleitend, förderorientiert, meist ohne Note","Formativ: Standortbestimmung im Lernprozess","Summativ: abschließend, bewertend, mit Note, dokumentiert den Lernstand","Beide Formen ergänzen sich"]},
+{code:"L-O7",c:"Allgemein",sub:"L",q:"Welche Gütekriterien gibt es bei der Leistungsmessung?",a:["Objektivität: Ergebnis unabhängig vom Beurteiler; präzise Erwartungshorizonte erhöhen sie","Reliabilität: Zuverlässigkeit bzw. Genauigkeit der Messung","Validität: Ein Test misst tatsächlich das, was er zu messen vorgibt","Alle drei Kriterien bedingen sich gegenseitig und sind nie vollständig erreichbar"]},
+{code:"L-O8",c:"Allgemein",sub:"L",q:"Welche subjektiven Fehlerquellen bei der Leistungsmessung sind Ihnen bekannt?",a:["Sympathie-Effekt und Effekt der Zusatzinformationen über Schüler:innen","Halo-Effekt: einzelne positive Merkmale strahlen auf andere Bereiche ab","Effekt des ersten Eindrucks, Voreinstellungs- und Reihenfolgeneffekt","Bewusstsein schaffen: Es gibt keine vollständig objektive Leistungsbewertung"]},
+{code:"L-O9",c:"Allgemein",sub:"L",q:"Wo finden Sie die Kriterien, die Sie zur Leistungsbewertung benötigen?",a:["Vier Ebenen des Rechtsrahmens: Schulgesetz § 48, APO-SI § 6, APO-GOSt §§ 13–19, schulisches Leistungskonzept","Beide Beurteilungsbereiche (schriftlich und Sonstige Mitarbeit) angemessen berücksichtigen","Konkretisierung erfolgt zusätzlich in der Fachkonferenz"]},
+{code:"L-O10",c:"Allgemein",sub:"L",q:"Was fließt wie stark in Ihre Bewertung ein? Gibt es Unterschiede zwischen Sek I und Sek II?",a:["Klausuren/Arbeiten und Sonstige Mitarbeit i. d. R. je 50 %, fachschaftsintern konkretisiert","Hausaufgaben werden in Sek I nicht benotet, in Sek II können sie einfließen","Sek I: Holpflicht der Lehrkraft; Sek II: Bringschuld der Schüler:innen","Schriftliche Übungen: angekündigt, max. 20 Minuten, nur Stoff der letzten vier Stunden"]},
+{code:"L-O11",c:"Allgemein",sub:"L",q:"Erläutern Sie Kriterien für die Ermittlung der Note im Bereich „Sonstige Mitarbeit“.",a:["Mündliche Noten sind häufig Schätzurteile, Milde-Effekt beachten","Gefahr subjektiver Einflüsse besonders groß, daher sorgfältige Dokumentation","Pädagogische Pflicht: zurückhaltende Schüler:innen gezielt befragen","Arithmetisches Mittel streng genommen unzulässig (einzelne „Ausrutscher“ möglich)"]},
+{code:"L-O12",c:"Allgemein",sub:"L",q:"Wie konzipieren Sie eine Klassenarbeit?",a:["Termin rechtzeitig bekanntgeben, Anforderungen transparent machen","Gestufte Schwierigkeitsgrade, einfache Einstiegsaufgabe, Erreichbarkeit der Note 4 für alle","Übersichtliche Gestaltung, Angabe der Punktebewertung, realistischer Zeitrahmen","Ruhige Prüfungsatmosphäre schaffen, Täuschungsversuche im Blick behalten","Keine Bloßstellung bei der Rückgabe (kein Notenspiegel an der Tafel)"]},
+{code:"L-O13",c:"Allgemein",sub:"L",q:"Gibt es in Ihrem Unterricht bewertungsfreie Phasen?",a:["Ja: Nachdenk- und Mutmaßungsphasen bewusst unbewertet lassen","Transparent machen, wann eine Phase bewertungsfrei ist","Unterscheidung nach Leisen: Lernaufgaben (ohne Druck) vs. Leistungsaufgaben","Ergebnisse aus Lernaufgaben können freiwillig zur Bewertung angeboten werden"]},
+{code:"L-O14",c:"Allgemein",sub:"L",q:"Wie bewerten Sie eine Exkursion?",a:["Teil der Sonstigen Mitarbeit, nicht gesondert benotet","Arbeitsaufträge zur Vor- und Nachbereitung stellen und bewerten","Sozialverhalten während der Exkursion beobachten","Selbst- und Fremdevaluation nutzen (Was hat die Exkursion gebracht?)"]},
+{code:"L-O15",c:"Allgemein",sub:"L",q:"Wann bekommt ein Schüler einen „blauen Brief“?",a:["Warnung, wenn auf dem Versetzungszeugnis eine 5 oder 6 droht","Steht bereits im Halbjahreszeugnis eine 5, ersetzt das den blauen Brief","Bei Nichtversetzung nach blauem Brief muss die Fachlehrkraft Lern- und Förderempfehlungen ergänzen"]},
+{code:"L-O16",c:"Allgemein",sub:"L",q:"Was kennzeichnet die drei Anforderungsbereiche (AFB I–III)?",a:["AFB I: Wiedergeben von Sachverhalten, Reproduktion","AFB II: selbstständiges Erklären, Bearbeiten und Anwenden bekannter Inhalte auf neue Sachverhalte","AFB III: reflexiver Umgang mit neuen Problemstellungen, eigenständige Begründungen und Wertungen","Aufgaben sollten möglichst alle drei Bereiche abdecken"]},
+{code:"L-O17",c:"Allgemein",sub:"L",q:"Was beschreibt die Doppelrolle der Lehrkraft als „Helfer und Richter“?",a:["Lehrkräfte fördern Lernen und bewerten gleichzeitig Leistung","Grundsatz „Wer lehrt, prüft“ bleibt trotz dieser Rollenspannung sinnvoll","Keine unkritische Bindung an starre Notengebungskonzepte","Transparenz und Kriteriengeleitetheit helfen, die Doppelrolle fair auszubalancieren"]},
+{code:"L-O18",c:"Allgemein",sub:"L",q:"Welche systembedingten Schwächen hat die Notengebung?",a:["Noten sind eine Rangskala, keine Intervallskala – Notendurchschnitte sind nur bedingt sinnvoll","Gefahr der Überinterpretation des numerischen Werts von Ziffernnoten","Noten aus verschiedenen Klassen, Schulen oder Bundesländern sind nur schwer vergleichbar","Ergänzt subjektive Fehlerquellen wie Halo- und Reihenfolgeneffekte"]},
+{code:"L-O19",c:"Allgemein",sub:"L",q:"Welche Diagnosemöglichkeiten im Unterricht gibt es außerhalb standardisierter Tests?",a:["Gespräche mit Schüler:innen, Beobachtungen im Unterricht","Analyse von Hausaufgaben und Schülerheften","Austausch mit anderen Fachlehrkräften","Selbstdiagnose bzw. -einschätzung und Peer-Evaluation"]},
+{code:"L-O20",c:"Allgemein",sub:"L",q:"Welche drei Schritte umfasst der schulische Diagnoseprozess?",a:["Fachliche und fachdidaktische Zielbestimmung, Lernziel festlegen","Daten erheben, z. B. durch Tests unabhängig von Klassenarbeiten (um Angst/Druck zu vermeiden)","Erhobene Daten interpretieren, Lernstand erfassen und Fördermaßnahmen ableiten"]},
+{code:"L-O3",c:"Allgemein",sub:"L",q:"Welche gängigen Bezugsnormen für die Notengebung gibt es?",a:["Soziale Bezugsnorm: Leistung im Verhältnis zur Lerngruppe","Kriteriale Bezugsnorm: Orientierung an festgelegten Leistungszielen","Individuelle Bezugsnorm: Berücksichtigung der Lernprogression"]},
+{code:"L-O4",c:"Allgemein",sub:"L",q:"Welche unterschiedlichen Funktionen der Notengebung gibt es?",a:["Selektionsfunktion: Versetzung, Übergang auf weiterführende Schulen","Berechtigungsfunktion: Zugang zu weiterem Bildungs-/Berufsweg","Sozialisierungsfunktion: Einüben von Leistungsorientierung","Rückmeldefunktion: Information über Lernfortschritt"]},
+{code:"L-O5",c:"Allgemein",sub:"L",q:"Wie können Gruppenarbeiten bewertet werden?",a:["Gruppennoten sind nicht zulässig, jede:r erhält eine individuelle Note","Beurteilung durch die Lehrkraft, z. B. über einen Beobachtungsbogen","Ergebnisprotokolle zur Dokumentation individueller Beiträge nutzen"]},
+{code:"L-O6",c:"Allgemein",sub:"L",q:"Dürfen sich Lernende selbst oder gegenseitig bewerten?",a:["Formale Bewertung obliegt allein der Lehrkraft","Selbst-/Peereinschätzung als Tendenz nutzbar (z. B. bei SoMi-Note, Gruppenarbeit)","Punkteverteilung in Kleingruppen als Rückmeldeinstrument einsetzen","Ergebnisse als Grundlage, nicht als alleinige Bewertung verwenden"]},
+{code:"L-N1",c:"Allgemein",sub:"L",q:"Ein Schüler reicht eine Hausaufgabe mit KI-Unterstützung ein. Wie gehen Sie vor?",a:["Sachliches Gespräch führen","Schulische KI-Regeln erläutern","Eigenleistung mündlich überprüfen","Konsequenzen transparent anwenden","Thema ggf. in der Fachkonferenz besprechen"]},
+{code:"L-N2",c:"Allgemein",sub:"L",q:"Wie bewerten Sie die sonstige Mitarbeit einer zurückhaltenden, aber schriftlich starken Schülerin fair?",a:["Nicht nur mündliche Mitarbeit berücksichtigen","Schriftliche Übungen, Protokolle und Gruppenarbeit einbeziehen","Digitale Beiträge berücksichtigen (wenn vorgesehen)","Niedrigschwellige, faire Beteiligungsmöglichkeiten schaffen"]},
+{code:"L-N3",c:"Allgemein",sub:"L",q:"Wie darf mit Leistungsverweigerung umgegangen werden?",a:["Gespräch mit dem/der Lernenden über die Gründe führen","Abmachungen treffen, ggf. Lernvertrag schließen, Vertrauen aufbauen","Mit anderen Lehrkräften und Eltern beraten bzw. einbeziehen","Bei anhaltender Verweigerung ggf. Disziplinarmaßnahme durch Schulleitung","Im Zweifel Bewertung mit „ungenügend“"]},
+{code:"L-N4",c:"Allgemein",sub:"L",q:"Ein Schüler fragt, warum er trotz gleicher Meldehäufigkeit eine schlechtere Note hat als ein Mitschüler. Wie begründen Sie das?",a:["Nicht nur Quantität, sondern vor allem Qualität der Beiträge zählt","Die Note für Sonstige Mitarbeit setzt sich aus vielen weiteren Faktoren zusammen","Konkreten, individuellen Verbesserungsvorschlag anbieten"]},
+{code:"L-N5",c:"Allgemein",sub:"L",q:"Wie gehen Sie bei der Bewertung mit Legasthenie um?",a:["Sek I: Attest erforderlich; Sek II: nicht mehr zwingend","Keine schlechtere Note oder Nichtversetzung allein aufgrund der Legasthenie","Recht auf Nachteilsausgleich (z. B. Zeitzuschlag bei Klausuren)","Schule muss einen individuellen Förderplan erstellen"]},
+{code:"L-N6",c:"Allgemein",sub:"L",q:"Wann darf eine Feststellungsprüfung erfolgen?",a:["Wenn ein Schüler über einen Zeitraum entschuldigt gefehlt hat und nicht bewertbar ist","Es darf nur der tatsächlich behandelte Stoff geprüft werden","Zwei Lehrkräfte müssen anwesend sein (Prüfer:in und Protokoll)"]},
+{code:"L-N7",c:"Allgemein",sub:"L",q:"Müssen Klassenarbeiten nachgeschrieben werden?",a:["In der Regel ja, gemäß schulischer Vorgaben","Nicht zwingend, wenn der Schüler bereits klar bewertbar ist (ggf. Feststellungsprüfung)"]},
+{code:"L-N8",c:"Allgemein",sub:"L",q:"Welche Kriterien muss eine schriftliche Überprüfung erfüllen?",a:["Klassenarbeiten am Ende eines Unterrichtsabschnitts, Kurzarbeiten nur zum Stoff der letzten Stunden","Ausreichende Leistung über das Basiscurriculum erreichbar, anspruchsvollere Inhalte im Aufbaucurriculum","Zentrale Unterrichtsinhalte abdecken (Validität), mehrere unabhängige Aufgaben stellen (Reliabilität)","Klare Formulierungen, Schwierigkeitsstaffelung, Parallelgruppen zur Vermeidung von Abschreiben"]},
+
+{code:"B-O1",c:"Allgemein",sub:"B",q:"Welche Beratungsformate gibt es im schulischen Alltag?",a:["Elternsprechtage, Lernentwicklungsgespräche","Schullaufbahnberatung, Sprechstunden","Beratung durch Beratungslehrkräfte","Schulsozialarbeit"]},
+{code:"B-O2",c:"Allgemein",sub:"B",q:"Welche Grenzen hat die Beratungstätigkeit einer Lehrkraft?",a:["Fachlich und pädagogisch beraten, keine therapeutische oder rechtliche Beratung","Bei Bedarf an Beratungslehrkräfte oder externe Stellen verweisen","Nur auf Grundlage von Fakten beraten","Sachlich und wertschätzend bleiben, Möglichkeiten der Schule berücksichtigen"]},
+{code:"B-O3",c:"Allgemein",sub:"B",q:"Was versteht man unter kollegialer Fallberatung?",a:["Freiwillige, personenorientierte Beratung ohne professionelle Leitung","Gruppenmodus (ca. 4–10 Personen), fester Ablauf, ergebnisorientiert","Wechselseitiges Reflektieren berufsbezogener Fälle der Teilnehmenden","Gleichrangigkeit und Wir-Gefühl als zentrale Gelingensbedingungen"]},
+{code:"B-O4",c:"Allgemein",sub:"B",q:"Welche Kommunikationsmodelle helfen Ihnen, Gespräche und Störungen zu analysieren?",a:["Sender-Empfänger-Modell (Shannon/Weaver): ein Code kann unterschiedlich decodiert werden","Vier-Seiten-Modell (Schulz von Thun): Sachinhalt, Selbstkundgabe, Beziehung, Appell","Beziehungs-Inhalts-Axiom (Watzlawick): Man kann nicht nicht kommunizieren","Kongruenz zwischen den Ebenen reduziert Missverständnisse"]},
+{code:"B-O5",c:"Allgemein",sub:"B",q:"Wie bauen Sie ein Beratungsgespräch mit Eltern oder Schülern auf?",a:["Offen zugehen, begrüßen, zunächst zuhören","Problem gemeinsam verstehen, dann Lösungssuche","Konkrete Zielvereinbarungen treffen","Nach festgelegter Zeit ein Folgegespräch zur Überprüfung ansetzen"]},
+{code:"B-O6",c:"Allgemein",sub:"B",q:"Was halten Sie von der These „Die Motivation zum Lernen wächst und stirbt im familialen Kontext“?",a:["Lernmotivation sinkt tendenziell mit zunehmendem Alter (Stage-Environment-Fit-Theorie nach Eccles/Midgley)","Das Elternhaus prägt grundlegende, persönlichkeitsrelevante Erfahrungen mit","Anregungsbedingungen (Medienkonsum, Konfliktverhalten) wirken sich aus","Schule kann familiäre Einflüsse abmildern, aber nicht vollständig ersetzen"]},
+{code:"B-O7",c:"Allgemein",sub:"B",q:"Welche Anzeichen für eine Suchtproblematik bei Jugendlichen sollten Sie kennen?",a:["Körperliche Anzeichen: Schlafstörungen, Unruhe, Kreislaufprobleme","Psychische Anzeichen: Angst, depressive Verstimmung, Rückzug","Als Vertrauensperson agieren, keine Vorverurteilung","Schulsozialarbeit bzw. Suchtberatungsstellen frühzeitig einbeziehen"]},
+{code:"B-O8",c:"Allgemein",sub:"B",q:"Welche Beratungsanlässe ergeben sich in Ihrem schulischen Alltag?",a:["Laufbahn- und Schulformberatung","Individuelle Förderberatung, Feedback zu Stärken und Schwächen","Erzieherische Beratung","Vermittlung zu externen Beratungsstellen (Suchtberatung, Jugendamt)"]},
+{code:"B-O9",c:"Allgemein",sub:"B",q:"Wie verstehen Sie Ihre Rolle als Berater bzw. Beraterin?",a:["Beratung ist Angebot, nicht Bewertung – Hilfe zur Selbsthilfe","Rolle als Vermittler:in zwischen Lernenden, Eltern und weiteren Professionen","Grenzen der eigenen Kompetenz kennen und an Fachstellen verweisen","Vertrauensvolle, wertschätzende Grundhaltung einnehmen"]},
+{code:"B-O10",c:"Allgemein",sub:"B",q:"Welche drei grundlegenden Formen der Gesprächsführung mit Schüler:innen kennen Sie?",a:["Förderliches, nicht-direktives Gespräch: Selbsterkundung im eigenen Tempo ermöglichen","Lenkende Gesprächsführung: bei klarer Faktenlage konkrete Tipps und Wege aufzeigen","Konstruktive Beeinflussung von Denkmustern: hinderliche kognitive Muster aufdecken und bearbeiten"]},
+{code:"B-O11",c:"Allgemein",sub:"B",q:"Was kennzeichnet ein förderliches, nicht-direktives Gespräch mit einem Schüler?",a:["Handlungsaufschub: emotional aufgeheizte Situation zeitlich vom Gespräch trennen","Türöffner: nicht-wertende Zusammenfassung des Ereignisses ohne Vorwurf","Neuformulierung: neue Sichtweise gemeinsam entwickeln","Offenheit, Verzicht auf rasche Beurteilung, Arbeit auf der Gefühlsebene"]},
+{code:"B-O12",c:"Allgemein",sub:"B",q:"Welche Techniken nutzen Sie beim aktiven Zuhören in Elterngesprächen?",a:["Wenige, gezielte Fragen stellen, Vertrauensklima schaffen","Reflektierendes Zuhören und Spiegeln der Gesprächsinhalte","Emotionale Erlebnisinhalte verbalisieren, einfühlendes Verstehen zeigen","Eigene Sorgen statt Anklagen formulieren, Echtheit und Selbstkongruenz wahren"]},
+{code:"B-O13",c:"Allgemein",sub:"B",q:"Welche rechtlichen Vorgaben zur Beratung macht das Schulgesetz NRW?",a:["Eltern und Schüler:innen sind in wichtigen Schulangelegenheiten zu informieren und zu beraten","Bewertungsmaßstäbe müssen erläutert werden, auf Wunsch der Leistungsstand mitgeteilt","Elternsprechtage finden außerhalb der Unterrichtszeit am Vormittag statt","Schule berät zu Erziehung, Schullaufbahn und Bildungsweg, u. a. mit dem schulpsychologischen Dienst"]},
+{code:"B-O14",c:"Allgemein",sub:"B",q:"Welche wesentlichen Merkmale kennzeichnen ein Beratungsgespräch?",a:["Freiwilligkeit und absolute Verschwiegenheit","Hilfe zur Selbsthilfe: Ressourcen der betroffenen Person aktivieren","Offener Ausgang möglich, keine Sanktionen oder Disziplinierung"]},
+{code:"B-N1",c:"Allgemein",sub:"B",q:"Ein Schüler bittet um eine Einschätzung zur Wahl eines Leistungskurses. Wie beraten Sie?",a:["Bisherige Leistungen und Kompetenzen einordnen","Anforderungen des Leistungskurses erläutern","Interessen und Motivation berücksichtigen","Entscheidung begleiten, nicht vorgeben","Bei Bedarf an Beratungslehrkraft/Oberstufenkoordination verweisen"]},
+{code:"B-N2",c:"Allgemein",sub:"B",q:"Ein Schüler berichtet von privaten Problemen. Wie reagieren Sie?",a:["Ruhig und wertschätzend zuhören, Vertrauen ernst nehmen","Nicht vorschnell bewerten","Unterstützungsangebote aufzeigen","Beratungslehrkraft oder Schulsozialarbeit einbeziehen","Vertraulichkeit wahren, soweit rechtlich möglich"]},
+{code:"B-N3",c:"Allgemein",sub:"B",q:"Ein Kollege hält sich nicht an die Vorgaben des Lehrplans. Wie gehen Sie vor?",a:["Kritikgespräch gut vorbereiten, besonders den Einstieg","Gespräch unter vier Augen führen, nicht vor anderen kritisieren","Kritik möglichst zeitnah äußern","Sachverhalt sachlich darstellen und nachfragen","Eigene Bewertung offenlegen, Konsequenzen/Wünsche benennen"]},
+{code:"B-N4",c:"Allgemein",sub:"B",q:"Wie bereiten Sie sich auf ein Beratungsgespräch, z. B. am Elternsprechtag, vor?",a:["Vorab klären, welche Eltern Priorität haben, wo Schwierigkeiten bestehen","Bei Problemfällen ggf. Sondertermine vereinbaren","Informationen sammeln (Kolleg:innengespräche, Notizen, Vorfälle)","Klassenarbeiten/Schülerhefte für das Gespräch bereithalten","Zeiten transparent absprechen, spontane Gespräche ermöglichen"]},
+{code:"B-N5",c:"Allgemein",sub:"B",q:"Ein Schüler der Mittelstufe hat Probleme, eigenständige Leistungen zu erbringen. Wie beraten Sie ihn?",a:["Ursache erfragen (Fach, Selbstvertrauen, Motivation)","Motivation schaffen, z. B. über bessere Beteiligung am Unterricht","Kleinschrittige, gemeinsam vereinbarte Ziele festlegen","Erfolge zurückmelden und loben","Holpflicht der Lehrkraft in der Sek I beachten"]},
+{code:"B-N6",c:"Allgemein",sub:"B",q:"Eine Mutter erbittet per Mail einen Überblick über den Leistungsstand ihrer Tochter. Wie gehen Sie damit um?",a:["Identität der absendenden Person ist per Mail nicht gesichert","Keine Noten über diesen Kommunikationsweg weitergeben (Datenschutz)","Alternative Kommunikationswege anbieten (persönliches Gespräch)"]},
+{code:"B-N7",c:"Allgemein",sub:"B",q:"Wie gehen Sie mit sehr „beratungswilligen“ Eltern um, die sehr häufig Kontakt suchen?",a:["Kommunikation ausschließlich über dienstliche Wege, keine privaten Kontaktdaten weitergeben","Im Gespräch von vornherein den nächsten Termin und einen sinnvollen zeitlichen Abstand festlegen","Begründen, warum Entwicklung Zeit braucht, um sie beobachten zu können"]},
+{code:"B-N8",c:"Allgemein",sub:"B",q:"Eltern werden im Beratungsgespräch unsachlich oder greifen Sie persönlich an. Wie reagieren Sie?",a:["Ruhig bleiben, Gespräch bei Bedarf unterbrechen oder vertagen","Zum neuen Termin ggf. Kolleg:in oder Schulleitung hinzuziehen","Sachlich bei den Fakten bleiben, keine Eskalation befördern"]},
+{code:"B-N9",c:"Allgemein",sub:"B",q:"Sie vermuten, dass ein Schüler von Vernachlässigung oder Kindeswohlgefährdung betroffen ist. Wie gehen Sie vor?",a:["Beobachtungen sachlich dokumentieren, keine vorschnellen Schlüsse ziehen","Insoweit erfahrene Fachkraft bzw. Schulleitung einbeziehen (Schutzauftrag nach § 8a SGB VIII)","Vertrauliche, für das Kind sichere Kommunikation wahren","Bei akuter Gefährdung das Jugendamt informieren"]},
+{code:"B-N10",c:"Allgemein",sub:"B",q:"Sie erfahren im Vertrauensgespräch oder zufällig von einer Straftat eines Schülers (z. B. Drogenhandel). Wie gehen Sie vor?",a:["Vertraulichkeit wahren, aber rechtliche Informationspflichten beachten","Ruhig und wertschätzend das Gespräch suchen, keine Vorverurteilung","Schulsozialarbeit bzw. Suchtberatungsstellen einbeziehen","Schulleitung und Erziehungsberechtigte informieren, wie rechtlich vorgeschrieben"]},
+{code:"B-N11",c:"Allgemein",sub:"B",q:"Wie bereiten Sie ein Beratungsgespräch systematisch vor?",a:["Ziele des Gesprächs und benötigte Informationen vorab klären","Passende Beteiligte auswählen (z. B. Klassenlehrkraft, Vertrauenslehrkraft, Schullaufbahnberatung)","Ort und Struktur des Gesprächs planen","Vereinbarungen und Nachhaltigkeit der Maßnahmen von Beginn an mitdenken"]},
+{code:"B-N12",c:"Allgemein",sub:"B",q:"Wie bereiten Sie sich auf ein schwieriges Elterngespräch zum Thema Noten vor (z. B. am Elternsprechtag)?",a:["Notizen/Beobachtungen aus dem Unterricht mitbringen","Konkrete Lösungsvorschläge vorbereiten (individuelle Förderung, Zusatzaufgaben, Referat, veränderte Sitzordnung)","In der Unterstufe Rücksprache mit der Klassenleitung, in der Sek II mit der Oberstufenkoordination halten","Sich vorab einen Überblick über die Leistungen in anderen Fächern verschaffen"]},
+{code:"B-N13",c:"Allgemein",sub:"B",q:"Ein Kollege beschwert sich über Ihre Klasse – wie gehen Sie damit um?",a:["Bei Beschwerde einer Lehrkraft: in der Klassenleitungsstunde das Gespräch suchen und sich einen eigenen Überblick verschaffen","Bei Beschwerde von Schüler:innen über eine Lehrkraft: klar vermitteln, dass keine Solidarisierung gegen die Lehrkraft erfolgt","Schülersicht anhören und Rücksprache mit der Lehrkraft halten"]},
+
+{code:"S-O1",c:"Allgemein",sub:"S",q:"Welche Bedeutung hat die Zusammenarbeit im Kollegium für die Schulentwicklung?",a:["Schulentwicklung gelingt durch Kooperation","Zusammenarbeit in Fach- und Klassenkonferenzen, Austausch in Jahrgangsteams","Gemeinsame Entwicklung von Unterrichtskonzepten, Bewertungsmaßstäbe abstimmen","Schulinterne Curricula weiterentwickeln, Qualität sichern"]},
+{code:"S-O2",c:"Allgemein",sub:"S",q:"Wie können Lehrkräfte aktiv zur Schulentwicklung beitragen?",a:["Mitarbeit in Steuergruppen, Fachkonferenzen und Arbeitsgruppen","Unterrichtserfahrungen und Fortbildungsinhalte einbringen","Schulprogramm mitgestalten","Verantwortung als Fachvorsitz oder in Projekten übernehmen"]},
+{code:"S-O3",c:"Allgemein",sub:"S",q:"Wie können Sie sich in das System Schule einbringen?",a:["Mitarbeit in Fachgruppen bei der Weiterentwicklung des schulinternen Curriculums","Angebot von Projekten/AGs (z. B. Experimentier-AG, Wettbewerbsvorbereitung)","Beteiligung an Arbeitskreisen zur Schulentwicklung (z. B. Digitalisierung, MINT-Schwerpunkt)","Mentorenrolle für Kolleg:innen bei neuen Methoden/Technologien","Kooperation mit außerschulischen Partnern (Exkursionen, Hochschulen)"]},
+{code:"S-O4",c:"Allgemein",sub:"S",q:"Sie streben eine Änderung im schulinternen Lehrplan an. Wie gehen Sie dabei vor?",a:["Bedarf analysieren: Abgleich mit Kernlehrplan und aktuellen fachlichen Entwicklungen","Vorschlag in der Fachkonferenz einbringen","Unterrichtsmaterialien und Kompetenzerwartungen vorbereiten","Änderung in eigener Praxis pilotieren, Feedback einholen","Abstimmung und Beschluss in der Fachkonferenz, Dokumentation"]},
+{code:"S-O5",c:"Allgemein",sub:"S",q:"Welche Aufgaben haben Sie als Klassenlehrer?",a:["Pädagogisch: Klassenklima fördern, individuelle Unterstützung, Beratungsgespräche","Organisatorisch: Koordination mit Fachkolleg:innen, Elternabende, Klassenfahrten/Projekttage","Sozial: Konfliktmanagement, Förderung von Eigenverantwortung","Zusammenarbeit mit Schulsozialarbeit/Beratungslehrkräften bei besonderen Herausforderungen"]},
+{code:"S-O6",c:"Allgemein",sub:"S",q:"Welche digitalen Tools kennen Sie, und wie können Sie diese lernförderlich nutzen?",a:["Lernplattformen (z. B. Moodle, IServ) für Materialien, Aufgaben, Lernfortschritt","Virtuelle Labore/Simulationen (z. B. PhET, ChemSketch) für sonst nicht durchführbare Experimente","Kollaborationstools (z. B. Padlet, Miro) für Gruppenarbeit und Ideensammlung","Übungs-/Quiz-Tools (z. B. LearningApps, H5P) zur Verständnisüberprüfung","Video-Tools (z. B. Explain Everything, Screencast-O-Matic) für Erklärvideos/Flipped Classroom"]},
+{code:"S-O8",c:"Allgemein",sub:"S",q:"Welche Aufgaben des Classroom Managements können Sie an Schüler:innen delegieren?",a:["Klassendienste wie Tafeldienst, Lüftungsdienst, Ordnungsdienst","Rollen wie „Ruhewächter“ oder Materialverantwortliche","Klassenbuchführung durch Schüler:innen","Verantwortung stärkt Selbstständigkeit und Identifikation mit der Klasse"]},
+{code:"S-O7",c:"Allgemein",sub:"S",q:"Wie organisieren Sie einen Wandertag?",a:["Rechtsgrundlage: Wandererlass (BASS 14–12 Nr. 2), deutlicher Unterrichtsbezug erforderlich","Schulkonferenz legt Kostenobergrenze sowie Anzahl und Dauer der Fahrten fest","Genehmigung durch die Schulleitung rechtzeitig vor Beginn einholen","Ausreichend Aufsichtspersonen einplanen (bei mehrtägigen Fahrten mind. eine weibliche Person)","Private PKW zur Beförderung grundsätzlich nicht zulässig"]},
+{code:"S-N1",c:"Allgemein",sub:"S",q:"In der Fachkonferenz soll ein neues Curriculum entwickelt werden. Wie bringen Sie sich ein?",a:["Sitzung fachlich vorbereiten","Vorschläge zur Kompetenzverteilung und kompetenzorientierte Aufgaben mitbringen","Abstimmung im Kollegium unterstützen","Auf realistische Stundenverteilung achten, Beschlüsse dokumentieren"]},
+{code:"S-N2",c:"Allgemein",sub:"S",q:"Unterschiedliche Bewertungsmaßstäbe in der Fachschaft – was tun Sie?",a:["Thema sachlich in der Fachkonferenz ansprechen, niemanden persönlich kritisieren","Gemeinsame Bewertungsraster entwickeln","Erwartungshorizonte vereinheitlichen","Regelmäßige Überprüfung der Vereinbarungen durchführen"]},
+{code:"S-N3",c:"Allgemein",sub:"S",q:"Sie nehmen einem Schüler das Smartphone ab, weil es im Unterricht verwendet wurde. Was müssen Sie beachten?",a:["Schulische Vorgaben zur Konfiszierung beachten","Schüler:in muss das Gerät „freiwillig“ abgeben","Rechtliche Rahmenbedingungen einhalten","Gerät ausschalten, Privatsphäre wahren"]},
+{code:"S-N4",c:"Allgemein",sub:"S",q:"Sie möchten ein neues Schulbuch einführen. Wie gehen Sie vor?",a:["Vorschlag in der Fachkonferenz einbringen und begründen","Entscheidung erfolgt im Rahmen der Lernmittelfreiheit durch die Fachkonferenz, abgestimmt mit dem schulinternen Curriculum","Sicherheits- und Kostenaspekte berücksichtigen"]},
+{code:"S-N5",c:"Allgemein",sub:"S",q:"Was würde Sie bei einem Vorstellungsgespräch an einer Schule von anderen Bewerber:innen abheben?",a:["Engagement und Fleiß","Der Wunsch, individuell auf Schüler:innen einzuwirken","Eine offene, selbstbestimmte Haltung"]},
+{code:"S-N6",c:"Allgemein",sub:"S",q:"Ein Schüler trägt im Unterricht eine Kappe oder kaut Kaugummi. Müssen Sie reagieren?",a:["Schulordnung als verbindliche Grundlage prüfen und konsequent anwenden","Bei geregeltem Verbot freundlich, aber bestimmt auf die Einhaltung hinweisen","Bei nicht geregelten Fällen (z. B. Kleidungswahl) Ermessensspielraum nutzen"]},
+{code:"S-N7",c:"Allgemein",sub:"S",q:"Wie reagieren Sie konkret und rechtssicher bei „Zoombombing“ in einer Videokonferenz?",a:["Präventiv: Wartezimmerfunktion aktivieren, Chat- und Bildschirmfreigabe deaktivieren, Umbenennung sperren","Nicht eingeladene Teilnehmer:innen konsequent entfernen, auf korrekte Namen bestehen","Möglichkeit zum Aufheben der eigenen Stummschaltung durch Teilnehmende sperren","Sobald alle da sind: Meeting sperren, damit niemand mehr beitreten kann"]},
+
+{code:"MA1",c:"Mathematik",q:"Wie ist die Leistungsbewertung in Mathematik der Sek I strukturiert?",a:["Sonstige Leistungen und schriftliche Arbeiten haben den gleichen Stellenwert","Lernstandserhebungen fließen nur ergänzend ein","Zunehmend Aufgaben zu Begründungen, Zusammenhängen und kritischer Reflexion","Sonstige Mitarbeit umfasst u. a. Unterrichtsbeiträge, Gruppenarbeit, Hefte, kurze Überprüfungen"]},
+{code:"MA2",c:"Mathematik",q:"Wie verteilen sich die Anforderungsbereiche in Mathematik-Klausuren der Sek II?",a:["Ca. 35–45 % AFB I, 50 % AFB II, 5–15 % AFB III","Verteilung variiert je nach Jahrgangsstufe","Formal und fachsprachlich korrekte Darstellung wird erwartet","Digitale Werkzeuge erfordern eine nachvollziehbare, vollständige Kommentierung der Arbeitsschritte"]},
+{code:"MA3",c:"Mathematik",q:"Welche Rolle spielt der hilfsmittelfreie Anteil in Mathematik-Klausuren?",a:["Gehört zu den zu prüfenden Kompetenzen: Werkzeuge sinnvoll einsetzen können","Einige Problemstellungen müssen ohne Hilfsmittel lösbar sein","Erhält in Klausuren einen entsprechenden Stellenwert"]},
+{code:"MA4",c:"Mathematik",q:"Wie gehen Sie mit fehlerhaften mündlichen Beiträgen im Mathematikunterricht um?",a:["Nicht zum Anlass punktueller Abwertung nehmen","Fehler produktiv für individuellen und generellen Lernfortschritt nutzen","Erarbeitungs- und Übungsphasen bewusst als „fehlerfreundlich“ gestalten"]},
+{code:"MA5",c:"Mathematik",q:"Welche Überprüfungsformen der Sonstigen Mitarbeit gibt es im Mathematikunterricht?",a:["Aufgaben mit realitätsnahem Kontext, innermathematische Argumentationsaufgaben","Hilfsmittelfreie, offene, geschlossene und explorative Aufgaben","Präsentations- und Dokumentationsaufgaben"]},
+{code:"MA6",c:"Mathematik",q:"Welche Vorgaben gibt es zum Taschenrechnereinsatz in NRW?",a:["Die Fachschaft entscheidet schulweit zwischen CAS (Computer-Algebra-System) und GTR (grafikfähiger Taschenrechner)","Alle eingesetzten Taschenrechner müssen dieselben Funktionen bieten, aber nicht dasselbe Modell sein","In der Sek II ist die Arbeit mit GTR oder CAS verbindlich vorgegeben"]},
+{code:"MA7",c:"Mathematik",q:"Wer erstellt die Abituraufgaben in Mathematik (und allgemein)?",a:["Einreichung durch Lehrkräfte möglich; Schulleitungen beauftragen dafür Kolleg:innen","Prüfung/Koordination durch die Kommission für Abituraufgaben bei Qualis in Soest","Zusätzlich werden Aufgaben vom IQB einbezogen, wohin die Bundesländer Personen entsenden","Ziel: zunehmend mehr IQB-Aufgaben zur besseren Vergleichbarkeit zwischen den Bundesländern"]},
+{code:"MA8",c:"Mathematik",q:"Warum ist mathematische Kompetenz gesellschaftlich bedeutsam?",a:["Entscheidender Erfolgsfaktor im beruflichen und privaten Alltag (z. B. Einkaufen, Steuererklärung)","Fördert Frustrationstoleranz und analytisches Denken","Befähigt zur kritischen Einordnung von Informationen (z. B. Plausibilität statistischer Angaben)","Schult das strukturierte Dokumentieren und Darstellen eigener Lösungswege"]},
+{code:"MA9",c:"Mathematik",q:"Was verstehen Sie unter kooperativem Lernen im Mathematikunterricht, und welche Elemente sind zentral?",a:["Interaktionsform, bei der alle Gruppenmitglieder gemeinsam Kenntnisse und Fähigkeiten erwerben und gleichberechtigt Verantwortung tragen","Positive Abhängigkeit herausfordern: jedes Mitglied muss die eigene Aufgabe erfüllen und andere unterstützen","Verbindlichkeit sicherstellen (z. B. zufällige Auswahl der präsentierenden Person)","Direkte Interaktion und soziale Kompetenzen fördern, Gruppenarbeit auch bezüglich Lernzuwachs evaluieren"]},
+{code:"MA10",c:"Mathematik",q:"Was ist beim Übergang einer 5. Klasse von der Grundschule zu beachten?",a:["Diagnostische Ausgangslage der neuen Lerngruppe erfassen (unterschiedliche Vorkenntnisse aus verschiedenen Grundschulen)","Grundlegende Lern- und Arbeitsstrategien aus der Grundschulzeit anknüpfen und weiter ausbauen","Ziel: selbstbestimmtes, eigenverantwortliches und kooperatives Lernen und Arbeiten fördern"]},
+
+{code:"SP1",c:"Sport",q:"Was beschreibt das „Meister-Modell“ zur Leistungsbewertung im Sport?",a:["Motorische Leistung und individuelle Verbesserung","Einsatzbereitschaft und Sozialverhalten","Theoretische Leistungen sowie Einhalten von Regeln und Vereinbarungen","Referate und andere selbstständige Leistungen"]},
+{code:"SP2",c:"Sport",q:"Wie wird die Leistung im Sportunterricht der Sek I bewertet?",a:["Keine Klassenarbeiten oder Lernstandserhebungen vorgesehen","Bewertung ausschließlich über „Sonstige Leistungen im Unterricht“","Verbindliche Bestandteile: Bewegungshandeln, Fitness-/Ausdauertests, Qualifikationsnachweise","Außerunterrichtliche Leistungen (z. B. Sporthelferausbildung) nur als Zeugnisbemerkung, nicht notenrelevant"]},
+{code:"SP3",c:"Sport",q:"Wie unterscheidet sich die Leistungsbewertung im Sport-Leistungskurs der Sek II?",a:["Sonstige Mitarbeit bleibt zentral (Übungs-/Spielverhalten, Präsentationen, Protokolle)","Im Leistungskurs sind zusätzlich Klausuren vorgesehen","In der Qualifikationsphase kann eine Klausur nach Schulentscheidung durch eine Facharbeit ersetzt werden"]},
+{code:"SP4",c:"Sport",q:"Anhand welcher Kriterien können Leistungen im Sportunterricht konkret bewertet werden?",a:["Kooperation: Zuhören, Kritik/Hilfe annehmen und geben, faires Verhalten, Regeln einhalten","Initiative: eigene Beiträge zur Unterrichtsgestaltung, aktives Engagement, eigene Lösungsvorschläge","Konstruktivität: zielgerichtetes Einbringen, Problemerkennung und Strategieentwicklung","Aktivität: gezeigtes Bewegungskönnen, Beteiligung am Unterrichtsgespräch, Anstrengungsbereitschaft"]},
+{code:"SP5",c:"Sport",q:"Mit welchen Methoden evaluieren Sie Ihren Sportunterricht?",a:["Fragebögen, Zielscheiben-Feedback, Klebepunkte, Blitzlicht, Stimmungsbarometer","Kollegiale Fallberatung und Selbsteinschätzung"]},
+{code:"SP6",c:"Sport",q:"Wie ordnen Sie Skifahrten in den Doppelauftrag des Schulsports ein?",a:["Der Doppelauftrag umfasst Entwicklungsförderung durch Bewegung sowie Erziehung zum Sport","Skifahrten bieten intensive Erfahrungsräume für Teamfähigkeit, Verantwortungsübernahme und Selbstständigkeit","Curriculare Einbindung und klare pädagogische Zielsetzung sind Voraussetzung für die Legitimation"]},
+{code:"SP7",c:"Sport",q:"Wie stehen Sie zur Forderung, den Sportunterricht nicht koedukativ zu unterrichten?",a:["Der Doppelauftrag (Bewegung + Erziehung) legt grundsätzlich koedukativen Unterricht nahe","In begründeten Einzelfällen kann eine zeitweise geschlechtergetrennte Organisation pädagogisch sinnvoll sein","Entscheidung erfordert eine differenzierte, fachlich begründete Abwägung statt einer pauschalen Regel"]},
+{code:"SP8",c:"Sport",q:"Wie begegnen Sie Kritiker:innen, die sich eine Rückkehr zum reinen Sportartenprogramm statt eines mehrperspektivischen Sportunterrichts wünschen?",a:["Der mehrperspektivische Ansatz erschließt Bewegung über verschiedene pädagogische Perspektiven statt nur über Sportarten","Ermöglicht individuellere Zugänge und stärkere Berücksichtigung heterogener Interessen","Sportartenorientierung allein wird dem Doppelauftrag des Schulsports nicht vollständig gerecht"]},
+{code:"SP9",c:"Sport",q:"Wie kann Sport zur Schulentwicklung und zum Schulleben beitragen?",a:["Konzepte wie „bewegte Schule“ und „gesunde Schule“, sportorientierte Klassenfahrten","Sportförderunterricht und Sport-AGs, Sportfeste und Schulmannschaften","Kooperation mit außerschulischen Partnern (Vereinen), Lehrer-Schüler-Sportangebote","Bewegte Pausen zur Steigerung der Leistungsfähigkeit im Schulalltag"]},
+];
+
+let activeKeys = new Set(["Chemie","Physik","Mathematik","Sport","ALL-Basis","ALL-U","ALL-E","ALL-L","ALL-B","ALL-S"]);
+const BADGE_LABELS = {
+  Allgemein:"ALLGEMEIN", Chemie:"CHEMIE", Physik:"PHYSIK"
+};
+function keyFor(item){
+  return item.c === "Allgemein" ? ("ALL-" + item.sub) : item.c;
+}
+let pool = [];
+let currentIndex = -1;
+let seen = [];
+let typingTimer = null;
+let isTyping = false;
+let answerShown = false;
+
+const el = {
+  badge: document.getElementById('badge'),
+  qcode: document.getElementById('qcode'),
+  counter: document.getElementById('counter'),
+  qText: document.getElementById('questionText'),
+  cursor: document.getElementById('cursor'),
+  dlgBox: document.getElementById('dialogueBox'),
+  answerBox: document.getElementById('answerBox'),
+  answerList: document.getElementById('answerList'),
+  actionBtn: document.getElementById('actionBtn'),
+  skipBtn: document.getElementById('skipBtn'),
+  btnA: document.getElementById('btnA'),
+  btnB: document.getElementById('btnB'),
+  btnStart: document.getElementById('btnStart'),
+  btnSelect: document.getElementById('btnSelect'),
+  overlay: document.getElementById('overlay'),
+};
+
+function buildPool(){
+  pool = DATA.map((_,i)=>i).filter(i=>activeKeys.has(keyFor(DATA[i])));
+  seen = [];
+}
+
+function pickRandomIndex(){
+  if(seen.length >= pool.length) seen = [];
+  let candidates = pool.filter(i => !seen.includes(i));
+  const idx = candidates[Math.floor(Math.random()*candidates.length)];
+  seen.push(idx);
+  return idx;
+}
+
+function typeText(text, done){
+  clearInterval(typingTimer);
+  el.qText.textContent = "";
+  el.cursor.classList.remove('show');
+  isTyping = true;
+  let i = 0;
+  typingTimer = setInterval(()=>{
+    el.qText.textContent += text[i];
+    i++;
+    if(i>=text.length){
+      clearInterval(typingTimer);
+      isTyping = false;
+      el.cursor.classList.add('show');
+      if(done) done();
+    }
+  }, 16);
+}
+
+function finishTypingInstantly(){
+  clearInterval(typingTimer);
+  const q = DATA[currentIndex].q;
+  el.qText.textContent = q;
+  isTyping = false;
+  el.cursor.classList.add('show');
+}
+
+let history = [];
+let historyPos = -1;
+
+function renderQuestion(){
+  currentIndex = history[historyPos];
+  const item = DATA[currentIndex];
+  el.badge.textContent = BADGE_LABELS[item.c] || item.c.toUpperCase();
+  el.badge.setAttribute('data-cat', item.c);
+  el.qcode.textContent = item.code;
+  el.counter.textContent = "Karte " + (seen.length) + "/" + pool.length;
+  answerShown = false;
+  el.answerBox.classList.remove('open');
+  el.answerBox.style.maxHeight = "0px";
+  el.answerList.innerHTML = "";
+  el.actionBtn.textContent = "▶ ANTWORT ZEIGEN";
+  typeText(item.q);
+}
+
+function nextQuestion(){
+  if(historyPos < history.length - 1){
+    // vorwärts durch bereits besuchte Fragen (Redo)
+    historyPos++;
+  } else {
+    const idx = pickRandomIndex();
+    history.push(idx);
+    historyPos = history.length - 1;
+  }
+  renderQuestion();
+}
+
+function backQuestion(){
+  if(historyPos > 0){
+    historyPos--;
+    renderQuestion();
+  }
+}
+
+function startFresh(){
+  history = [];
+  historyPos = -1;
+  nextQuestion();
+}
+
+function showAnswer(){
+  const item = DATA[currentIndex];
+  el.answerList.innerHTML = "";
+  item.a.forEach((line, idx)=>{
+    const li = document.createElement('li');
+    li.style.opacity = 0;
+    li.textContent = line;
+    el.answerList.appendChild(li);
+    setTimeout(()=>{ li.style.transition="opacity .2s"; li.style.opacity = 1; }, idx*140);
+  });
+  el.answerBox.classList.add('open');
+  // Höhe dynamisch an den tatsächlichen Inhalt anpassen, damit nichts abgeschnitten wird
+  requestAnimationFrame(()=>{
+    el.answerBox.style.maxHeight = el.answerList.scrollHeight + 40 + "px";
+  });
+  answerShown = true;
+  el.actionBtn.textContent = "▶ NÄCHSTE FRAGE";
+}
+
+function collapseAnswer(){
+  if(!answerShown) return;
+  answerShown = false;
+  el.answerBox.classList.remove('open');
+  el.answerBox.style.maxHeight = "0px";
+  el.actionBtn.textContent = "▶ ANTWORT ZEIGEN";
+}
+
+function revealAnswer(){
+  if(isTyping){ finishTypingInstantly(); }
+  if(!answerShown){ showAnswer(); }
+}
+
+function primaryAction(){
+  if(isTyping){
+    finishTypingInstantly();
+  } else if(!answerShown){
+    showAnswer();
+  } else {
+    nextQuestion();
+  }
+}
+
+el.dlgBox.addEventListener('click', primaryAction);
+el.actionBtn.addEventListener('click', primaryAction);
+el.btnA.addEventListener('click', primaryAction);
+el.skipBtn.addEventListener('click', backQuestion);
+el.btnB.addEventListener('click', backQuestion);
+
+document.getElementById('dpadUp').addEventListener('click', collapseAnswer);
+document.getElementById('dpadDown').addEventListener('click', revealAnswer);
+document.getElementById('dpadLeft').addEventListener('click', backQuestion);
+document.getElementById('dpadRight').addEventListener('click', nextQuestion);
+
+let poolChangedWhileOpen = false;
+
+el.btnStart.addEventListener('click', ()=>{
+  el.overlay.classList.toggle('open');
+});
+document.getElementById('overlayClose').addEventListener('click', ()=>{
+  el.overlay.classList.remove('open');
+  if(poolChangedWhileOpen){
+    buildPool();
+    startFresh();
+    poolChangedWhileOpen = false;
+  }
+});
+el.btnSelect.addEventListener('click', ()=>{
+  buildPool();
+  startFresh();
+});
+
+const subItems = document.querySelectorAll('.menu-item.sub');
+const parentItem = document.querySelector('.menu-item.parent');
+
+function syncParentVisual(){
+  const allChecked = Array.from(subItems).every(s => s.classList.contains('checked'));
+  parentItem.classList.toggle('checked', allChecked);
+}
+
+parentItem.addEventListener('click', ()=>{
+  const turningOn = !parentItem.classList.contains('checked');
+  if(!turningOn){
+    // Würde alle Basis/U/E/L/B/S-Kästchen abwählen -> nur erlauben, wenn danach noch etwas anderes aktiv bleibt
+    const remaining = new Set(activeKeys);
+    subItems.forEach(s => remaining.delete(s.getAttribute('data-key')));
+    if(remaining.size === 0) return; // mind. 1 Kästchen muss an bleiben
+  }
+  subItems.forEach(s => {
+    const key = s.getAttribute('data-key');
+    s.classList.toggle('checked', turningOn);
+    if(turningOn) activeKeys.add(key); else activeKeys.delete(key);
+  });
+  syncParentVisual();
+  poolChangedWhileOpen = true;
+});
+
+subItems.forEach(item=>{
+  item.addEventListener('click', ()=>{
+    const key = item.getAttribute('data-key');
+    const isChecked = item.classList.contains('checked');
+    if(isChecked && activeKeys.size === 1) return; // letztes aktives Kästchen bleibt an
+    if(isChecked){ activeKeys.delete(key); item.classList.remove('checked'); }
+    else { activeKeys.add(key); item.classList.add('checked'); }
+    syncParentVisual();
+    poolChangedWhileOpen = true;
+  });
+});
+
+document.querySelectorAll('.menu-item[data-key="Chemie"], .menu-item[data-key="Physik"], .menu-item[data-key="Mathematik"], .menu-item[data-key="Sport"]').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    const key = item.getAttribute('data-key');
+    const isChecked = item.classList.contains('checked');
+    if(isChecked && activeKeys.size === 1) return; // letztes aktives Kästchen bleibt an
+    if(isChecked){ activeKeys.delete(key); item.classList.remove('checked'); }
+    else { activeKeys.add(key); item.classList.add('checked'); }
+    poolChangedWhileOpen = true;
+  });
+});
+
+buildPool();
+startFresh();
+</script>
+</body>
+</html>
