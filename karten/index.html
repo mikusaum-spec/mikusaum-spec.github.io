@@ -349,16 +349,30 @@ function confirmReset() {
 }
 
 // ---------- Game actions ----------
-function computePlacementsFromValues(values, activeIds) {
+function computePlacementsFromValues(values, activeIds, previousDraft) {
   const entries = activeIds
     .filter((id) => values[id] !== "" && values[id] != null && !isNaN(Number(values[id])))
-    .map((id) => ({ id, val: Number(values[id]) }));
-  entries.sort((a, b) => b.val - a.val); // in Schwimmen gewinnt der höchste Wert
+    .map((id) => ({
+      id,
+      val: Number(values[id]),
+      prevRank: previousDraft && previousDraft[id] != null ? previousDraft[id] : null
+    }));
+  entries.sort((a, b) => {
+    if (b.val !== a.val) return b.val - a.val; // in Schwimmen gewinnt der höchste Wert
+    // gleicher Wert: eine bereits per Stechen entschiedene Reihenfolge beibehalten
+    if (a.prevRank != null && b.prevRank != null && a.prevRank !== b.prevRank) {
+      return a.prevRank - b.prevRank;
+    }
+    return 0;
+  });
   const placements = {};
   let rank = 1;
   for (let i = 0; i < entries.length; i++) {
-    if (i > 0 && entries[i].val === entries[i - 1].val) {
-      placements[entries[i].id] = placements[entries[i - 1].id];
+    const prevEntry = entries[i - 1];
+    const sameValue = i > 0 && entries[i].val === prevEntry.val;
+    const alreadyDecided = sameValue && entries[i].prevRank != null && prevEntry.prevRank != null && entries[i].prevRank !== prevEntry.prevRank;
+    if (sameValue && !alreadyDecided) {
+      placements[entries[i].id] = placements[prevEntry.id];
     } else {
       placements[entries[i].id] = rank;
     }
@@ -370,9 +384,9 @@ function computePlacementsFromValues(values, activeIds) {
 function setRoundValue(id, rawValue) {
   const values = { ...state.valuesDraft, [id]: rawValue };
   const active = derivedPlayers().filter((p) => !p.out).map((p) => p.id);
-  const placements = computePlacementsFromValues(values, active);
+  const placements = computePlacementsFromValues(values, active, state.placementsDraft);
   active.forEach((pid) => { if (!(pid in placements)) placements[pid] = null; });
-  update({ valuesDraft: values, placementsDraft: placements, stechenGroup: null, stechenOrder: [] });
+  update({ valuesDraft: values, placementsDraft: placements });
 }
 
 function computeTieGroups(draft) {
