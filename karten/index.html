@@ -352,32 +352,40 @@ function confirmReset() {
 function computePlacementsFromValues(values, activeIds, previousDraft) {
   const entries = activeIds
     .filter((id) => values[id] !== "" && values[id] != null && !isNaN(Number(values[id])))
-    .map((id) => ({
-      id,
-      val: Number(values[id]),
-      prevRank: previousDraft && previousDraft[id] != null ? previousDraft[id] : null
-    }));
-  entries.sort((a, b) => {
-    if (b.val !== a.val) return b.val - a.val; // in Schwimmen gewinnt der höchste Wert
-    // gleicher Wert: eine bereits per Stechen entschiedene Reihenfolge beibehalten
-    if (a.prevRank != null && b.prevRank != null && a.prevRank !== b.prevRank) {
-      return a.prevRank - b.prevRank;
-    }
-    return 0;
+    .map((id) => ({ id, val: Number(values[id]) }));
+
+  // 1. Nach erreichtem Wert gruppieren (das sind die potenziellen Gleichstände)
+  const byValue = new Map();
+  entries.forEach((e) => {
+    if (!byValue.has(e.val)) byValue.set(e.val, []);
+    byValue.get(e.val).push(e);
   });
+
+  // 2. Pro Gruppe: nur wenn WIRKLICH jedes Mitglied bereits eine eigene,
+  //    paarweise unterschiedliche Stechen-Reihenfolge hat, diese übernehmen.
+  //    Sobald auch nur ein (z.B. neu hinzugekommener) Spieler keine hat,
+  //    gilt die ganze Gruppe wieder als offener Gleichstand.
+  const groups = [];
+  byValue.forEach((members, val) => {
+    const prevRanks = members.map((m) => (previousDraft ? previousDraft[m.id] : null));
+    const allDecided = prevRanks.every((r) => r != null) && new Set(prevRanks).size === members.length;
+    const ordered = allDecided
+      ? [...members].sort((a, b) => previousDraft[a.id] - previousDraft[b.id])
+      : members;
+    groups.push({ val, ordered, tied: !allDecided });
+  });
+  groups.sort((a, b) => b.val - a.val); // in Schwimmen gewinnt der höchste Wert
+
   const placements = {};
   let rank = 1;
-  for (let i = 0; i < entries.length; i++) {
-    const prevEntry = entries[i - 1];
-    const sameValue = i > 0 && entries[i].val === prevEntry.val;
-    const alreadyDecided = sameValue && entries[i].prevRank != null && prevEntry.prevRank != null && entries[i].prevRank !== prevEntry.prevRank;
-    if (sameValue && !alreadyDecided) {
-      placements[entries[i].id] = placements[prevEntry.id];
+  groups.forEach(({ ordered, tied }) => {
+    if (tied) {
+      ordered.forEach((m) => { placements[m.id] = rank; });
+      rank += ordered.length;
     } else {
-      placements[entries[i].id] = rank;
+      ordered.forEach((m) => { placements[m.id] = rank; rank += 1; });
     }
-    rank++;
-  }
+  });
   return placements;
 }
 
@@ -407,12 +415,12 @@ function pickStechenPlayer(id) {
   if (state.stechenOrder.includes(id)) return;
   const next = [...state.stechenOrder, id];
   if (next.length === state.stechenGroup.ids.length) {
+    // Nur die Ränge der Stechen-Teilnehmer selbst setzen (group.rank .. group.rank+size-1).
+    // Dieser Block war exklusiv für sie reserviert - alle anderen Plätze bleiben unangetastet,
+    // ein "Aufräumen"/Neu-Durchnummerieren würde bei noch offenen Gleichständen falsche
+    // Ergebnisse liefern (Gruppengröße würde als nur 1 Platz gezählt).
     const draft = { ...state.placementsDraft };
     next.forEach((pid, i) => { draft[pid] = state.stechenGroup.rank + i; });
-    const usedRanks = [...new Set(Object.values(draft).filter((r) => r != null))].sort((a, b) => a - b);
-    const remap = {};
-    usedRanks.forEach((r, i) => (remap[r] = i + 1));
-    Object.keys(draft).forEach((k) => { draft[k] = remap[draft[k]]; });
     update({ placementsDraft: draft, stechenGroup: null, stechenOrder: [] });
   } else {
     update({ stechenOrder: next });
