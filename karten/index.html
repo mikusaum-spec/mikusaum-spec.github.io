@@ -205,6 +205,7 @@
 const SUITS = ["♠", "♥", "♦", "♣"];
 const PALETTE = ["#C9A15A", "#7FA98C", "#B5768A", "#7B93B0", "#C08552", "#8FA6A0"];
 const STORAGE_KEY = "kartenspiel-scoreboard-state";
+const VERSION = "v1";
 
 function playerColor(i) { return PALETTE[i % PALETTE.length]; }
 
@@ -555,7 +556,7 @@ function renderSetup() {
   return `
     <div class="card">
       <div class="suit-row">${suits}</div>
-      <h1 class="title">Punkte-Board</h1>
+      <h1 class="title">Punkte-Board <span style="font-family:'JetBrains Mono',monospace; font-size:13px; color:#8FA6A0; font-weight:400;">${VERSION}</span></h1>
       <p class="subtitle">Spiel endet, sobald 2 Spieler die Deadline erreicht haben.</p>
 
       <label class="field-label">Ausscheiden ab (Deadline)</label>
@@ -745,7 +746,7 @@ function renderGame(derived) {
   return `
     <div class="header-bar">
       <div>
-        <h1 class="title-small">Punkte-Board</h1>
+        <h1 class="title-small">Punkte-Board <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#8FA6A0; font-weight:400;">${VERSION}</span></h1>
         <p class="subtitle-small">Deadline: ${state.deadline} · Runde ${state.rounds.length + 1}</p>
         ${state.saveError ? `<p class="subtitle-small" style="color:#E3ABA6;">Speichern fehlgeschlagen: ${escapeHtml(state.saveErrorDetail || "unbekannter Fehler")}</p>` : ""}
       </div>
