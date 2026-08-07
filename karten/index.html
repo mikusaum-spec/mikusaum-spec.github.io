@@ -221,6 +221,7 @@ let state = {
   valuesDraft: {},       // {id: achievedPoints}
   stechenGroup: null,    // {rank, ids:[...]}
   stechenOrder: [],
+  resolvedStechen: [],    // [{idsKey: "1,2", order: [1,2]}] - abgeschlossene Stechen dieser Runde
   correctionOpen: false,
   correctionPlayerId: null,
   correctionAmount: ""
@@ -329,7 +330,7 @@ function startGame() {
   initial.forEach((p) => { draft[p.id] = null; values[p.id] = ""; });
   update({
     phase: "game", players: initial, deadline, rounds: [], corrections: [],
-    placementsDraft: draft, valuesDraft: values, stechenGroup: null, stechenOrder: [],
+    placementsDraft: draft, valuesDraft: values, stechenGroup: null, stechenOrder: [], resolvedStechen: [],
     correctionOpen: false, correctionPlayerId: null, correctionAmount: ""
   });
 }
@@ -337,7 +338,7 @@ function startGame() {
 function resetGame() {
   update({
     phase: "setup", players: [], rounds: [], corrections: [],
-    placementsDraft: {}, valuesDraft: {}, stechenGroup: null, stechenOrder: [],
+    placementsDraft: {}, valuesDraft: {}, stechenGroup: null, stechenOrder: [], resolvedStechen: [],
     correctionOpen: false, correctionPlayerId: null, correctionAmount: ""
   });
 }
@@ -349,7 +350,7 @@ function confirmReset() {
 }
 
 // ---------- Game actions ----------
-function computePlacementsFromValues(values, activeIds, previousDraft) {
+function computePlacementsFromValues(values, activeIds, resolvedStechen) {
   const entries = activeIds
     .filter((id) => values[id] !== "" && values[id] != null && !isNaN(Number(values[id])))
     .map((id) => ({ id, val: Number(values[id]) }));
@@ -361,18 +362,25 @@ function computePlacementsFromValues(values, activeIds, previousDraft) {
     byValue.get(e.val).push(e);
   });
 
-  // 2. Pro Gruppe: nur wenn WIRKLICH jedes Mitglied bereits eine eigene,
-  //    paarweise unterschiedliche Stechen-Reihenfolge hat, diese übernehmen.
-  //    Sobald auch nur ein (z.B. neu hinzugekommener) Spieler keine hat,
-  //    gilt die ganze Gruppe wieder als offener Gleichstand.
+  // 2. Pro Gruppe: nur wenn für GENAU diese Spieler-Kombination schon ein Stechen
+  //    abgeschlossen wurde, die dort festgelegte Reihenfolge übernehmen.
+  //    Kommt ein neuer Spieler dazu oder ändert sich die Gruppe, gilt sie wieder
+  //    als offener Gleichstand - ein zufällig unterschiedlicher Zwischenwert beim
+  //    Tippen zählt NICHT als Entscheidung.
+  const resMap = new Map((resolvedStechen || []).map((r) => [r.idsKey, r.order]));
   const groups = [];
   byValue.forEach((members, val) => {
-    const prevRanks = members.map((m) => (previousDraft ? previousDraft[m.id] : null));
-    const allDecided = prevRanks.every((r) => r != null) && new Set(prevRanks).size === members.length;
-    const ordered = allDecided
-      ? [...members].sort((a, b) => previousDraft[a.id] - previousDraft[b.id])
-      : members;
-    groups.push({ val, ordered, tied: !allDecided });
+    const idsKey = members.map((m) => m.id).sort((a, b) => a - b).join(",");
+    const order = resMap.get(idsKey);
+    let ordered, tied;
+    if (order && order.length === members.length) {
+      ordered = order.map((id) => members.find((m) => m.id === id));
+      tied = false;
+    } else {
+      ordered = members;
+      tied = true;
+    }
+    groups.push({ val, ordered, tied });
   });
   groups.sort((a, b) => b.val - a.val); // in Schwimmen gewinnt der höchste Wert
 
@@ -392,7 +400,7 @@ function computePlacementsFromValues(values, activeIds, previousDraft) {
 function setRoundValue(id, rawValue) {
   const values = { ...state.valuesDraft, [id]: rawValue };
   const active = derivedPlayers().filter((p) => !p.out).map((p) => p.id);
-  const placements = computePlacementsFromValues(values, active, state.placementsDraft);
+  const placements = computePlacementsFromValues(values, active, state.resolvedStechen);
   active.forEach((pid) => { if (!(pid in placements)) placements[pid] = null; });
   update({ valuesDraft: values, placementsDraft: placements });
 }
@@ -421,7 +429,11 @@ function pickStechenPlayer(id) {
     // Ergebnisse liefern (Gruppengröße würde als nur 1 Platz gezählt).
     const draft = { ...state.placementsDraft };
     next.forEach((pid, i) => { draft[pid] = state.stechenGroup.rank + i; });
-    update({ placementsDraft: draft, stechenGroup: null, stechenOrder: [] });
+    // Diese exakte Spielergruppe als entschieden vermerken, damit spätere Werte-
+    // Änderungen die Reihenfolge nicht wieder verwerfen.
+    const idsKey = [...state.stechenGroup.ids].sort((a, b) => a - b).join(",");
+    const resolvedStechen = [...state.resolvedStechen.filter((r) => r.idsKey !== idsKey), { idsKey, order: next }];
+    update({ placementsDraft: draft, stechenGroup: null, stechenOrder: [], resolvedStechen });
   } else {
     update({ stechenOrder: next });
   }
@@ -441,7 +453,7 @@ function undoLastRound() {
   const draft = {};
   const values = {};
   newDerived.filter((p) => !p.out).forEach((p) => { draft[p.id] = null; values[p.id] = ""; });
-  update({ rounds: newRounds, corrections: newCorrections, placementsDraft: draft, valuesDraft: values, stechenGroup: null, stechenOrder: [] });
+  update({ rounds: newRounds, corrections: newCorrections, placementsDraft: draft, valuesDraft: values, stechenGroup: null, stechenOrder: [], resolvedStechen: [] });
 }
 
 function submitRound() {
@@ -461,7 +473,7 @@ function submitRound() {
   const draft = {};
   const values = {};
   newDerived.filter((p) => !p.out).forEach((p) => { draft[p.id] = null; values[p.id] = ""; });
-  update({ rounds: newRounds, placementsDraft: draft, valuesDraft: values });
+  update({ rounds: newRounds, placementsDraft: draft, valuesDraft: values, resolvedStechen: [] });
 }
 
 // ---------- Korrektur ----------
