@@ -3065,6 +3065,7 @@ modalContinue.addEventListener("click", ()=>{
 
   const firstTime = !solved.has(activeTask.id);
   solved.add(activeTask.id);
+  if(firstTime) sendProgress(activeTask.id, activeTask.title, "gelöst");
 
   // Endanimation startet sobald Aufgabe 5 abgeschlossen wird — unabhängig
   // davon, ob die anderen Aufgaben vorher schon erledigt wurden oder nicht.
@@ -3094,10 +3095,52 @@ modalClose.addEventListener("click", ()=>{
   activeTask = null;
 });
 
+/* ============ Live-Fortschritts-Tracking (optional) ============ */
+// TRACKING_URL zeigt auf ein Google Apps Script "Web App", das jede Meldung
+// als neue Zeile in ein Google Sheet schreibt. Siehe die separate Anleitung
+// ("Fortschritts-Tracking einrichten") für die Einrichtung.
+// Solange hier ein leerer String steht, passiert einfach nichts — das Spiel
+// funktioniert dann ganz normal ohne jede externe Übertragung.
+const TRACKING_URL = "https://script.google.com/macros/s/AKfycbzdGr26gbUVu8BKdnzDCNkTtKTsnOMAW8xbSniWtdGTmpEVnQlEKw8IzpD9aGAiFA3e/exec";
+
+// Statt einer Namensabfrage bekommt jedes Gerät automatisch eine Kennnummer
+// zugeteilt (kein Eingabefeld nötig). Eine echte FORTLAUFENDE Nummerierung
+// (1, 2, 3, ...) über mehrere Geräte hinweg ist ohne eigenen Server nicht
+// zuverlässig möglich — jedes Gerät würde sonst unabhängig wieder bei 1
+// anfangen. Stattdessen bekommt jedes Gerät eine zufällige 4-stellige
+// Nummer, die im Browser gespeichert wird (localStorage) und dadurch bei
+// jedem erneuten Öffnen im selben Browser gleich bleibt.
+function getStudentNumber(){
+  let n = localStorage.getItem("zauberwerkstatt_teilnehmer_nr");
+  if(!n){
+    n = String(1000 + Math.floor(Math.random()*9000));
+    localStorage.setItem("zauberwerkstatt_teilnehmer_nr", n);
+  }
+  return n;
+}
+const studentName = "Teilnehmer " + getStudentNumber();
+
+// Schickt eine einzelne Fortschritts-Meldung an TRACKING_URL (falls gesetzt).
+// Nutzt fetch() im "no-cors"-Modus: die Antwort wird nicht ausgewertet (kann
+// wegen Cross-Origin-Regeln ohnehin nicht gelesen werden), es geht nur
+// darum, die Daten zuverlässig loszuschicken. Schlägt die Übertragung fehl
+// (z.B. kein Internet), wird das bewusst ignoriert — das Spiel darf dadurch
+// nie ins Stocken geraten.
+function sendProgress(taskId, taskTitle, status){
+  if(!TRACKING_URL) return;
+  const params = new URLSearchParams({
+    name: studentName,
+    task: taskId || "",
+    title: taskTitle || "",
+    status: status || ""
+  });
+  fetch(TRACKING_URL + "?" + params.toString(), { mode: "no-cors" }).catch(()=>{});
+}
+
 /* ============ Story-Intro & Steuerungs-Tutorial ============ */
 // Reihenfolge beim ersten Laden: erst die Geschichte (per CSS-Klasse "show"
-// im HTML), danach automatisch das Steuerungs-Tutorial. Das Tutorial lässt
-// sich zusätzlich jederzeit über den "?"-Button oben rechts erneut aufrufen.
+// im HTML), danach das Steuerungs-Tutorial. Das Tutorial lässt sich
+// zusätzlich jederzeit über den "?"-Button oben rechts erneut aufrufen.
 const storyOverlay = document.getElementById("story-overlay");
 const tutorialOverlay = document.getElementById("tutorial-overlay");
 document.getElementById("story-close").addEventListener("click", ()=>{
@@ -3106,6 +3149,7 @@ document.getElementById("story-close").addEventListener("click", ()=>{
 });
 document.getElementById("tutorial-close").addEventListener("click", ()=>{
   tutorialOverlay.classList.remove("show");
+  sendProgress("start", "Spiel gestartet", "gestartet");
 });
 document.getElementById("tutorial-reopen-btn").addEventListener("click", ()=>{
   tutorialOverlay.classList.add("show");
