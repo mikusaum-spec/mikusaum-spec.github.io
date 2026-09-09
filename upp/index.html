@@ -778,7 +778,7 @@ const TASKS = [
     id:"spot_4", x:0.217, y:0.523, type:"periscope",
     title:"Aufgabe 4 - Periskop",
     introTitle:"Das Periskop",
-    introText:"Oben auf dem Schrank müsste etwas heruntergefallen sein. Er baut ein Periskop, um von hier aus über den Schrank zu blicken, ohne eine Leiter holen zu müssen.\n\nEin Periskop ist ein Gerät, mit dem man Gegenstände sehen kann, die sich nicht direkt auf Augenhöhe oder um eine Ecke befinden. Es wird zum Beispiel in U-Booten verwendet, um über die Wasseroberfläche zu schauen.\n\nEin einfaches Periskop besteht aus einem langen Rohr und zwei Spiegeln.",
+    introText:"Oben auf dem Schrank müsste etwas heruntergefallen sein. Du baust ein Periskop, um von hier aus über den Schrank zu blicken, ohne eine Leiter holen zu müssen.\n\nEin Periskop ist ein Gerät, mit dem man Gegenstände sehen kann, die sich nicht direkt auf Augenhöhe oder um eine Ecke befinden. Es wird zum Beispiel in U-Booten verwendet, um über die Wasseroberfläche zu schauen.\n\nEin einfaches Periskop besteht aus einem langen Rohr und zwei Spiegeln.",
     instruction:"Lenke den Lichtstrahl durch das Periskop: Stelle beide Spiegel mit den Reglern so ein, dass der Strahl unten das Auge trifft.",
     feedbackOk:"Perfekt — beide Spiegel stehen im richtigen Winkel zum Lot, der Strahl wird zweimal exakt reflektiert und trifft das Auge.",
     hint:"Lenke den Strahl mit Spiegel 1 auf die Mitte von Spiegel 2. Lenke dann den Strahl auf das Auge."
@@ -1254,7 +1254,7 @@ function setActionButton(active){
 // angezeigt; "Weiter" öffnet danach automatisch die eigentliche Aufgabe
 // (siehe secretBannerClose-Handler weiter unten).
 const PRE_STORY_BANNERS = {
-  spot_1:"Ein altes, verstaubtes Physikbuch liegt aufgeschlagen da — eine seiner Lieblingsaufgaben aus Studienzeiten: das Reflexionsgesetz. Er kann nicht widerstehen und beginnt zu rechnen."
+  spot_1:"Ein altes, verstaubtes Physikbuch liegt aufgeschlagen da — eine deiner Lieblingsaufgaben aus Studienzeiten: das Reflexionsgesetz. Du kannst nicht widerstehen und beginnst zu rechnen."
 };
 const preStoryShown = new Set(); // Aufgaben-IDs, deren Vor-Banner schon gezeigt wurde
 let pendingTaskAfterBanner = null; // Aufgabe, die nach dem aktuellen Story-Banner geöffnet werden soll
@@ -3059,10 +3059,10 @@ function checkMatchComplete(){
 // Story-Zwischentexte, die nach dem ersten Lösen der jeweiligen Aufgabe als
 // großes Textfeld eingeblendet werden (siehe completeActiveTask()).
 const STORY_BANNERS = {
-  spot_1:"Kaum ist die Aufgabe gelöst, fällt sein Blick auf einen alten Laserapparat in der Ecke — offenbar noch funktionstüchtig. Ein perfektes Gerät, um das Gelernte gleich in die Praxis umzusetzen.",
+  spot_1:"Kaum ist die Aufgabe gelöst, fällt dein Blick auf einen alten Laserapparat in der Ecke — offenbar noch funktionstüchtig. Ein perfektes Gerät, um das Gelernte gleich in die Praxis umzusetzen.",
   spot_2:"Der Sensor blinkt zufrieden auf. Vielleicht gibt es noch mehr solcher alten Apparate im Labor …",
   spot_3:"Kaum leuchtet der Sensor, ist am anderen Ende des Labors ein dumpfes Poltern zu hören. Etwas ist heruntergefallen …",
-  spot_4:"Durch das Periskop sieht er es: Oben auf dem Schrank liegt ein Zettel. „Gehe zum Tisch.“"
+  spot_4:"Durch das Periskop siehst du es: Oben auf dem Schrank liegt ein Zettel. „Gehe zum Tisch.“"
 };
 
 function completeActiveTask(){
