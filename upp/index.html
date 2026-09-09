@@ -578,7 +578,7 @@
 
 <div id="secret-banner-overlay">
   <div id="secret-banner">
-    <span id="secret-banner-text">Du hast alle Rätsel in der Zauberwerkstatt gelöst. Hole dir am Pult ein Arbeitsblatt und erkläre nun, wie die Zauberbox aufgebaut ist.</span>
+    <span id="secret-banner-text">Eine leere Box. Hole dir am Pult ein Arbeitsblatt und erkläre nun, wie die Zauberbox aufgebaut ist.</span>
     <button id="secret-banner-close">Weiter</button>
   </div>
 </div>
@@ -778,7 +778,7 @@ const TASKS = [
     id:"spot_4", x:0.217, y:0.523, type:"periscope",
     title:"Aufgabe 4 - Periskop",
     introTitle:"Das Periskop",
-    introText:"Ein Periskop ist ein Gerät, mit dem man Gegenstände sehen kann, die sich nicht direkt auf Augenhöhe befinden. Es wird zum Beispiel in U-Booten verwendet, um über die Wasseroberfläche zu schauen.\n\nEin einfaches Periskop besteht aus einem langen Rohr und zwei Spiegeln.",
+    introText:"Oben auf dem Schrank müsste etwas heruntergefallen sein. Er baut ein Periskop, um von hier aus über den Schrank zu blicken, ohne eine Leiter holen zu müssen.\n\nEin Periskop ist ein Gerät, mit dem man Gegenstände sehen kann, die sich nicht direkt auf Augenhöhe oder um eine Ecke befinden. Es wird zum Beispiel in U-Booten verwendet, um über die Wasseroberfläche zu schauen.\n\nEin einfaches Periskop besteht aus einem langen Rohr und zwei Spiegeln.",
     instruction:"Lenke den Lichtstrahl durch das Periskop: Stelle beide Spiegel mit den Reglern so ein, dass der Strahl unten das Auge trifft.",
     feedbackOk:"Perfekt — beide Spiegel stehen im richtigen Winkel zum Lot, der Strahl wird zweimal exakt reflektiert und trifft das Auge.",
     hint:"Lenke den Strahl mit Spiegel 1 auf die Mitte von Spiegel 2. Lenke dann den Strahl auf das Auge."
@@ -930,22 +930,66 @@ function triggerFireworks(){
     delay += 420 + Math.random()*180;
   });
 
-  // Nachdem das Feuerwerk durchgelaufen ist, das große Ankündigungs-Textfeld zeigen.
-  setTimeout(showSecretBanner, delay + 1200);
+  // Nachdem das Feuerwerk durchgelaufen ist, erst den Nebel-Zwischentext
+  // zeigen; erst wenn DER mit "Weiter" geschlossen wird, kommt der eigentliche
+  // Abschluss-Banner (siehe secretBannerClose-Handler weiter unten).
+  setTimeout(()=>{
+    pendingBannerAfterBanner = showSecretBanner;
+    showStoryBanner(FOG_BANNER_TEXT);
+  }, delay + 1200);
 }
+
+// Zwischentext, der nach dem Feuerwerk erscheint, bevor der eigentliche
+// Abschluss-Banner (mit der Aufgabe fürs Arbeitsblatt) gezeigt wird.
+const FOG_BANNER_TEXT = "Der Raum füllt sich mit Nebel, mit einem leisen Klick öffnet sich die Box vor dir. Du blickst in die Box und siehst …";
 
 // Das große zentrierte Textfeld, das nach dem Feuerwerk erscheint und den
 // Abschluss aller Aufgaben verkündet. Es wird per CSS-Klasse "show" ein-/ausgeblendet.
 const secretBannerOverlay = document.getElementById("secret-banner-overlay");
 const secretBannerClose = document.getElementById("secret-banner-close");
+const secretBannerText = document.getElementById("secret-banner-text");
+// Der ursprünglich im HTML stehende Text ist der Abschluss-Text für Aufgabe 5 —
+// den merken wir uns hier, damit showSecretBanner() ihn immer wieder herstellen
+// kann, auch nachdem showStoryBanner() zwischendurch einen anderen Text zeigt.
+const DEFAULT_SECRET_BANNER_TEXT = secretBannerText.textContent;
+// Funktion, die nach dem Schließen des AKTUELLEN Story-Banners den nächsten
+// Banner anzeigen soll (Verkettung mehrerer Banner hintereinander, z.B.
+// Nebel-Text -> Abschluss-Banner). null, wenn nach dem Schließen nichts
+// Weiteres folgen soll.
+let pendingBannerAfterBanner = null;
 
 function showSecretBanner(){
+  secretBannerText.textContent = DEFAULT_SECRET_BANNER_TEXT;
+  secretBannerOverlay.classList.add("show");
+}
+// Zeigt das gleiche große Textfeld wie showSecretBanner(), aber mit einem
+// beliebigen Zwischentext für die Geschichte (z.B. nach Aufgabe 1-4).
+function showStoryBanner(text){
+  secretBannerText.textContent = text;
   secretBannerOverlay.classList.add("show");
 }
 function hideSecretBanner(){
   secretBannerOverlay.classList.remove("show");
 }
-secretBannerClose.addEventListener("click", hideSecretBanner);
+secretBannerClose.addEventListener("click", ()=>{
+  hideSecretBanner();
+  // War der gerade geschlossene Banner ein Vor-Text zu einer Aufgabe
+  // (siehe tryOpenTask()), wird jetzt die eigentliche Aufgabe geöffnet.
+  if(pendingTaskAfterBanner){
+    const task = pendingTaskAfterBanner;
+    pendingTaskAfterBanner = null;
+    openTaskModal(task);
+    return;
+  }
+  // War stattdessen ein weiterer Banner verkettet (siehe triggerFireworks()),
+  // wird jetzt dieser gezeigt.
+  if(pendingBannerAfterBanner){
+    const next = pendingBannerAfterBanner;
+    pendingBannerAfterBanner = null;
+    next();
+  }
+});
+
 
 // Bewegt jedes Feuerwerks-Teilchen einen Frame weiter (Physik-Simulation):
 // "ring"-Teilchen wachsen einfach nach außen, "spark"-Teilchen fliegen mit
@@ -1032,6 +1076,16 @@ const player = {
 // (true/false). keyMap übersetzt Tastatur-Codes (z.B. "ArrowUp", "KeyW")
 // in diese vier Richtungen, damit Pfeiltasten UND WASD funktionieren.
 const keys = {up:false, down:false, left:false, right:false};
+// Prüft, ob gerade irgendein Vollbild-Overlay (Aufgabenfenster, Tutorial,
+// Story-Intro oder Story-Zwischentext-Banner) angezeigt wird. Solange das
+// der Fall ist, soll sich der Held NICHT bewegen können — weder per Taste
+// noch per D-Pad noch mit bereits gedrückt gehaltenen Tasten.
+function isMovementBlocked(){
+  return overlay.classList.contains("show")
+    || document.getElementById("tutorial-overlay").classList.contains("show")
+    || document.getElementById("story-overlay").classList.contains("show")
+    || document.getElementById("secret-banner-overlay").classList.contains("show");
+}
 const keyMap = {
   ArrowUp:"up", KeyW:"up",
   ArrowDown:"down", KeyS:"down",
@@ -1039,13 +1093,13 @@ const keyMap = {
   ArrowRight:"right", KeyD:"right"
 };
 window.addEventListener("keydown", e=>{
-  if(overlay.classList.contains("show") || document.getElementById("tutorial-overlay").classList.contains("show") || document.getElementById("story-overlay").classList.contains("show")) return; // Modal/Tutorial/Story offen: Spielsteuerung pausiert
+  if(isMovementBlocked()) return; // Modal/Tutorial/Story/Banner offen: Spielsteuerung pausiert
   const d = keyMap[e.code];
   if(d){ keys[d]=true; e.preventDefault(); }
   if(e.code === "KeyE" || e.code === "Space"){ tryOpenTask(); e.preventDefault(); }
 });
 window.addEventListener("keyup", e=>{
-  if(overlay.classList.contains("show") || document.getElementById("tutorial-overlay").classList.contains("show") || document.getElementById("story-overlay").classList.contains("show")) return;
+  if(isMovementBlocked()) return;
   const d = keyMap[e.code];
   if(d){ keys[d]=false; e.preventDefault(); }
 });
@@ -1057,7 +1111,7 @@ window.addEventListener("keyup", e=>{
 // beide Eingabearten gleich behandeln.
 document.querySelectorAll(".dbtn[data-dir]").forEach(btn=>{
   const dir = btn.dataset.dir;
-  const press = (e)=>{ e.preventDefault(); keys[dir]=true; btn.classList.add("pressed"); };
+  const press = (e)=>{ e.preventDefault(); if(isMovementBlocked()) return; keys[dir]=true; btn.classList.add("pressed"); };
   const release = (e)=>{ e.preventDefault(); keys[dir]=false; btn.classList.remove("pressed"); };
   btn.addEventListener("mousedown", press);
   btn.addEventListener("touchstart", press, {passive:false});
@@ -1090,6 +1144,19 @@ function collidesWithWalls(px, py){
 // Wird JEDEN Frame aufgerufen (aus loop() unten). Berechnet die neue
 // Position des Helden basierend auf den aktuell gedrückten Tasten.
 function update(){
+  // Solange ein Textfeld/Modal offen ist, darf sich der Held nicht bewegen —
+  // auch nicht, wenn eine Taste noch von vorher gedrückt gehalten wird.
+  // Wir setzen hier alle Richtungen zurück, damit nach dem Schließen (z.B.
+  // per "Weiter") nicht plötzlich unerwartet weitergelaufen wird.
+  if(isMovementBlocked()){
+    keys.up = keys.down = keys.left = keys.right = false;
+    player.moving = false;
+    player.frame = 1;
+    player.frameTimer = 0;
+    updateParticles();
+    return;
+  }
+
   // dx/dy sind die gewünschte Bewegungsrichtung: -1, 0 oder 1 auf jeder Achse.
   // Je nach gedrückter Taste wird außerdem die Blickrichtung (dirRow) gesetzt,
   // damit das richtige Sprite-Bild angezeigt wird.
@@ -1182,11 +1249,29 @@ const actionBtnOverlay = document.getElementById("action-btn-overlay");
 function setActionButton(active){
   actionBtnOverlay.classList.toggle("active", active);
 }
+// Story-Text, der als eigenes Textfeld VOR dem Öffnen einer Aufgabe erscheint
+// (nur beim allerersten Erreichen dieser Aufgabe). Wird per showStoryBanner()
+// angezeigt; "Weiter" öffnet danach automatisch die eigentliche Aufgabe
+// (siehe secretBannerClose-Handler weiter unten).
+const PRE_STORY_BANNERS = {
+  spot_1:"Ein altes, verstaubtes Physikbuch liegt aufgeschlagen da — eine seiner Lieblingsaufgaben aus Studienzeiten: das Reflexionsgesetz. Er kann nicht widerstehen und beginnt zu rechnen."
+};
+const preStoryShown = new Set(); // Aufgaben-IDs, deren Vor-Banner schon gezeigt wurde
+let pendingTaskAfterBanner = null; // Aufgabe, die nach dem aktuellen Story-Banner geöffnet werden soll
+
 actionBtnOverlay.addEventListener("click", tryOpenTask);
 // Öffnet das Aufgabenfenster für die aktuell nächstgelegene Aufgabe
-// (falls überhaupt eine in Reichweite ist).
+// (falls überhaupt eine in Reichweite ist). Gibt es dafür einen Vor-Banner,
+// der noch nicht gezeigt wurde, erscheint zuerst dieser statt der Aufgabe.
 function tryOpenTask(){
-  if(nearTask) openTaskModal(nearTask);
+  if(!nearTask) return;
+  if(PRE_STORY_BANNERS[nearTask.id] && !preStoryShown.has(nearTask.id)){
+    preStoryShown.add(nearTask.id);
+    pendingTaskAfterBanner = nearTask;
+    showStoryBanner(PRE_STORY_BANNERS[nearTask.id]);
+    return;
+  }
+  openTaskModal(nearTask);
 }
 
 /* ============ Rendering ============ */
@@ -2348,65 +2433,94 @@ function normalize2(v){
 
 // Zeichnet das komplette Periskop-Rohr (als abgerundete Linie), beide Spiegel (als drehbare blaue
 // Balken, deren Winkel live dem Regler folgt) und den simulierten Lichtweg.
-// Wasserlinie: alles darüber ist Luft (dort schwimmt das Boot), alles
-// darunter ist Wasser (dort liegen das untere Ende des Periskops und das Auge).
-const PERI_WATERLINE_Y = 150;
+// Der Raum ist durchgehend der offene Werkstatt-Raum (dunkles Lila) — NUR
+// direkt am oberen Rohrende (beim Einstiegspunkt) liegt ein kleines Stück
+// Schrank-Kante, über die das Rohr gerade so weit hinausragt, dass es den
+// Zettel erreichen kann. Alles andere (beide Spiegel, das Auge) befindet
+// sich normal im Raum, nicht "im Holz".
+const PERI_WATERLINE_Y = 150; // Höhe der kleinen Schrank-Kante beim Einstiegspunkt
 
-// Zeichnet Himmel über und Wasser unter der Wasserlinie, plus eine leicht
-// wellige Trennlinie an der Oberfläche.
+// Zeichnet den durchgehend dunklen Werkstatt-Raum als Hintergrund.
 function drawPeriBackground(ctx2){
-  const sky = ctx2.createLinearGradient(0,0,0,PERI_WATERLINE_Y);
-  sky.addColorStop(0, "#1c2a3a");
-  sky.addColorStop(1, "#3d6280");
-  ctx2.fillStyle = sky;
-  ctx2.fillRect(0,0,600,PERI_WATERLINE_Y);
-
-  const water = ctx2.createLinearGradient(0,PERI_WATERLINE_Y,0,400);
-  water.addColorStop(0, "#2c5f6e");
-  water.addColorStop(1, "#0a1e2a");
-  ctx2.fillStyle = water;
-  ctx2.fillRect(0,PERI_WATERLINE_Y,600,400-PERI_WATERLINE_Y);
-
-  ctx2.save();
-  ctx2.strokeStyle = "rgba(190,225,235,0.55)";
-  ctx2.lineWidth = 2;
-  ctx2.beginPath();
-  for(let x=0;x<=600;x+=16){
-    const y = PERI_WATERLINE_Y + Math.sin(x/38 + periDashOffset/9)*3;
-    if(x===0) ctx2.moveTo(x,y); else ctx2.lineTo(x,y);
-  }
-  ctx2.stroke();
-  ctx2.restore();
+  const room = ctx2.createLinearGradient(0,0,0,400);
+  room.addColorStop(0, "#171020");
+  room.addColorStop(1, "#2e2340");
+  ctx2.fillStyle = room;
+  ctx2.fillRect(0,0,600,400);
 }
 
-// Zeichnet ein kleines Boot, das genau auf der Wasserlinie schwimmt.
+// Zeichnet NUR am Einstiegspunkt ein kleines Stück Schrank-Kante (nicht über
+// die ganze Szene), das obere Ende des Periskop-Rohrs, das knapp darüber
+// hinausragt, sowie den Zettel, der direkt daneben auf dem Schrank liegt —
+// genau der Zettel, den der Physiker gleich entdecken wird.
 function drawBoat(ctx2, x){
   const y = PERI_WATERLINE_Y;
-  const mastTop = PERI.entry.y - y; // Mastspitze = exakt der Startpunkt des Lichtstrahls
+  const tubeTop = PERI.entry.y - y; // Rohrende = exakt der Startpunkt des Lichtstrahls
   ctx2.save();
   ctx2.translate(x, y);
-  ctx2.fillStyle = "#6b4a2f";
-  ctx2.beginPath();
-  ctx2.moveTo(-26,0);
-  ctx2.lineTo(26,0);
-  ctx2.lineTo(18,13);
-  ctx2.lineTo(-18,13);
-  ctx2.closePath();
-  ctx2.fill();
-  ctx2.strokeStyle = "#3a2818";
-  ctx2.lineWidth = 2;
-  ctx2.stroke();
-  ctx2.strokeStyle = "#c9a24b";
+
+  // Der Schrank reicht als Holzfläche bis zum unteren Bildrand hinunter —
+  // nur an dieser Stelle (um den Einstiegspunkt), nicht über die ganze Szene.
+  ctx2.save();
+  const plankTop = -8, plankBottom = 400 - y;
+  const cabinet = ctx2.createLinearGradient(0,plankTop,0,plankBottom);
+  cabinet.addColorStop(0, "#7a5636");
+  cabinet.addColorStop(1, "#3a2818");
+  ctx2.fillStyle = cabinet;
+  ctx2.fillRect(-95, plankTop, 205, plankBottom-plankTop);
+  ctx2.strokeStyle = "rgba(240,207,122,0.6)";
   ctx2.lineWidth = 3;
   ctx2.beginPath();
-  ctx2.moveTo(0,0);
-  ctx2.lineTo(0,mastTop);
+  ctx2.moveTo(-95, plankTop);
+  ctx2.lineTo(110, plankTop);
   ctx2.stroke();
-  ctx2.fillStyle = "rgba(233,223,201,0.9)";
+  // Angedeutete Holzmaserung über die ganze Höhe des Schranks.
+  ctx2.strokeStyle = "rgba(0,0,0,0.18)";
+  ctx2.lineWidth = 1;
+  for(let gy = plankTop+26; gy < plankBottom; gy += 26){
+    ctx2.beginPath();
+    ctx2.moveTo(-95, gy);
+    ctx2.lineTo(110, gy);
+    ctx2.stroke();
+  }
+  ctx2.restore();
+
+  // Rohrstück, das über die Schrankkante hinausragt.
+  ctx2.strokeStyle = "#c9a24b";
+  ctx2.lineWidth = 6;
+  ctx2.lineCap = "round";
   ctx2.beginPath();
-  ctx2.moveTo(0,mastTop+2); ctx2.lineTo(0,mastTop+26); ctx2.lineTo(16,mastTop+24);
-  ctx2.closePath();
+  ctx2.moveTo(0,0);
+  ctx2.lineTo(0,tubeTop);
+  ctx2.stroke();
+  // kleine Linse/Öffnung am oberen Rohrende
+  ctx2.beginPath();
+  ctx2.arc(0,tubeTop,6,0,Math.PI*2);
+  ctx2.fillStyle = "#3d6280";
   ctx2.fill();
+  ctx2.strokeStyle = "#1a1225";
+  ctx2.lineWidth = 2;
+  ctx2.stroke();
+
+  // Der Zettel liegt ein Stück daneben auf dem Schrank.
+  ctx2.save();
+  ctx2.translate(34, -4);
+  ctx2.rotate(-0.12);
+  ctx2.fillStyle = "#f3ecd8";
+  ctx2.fillRect(-16,-11,32,22);
+  ctx2.strokeStyle = "#c9bd97";
+  ctx2.lineWidth = 1.5;
+  ctx2.strokeRect(-16,-11,32,22);
+  ctx2.strokeStyle = "rgba(60,50,30,0.5)";
+  ctx2.lineWidth = 1;
+  [-4,0,4].forEach(oy=>{
+    ctx2.beginPath();
+    ctx2.moveTo(-10,oy);
+    ctx2.lineTo(10,oy);
+    ctx2.stroke();
+  });
+  ctx2.restore();
+
   ctx2.restore();
 }
 
@@ -2942,10 +3056,29 @@ function checkMatchComplete(){
 // meldet den Fortschritt, startet ggf. das Feuerwerk, aktualisiert die
 // Seitenleiste und schließt das Aufgabenfenster. Wird sowohl vom normalen
 // "Weiter"-Fluss als auch vom "Bestätigen"-Knopf des Laser-Puzzles genutzt.
+// Story-Zwischentexte, die nach dem ersten Lösen der jeweiligen Aufgabe als
+// großes Textfeld eingeblendet werden (siehe completeActiveTask()).
+const STORY_BANNERS = {
+  spot_1:"Kaum ist die Aufgabe gelöst, fällt sein Blick auf einen alten Laserapparat in der Ecke — offenbar noch funktionstüchtig. Ein perfektes Gerät, um das Gelernte gleich in die Praxis umzusetzen.",
+  spot_2:"Der Sensor blinkt zufrieden auf. Vielleicht gibt es noch mehr solcher alten Apparate im Labor …",
+  spot_3:"Kaum leuchtet der Sensor, ist am anderen Ende des Labors ein dumpfes Poltern zu hören. Etwas ist heruntergefallen …",
+  spot_4:"Durch das Periskop sieht er es: Oben auf dem Schrank liegt ein Zettel. „Gehe zum Tisch.“"
+};
+
 function completeActiveTask(){
   const firstTime = !solved.has(activeTask.id);
   solved.add(activeTask.id);
   if(firstTime) sendProgress(activeTask.id, activeTask.title, "gelöst");
+
+  // Story-Zwischentexte: erscheinen nur beim ERSTEN Lösen der jeweiligen
+  // Aufgabe, direkt nachdem das Aufgabenfenster geschlossen wurde. Der Text
+  // wird HIER (synchron, solange activeTask noch existiert) ausgelesen und
+  // nicht erst im setTimeout-Callback — der läuft erst 300ms später, wenn
+  // activeTask unten schon auf null gesetzt wurde.
+  const storyBannerText = STORY_BANNERS[activeTask.id];
+  if(firstTime && storyBannerText){
+    setTimeout(()=>showStoryBanner(storyBannerText), 300);
+  }
 
   // Endanimation startet sobald Aufgabe 5 abgeschlossen wird — unabhängig
   // davon, ob die anderen Aufgaben vorher schon erledigt wurden oder nicht.
