@@ -1603,7 +1603,8 @@ function drawLaserBody(ctx2, x, y, ang){
 
 // Zeichnet den Ziel-Sensor als Kreis: grau/lila mit "◎"-Symbol wenn noch
 // nicht getroffen, grün leuchtend mit "✓" sobald "ok" (Treffer) true ist.
-function drawSensor(ctx2, sensor, ok){
+// showLabel: wenn true, wird zusätzlich klein "Sensor" darunter geschrieben.
+function drawSensor(ctx2, sensor, ok, showLabel){
   ctx2.save();
   ctx2.beginPath();
   ctx2.arc(sensor.x, sensor.y, sensor.r, 0, Math.PI*2);
@@ -1621,6 +1622,15 @@ function drawSensor(ctx2, sensor, ok){
   ctx2.textBaseline = "middle";
   ctx2.fillText(ok ? "✓" : "◎", sensor.x, sensor.y+1);
   ctx2.restore();
+  if(showLabel){
+    ctx2.save();
+    ctx2.fillStyle = "rgba(233,223,201,0.85)";
+    ctx2.font = "11px Georgia";
+    ctx2.textAlign = "center";
+    ctx2.textBaseline = "top";
+    ctx2.fillText("Sensor", sensor.x, sensor.y + sensor.r + 4);
+    ctx2.restore();
+  }
 }
 
 // Zeichnet einen Text-Hinweis (z.B. "Einfallswinkel α = 60°") links unten
@@ -1689,7 +1699,7 @@ function drawLaserStage1(){
 
   const ang = Math.atan2(M.y-LASER_GEO.Ly, M.x-LASER_GEO.Lx);
   drawLaserBody(ctx2, LASER_GEO.Lx, LASER_GEO.Ly, ang);
-  drawSensor(ctx2, sensor, hit);
+  drawSensor(ctx2, sensor, hit, true);
 
   // "Bestätigen" ist immer klickbar — beim Klick wird geprüft, ob der
   // Sensor GERADE JETZT getroffen wird (siehe modalContinue-Handler unten).
@@ -1745,7 +1755,7 @@ function drawLaserStage2(){
 
   const angBody = Math.atan2(M.y-laserStage1Ly, M.x-LASER_GEO.Lx);
   drawLaserBody(ctx2, LASER_GEO.Lx, laserStage1Ly, angBody);
-  drawSensor(ctx2, sensor, ok);
+  drawSensor(ctx2, sensor, ok, true);
 
   drawAngleLabel(ctx2, 14, 350, "Einfallswinkel α = " + Math.round(laserCorrectAngleDeg) + "°", true);
   drawAngleLabel(ctx2, 14, 375, "Reflexionswinkel α' = " + Math.round(laserAngle) + "°", ok);
@@ -2154,7 +2164,7 @@ function drawGridScene(){
 
   // Sensor
   const sPos = gridCellCenter(GRID_SENSOR.col, GRID_SENSOR.row);
-  drawSensor(ctx2, {x:sPos.x, y:sPos.y, r:18}, hit);
+  drawSensor(ctx2, {x:sPos.x, y:sPos.y, r:18}, hit, true);
 
   // "Weiter" nur klickbar, solange der Sensor GERADE JETZT getroffen wird.
   taskCompleted = hit;
