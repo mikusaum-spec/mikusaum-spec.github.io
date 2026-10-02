@@ -1,0 +1,1818 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Säure-Base-Training Q1 LK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Laborheft — schmale Ich-kann-Spalte links, Aufgabenkarte rechts; Universalindikator-Skala als einziges Farbelement */
+:root{
+  --bg:#EEF2F1; --surface:#FFFFFF; --ink:#18262A; --muted:#56676B; --line:#D3DCDB;
+  --accent:#1D6670; --accent-soft:#DCEBEC;
+  --oxy:#C9473B; --probe:#F3C9DE; --ok:#2B7A4B; --ok-soft:#E1F1E6; --bad:#B23A2E; --bad-soft:#F7E3E0;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "Consolas", monospace;
+  --ind:linear-gradient(90deg,#D3242B 0%,#EC6A23 18%,#F0B42A 34%,#E4DA3A 44%,#5DAE46 50%,#2E9387 62%,#2C6BB0 76%,#3C3F9A 88%,#5E2F86 100%);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111A1C; --surface:#182427; --ink:#E3ECEA; --muted:#9AAEB0; --line:#2C3C40;
+  --accent:#6CC0C8; --accent-soft:#1D3639; --oxy:#E2786C; --probe:#6B3A55; --ok:#6CC995; --ok-soft:#173226; --bad:#F08A7E; --bad-soft:#3A201D; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111A1C; --surface:#182427; --ink:#E3ECEA; --muted:#9AAEB0; --line:#2C3C40;
+  --accent:#6CC0C8; --accent-soft:#1D3639; --oxy:#E2786C; --probe:#6B3A55; --ok:#6CC995; --ok-soft:#173226; --bad:#F08A7E; --bad-soft:#3A201D; color-scheme:dark}
+
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:20px;padding-block:28px 72px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+sub,sup{font-size:.72em;line-height:0}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* Kopf */
+header{display:grid;gap:14px;margin-bottom:28px}
+header h1{font-size:clamp(2rem,5vw,3.1rem);font-weight:800;letter-spacing:-.01em}
+.scale{max-width:560px}
+.scale .bar{height:12px;border-radius:6px;background:var(--ind)}
+.scale .ticks{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:.72rem;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.back{background:none;border:0;padding:0;color:var(--accent);font-weight:700;justify-self:start}
+
+/* Startseite */
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.cat{display:grid;gap:8px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.cat h2{font-size:1.2rem;font-weight:600}
+.cat p{margin:0;color:var(--muted)}
+.cat .meta{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--f-mono);font-size:.78rem;color:var(--muted);margin-top:4px}
+.cat.ready{border-color:var(--accent)}
+.cat.ready:hover{background:var(--accent-soft)}
+.cat:disabled{cursor:default;opacity:.62}
+.pill{font-family:var(--f-mono);font-size:.72rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.pill.go{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.home-note{margin-top:22px;color:var(--muted);max-width:65ch}
+
+/* Kategorie */
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);grid-template-areas:"aside main";gap:24px;align-items:start}
+.layout main{grid-area:main;display:grid;gap:18px;min-width:0}
+.layout aside{grid-area:aside;display:grid;gap:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+@media (max-width:820px){.layout{grid-template-columns:1fr;grid-template-areas:"main" "aside"}.layout aside{position:static}}
+
+.info{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.info summary{padding:14px 18px;font-family:var(--f-display);font-weight:600;font-size:1.1rem;cursor:pointer}
+.info .body{padding:0 18px 18px;display:grid;gap:12px;max-width:72ch}
+.info p{margin:0}
+.formula{font-family:var(--f-mono);background:var(--accent-soft);border-radius:6px;padding:8px 12px;overflow-x:auto;white-space:nowrap}
+.rules{margin:0;padding-left:1.2em;display:grid;gap:4px}
+
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{display:grid;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:0}
+.tab .n{font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.tab .t{font-weight:700}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.tab[aria-selected="true"] .n{color:var(--surface);opacity:.85}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;display:grid;gap:16px}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.card-head h3{font-size:1.25rem;font-weight:600}
+.streak{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.stem{margin:0;font-size:1.08rem;max-width:65ch}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:11px 14px;min-width:0}
+.opt .key{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:.8rem;border:1px solid var(--line);background:var(--surface)}
+.opt .val{min-width:0;font-variant-numeric:tabular-nums}
+.opt:not(:disabled):hover{border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.correct{border-color:var(--ok);background:var(--ok-soft)}
+.opt.correct .key{background:var(--ok);color:var(--surface);border-color:var(--ok)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .key{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.opt.dim{opacity:.55}
+
+.fb{border-radius:8px;padding:14px 16px;display:grid;gap:8px;border-left:4px solid var(--ok);background:var(--ok-soft)}
+.fb.bad{border-left-color:var(--bad);background:var(--bad-soft)}
+.fb strong.v{font-family:var(--f-display);font-size:1.05rem}
+.fb p{margin:0}
+.sol{font-family:var(--f-mono);font-size:.92rem;line-height:1.7;overflow-x:auto}
+.mini{position:relative;height:10px;border-radius:5px;background:var(--ind);margin:14px 0 4px;max-width:420px}
+.mini .mk{position:absolute;top:-6px;width:3px;height:22px;background:var(--ink);border-radius:2px;transform:translateX(-50%)}
+.mini .lb{position:absolute;top:-24px;transform:translateX(-50%);font-family:var(--f-mono);font-size:.72rem;white-space:nowrap}
+
+.qbar{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:1.5px solid var(--accent);background:transparent;color:var(--accent);border-radius:8px;padding:9px 16px;font-weight:700}
+.btn.primary{background:var(--accent);color:var(--surface)}
+.hint{background:var(--accent-soft);border-radius:8px;padding:12px 14px;font-size:.95rem}
+.hint .formula{background:var(--surface);margin-top:6px}
+
+/* Ich-kann-Spalte */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:14px}
+.panel h3{font-size:1.05rem;font-weight:600}
+.item{display:grid;gap:6px;padding-top:12px;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0;padding-top:0}
+.item .txt{font-size:.92rem}
+.item .txt b{font-family:var(--f-mono);font-weight:500;color:var(--muted);margin-right:4px}
+.prog{display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.prog .track{flex:1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog .fill{height:100%;background:var(--accent)}
+.self{display:flex;gap:4px;flex-wrap:wrap}
+.self button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:2px 9px;font-size:.76rem;color:var(--muted)}
+.self button[aria-pressed="true"].s-up{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.self button[aria-pressed="true"].s-mid{background:#C48A12;border-color:#C48A12;color:#fff}
+.self button[aria-pressed="true"].s-down{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.where{font-size:.85rem;color:var(--muted);margin:0}
+.big{display:inline-block;margin-top:8px;font-size:1.6rem;font-family:var(--f-mono)}
+.opts.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opts.grid2 .opt{align-items:flex-start}
+.beaker{width:100%;max-width:220px;height:auto;display:block}
+.pc-box{fill:var(--surface);stroke:var(--line)}
+.pc-a{fill:var(--muted)}
+.pc-h{fill:var(--surface);stroke:var(--ink);stroke-width:1}
+.pc-o{fill:var(--oxy)}
+.pc-q{fill:var(--ink);font:700 10px var(--f-mono);text-anchor:middle}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:.9rem;margin-bottom:10px}
+.legend>span{display:inline-flex;align-items:center;gap:4px}
+.legend .lnote{color:var(--muted);font-size:.82rem}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 4px}
+.frac>span:first-child{border-bottom:1px solid currentColor;padding:0 4px 2px}
+.frac>span:last-child{padding:2px 4px 0}
+.figwrap{display:block;margin-bottom:10px}
+.tfig{width:100%;max-width:240px;height:auto;display:block}
+.tf-metal{fill:var(--muted)}
+.tf-clamp{fill:none;stroke:var(--muted);stroke-width:2}
+.tf-glass{fill:none;stroke:var(--ink);stroke-width:1.4;stroke-linejoin:round}
+.tf-mass{fill:var(--accent-soft)}
+.tf-probe{fill:var(--probe)}
+.tf-line{stroke:var(--ink);stroke-width:.8}
+.tf-tap{fill:var(--ink)}
+.tf-stir{fill:var(--line);stroke:var(--ink);stroke-width:1}
+.tf-knob{fill:var(--ink)}
+.tf-bar{fill:var(--ink)}
+.tf-lead{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 2}
+.tf-num{fill:var(--accent)}
+.tf-numt{fill:var(--surface);font:700 11px var(--f-mono);text-anchor:middle}
+.tablewrap{overflow-x:auto}
+table.ind{border-collapse:collapse;font-size:.9rem;font-variant-numeric:tabular-nums}
+table.ind th,table.ind td{text-align:left;padding:5px 12px 5px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+table.ind th{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.chartwrap{display:block;margin-bottom:10px;max-width:520px}
+.chart{width:100%;height:auto;display:block}
+.chcap{display:block;font-size:.8rem;color:var(--muted);margin-top:2px}
+.ch-grid{stroke:var(--line);stroke-width:.8}
+.ch-grid2{stroke:var(--line);stroke-width:.5;stroke-dasharray:2 3}
+.ch-axis{stroke:var(--muted);stroke-width:1}
+.ch-tick{fill:var(--muted);font:10px var(--f-mono)}
+.ch-title{fill:var(--muted);font:10.5px var(--f-body)}
+.ch-line{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linejoin:round}
+.ch-line.alt{stroke:var(--oxy);stroke-dasharray:6 3}
+.ch-lab{fill:var(--accent);font:700 11px var(--f-body)}
+.ch-lab.alt{fill:var(--oxy)}
+.ch-mk{fill:var(--surface);stroke:var(--ink);stroke-width:1.6}
+.ch-mkt{fill:var(--ink);font:700 12px var(--f-mono)}
+.tf-cable{fill:none;stroke:var(--ink);stroke-width:1.4}
+.tf-elec{fill:var(--line);stroke:var(--ink);stroke-width:1.2}
+.tf-meter{fill:var(--line);stroke:var(--ink);stroke-width:1.2}
+.tf-disp{fill:var(--surface);stroke:var(--ink);stroke-width:.8}
+.tf-dispt{fill:var(--ink);font:600 10px var(--f-mono);text-anchor:middle}
+.reset{background:none;border:0;padding:0;color:var(--muted);font-size:.82rem;text-decoration:underline;justify-self:start}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <button class="back" id="back" hidden>← Alle Kategorien</button>
+    <span class="eyebrow">Chemie Q1 LK · Vorbereitung 1. Klausur</span>
+    <h1 id="h1">Säuren und Basen</h1>
+    <div class="scale" aria-hidden="true">
+      <div class="bar"></div>
+      <div class="ticks"><span>0</span><span>2</span><span>4</span><span>6</span><span>7</span><span>8</span><span>10</span><span>12</span><span>14</span></div>
+    </div>
+  </header>
+  <div id="view"></div>
+</div>
+
+<script>
+/* ---------- Speicher ---------- */
+const STORE = 'sb-q1-lk-v1';
+let state = { stats:{}, self:{} };
+try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.stats) state = s; } catch(e) {}
+function save(){ try { localStorage.setItem(STORE, JSON.stringify(state)); } catch(e) {} }
+
+/* ---------- Hilfsfunktionen ---------- */
+const $ = s => document.querySelector(s);
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const lg = Math.log10;
+const num = (x,d=2) => x.toFixed(d).replace('.',',').replace('-','−');
+const dec = x => String(x).replace('.',',');
+function pot(x){ // a,b · 10^n
+  let n = Math.floor(lg(x)); let m = x/Math.pow(10,n);
+  m = Math.round(m*10)/10; if (m>=10){ m/=10; n++; }
+  if (n===0) return num(m,1);
+  if (n===1) return num(m*10,0);
+  return `${num(m,1)} · 10<sup>${String(n).replace('-','−')}</sup>`;
+}
+const conc = x => pot(x)+' mol/L';
+function pick(correct, distractors){
+  const seen = new Set([correct.html]); const out = [];
+  for (const d of shuffle(distractors.slice())){
+    if (seen.has(d.html)) continue; seen.add(d.html); out.push(d); if (out.length===3) break;
+  }
+  return shuffle([{...correct, correct:true}, ...out]);
+}
+const fromPool = pool => { const q = rnd(pool); return { stem:q.q, options:pick({html:q.c}, q.d), sol:q.sol }; };
+
+/* ---------- Daten ---------- */
+const CATS = [
+  {id:'konzepte', title:'Säure-Base-Konzepte', sub:'Arrhenius oder Brönsted, Säure, Base oder Ampholyt, Protolysegleichungen, Säure-Base-Paare', items:'1–9'},
+  {id:'staerke', title:'Starke und schwache Säuren', sub:'Protolysegleichgewicht, Kₛ und pKₛ, Säurestärke ordnen', items:'10–15'},
+  {id:'ph', title:'pH-Wert und Oxonium-Ionen', sub:'pH ↔ c(H₃O⁺), pH-Werte schwacher Säuren, Verdünnen', items:'16–20', ready:true},
+  {id:'titration', title:'Titration mit Indikator', sub:'Äquivalenzpunkt, Indikatorwahl, Konzentration bestimmen', items:'21–27'},
+  {id:'phmetrisch', title:'pH-metrische Titration', sub:'Titrationskurven lesen und deuten', items:'28–40'},
+  {id:'mix', title:'Klausurtraining', sub:'Gemischte Aufgaben mit Auswertung nach Ich-kann-Punkten', items:'alle'}
+];
+const ITEMS = {
+  16:'…erklären, was der pH-Wert einer Lösung angibt.',
+  17:'…pH-Werte starker Säuren ausgehend von ihrer Konzentration berechnen.',
+  18:'…ausgehend von einem gegebenen pH-Wert die Konzentration einer starken Säure berechnen.',
+  19:'…den pH-Wert schwacher Säuren berechnen.',
+  20:'…erklären, warum eine schwache Säure bei gleicher Ausgangskonzentration einen höheren pH-Wert besitzt als eine starke Säure.'
+};
+const WEAK = [
+  {n:'Essigsäure', f:'CH<sub>3</sub>COOH', pks:4.75},
+  {n:'Ameisensäure', f:'HCOOH', pks:3.75},
+  {n:'Benzoesäure', f:'C<sub>6</sub>H<sub>5</sub>COOH', pks:4.20},
+  {n:'Milchsäure', f:'CH<sub>3</sub>CH(OH)COOH', pks:3.86},
+  {n:'Propansäure', f:'C<sub>2</sub>H<sub>5</sub>COOH', pks:4.87},
+  {n:'Flusssäure', f:'HF', pks:3.17}
+];
+const H3O = 'c(H<sub>3</sub>O<sup>+</sup>)';
+
+/* ---------- Generatoren ---------- */
+function genC2pH(){
+  const acid = rnd(['Salzsäure','Salpetersäure']);
+  const m = rnd([1,1.5,2,2.5,3,4,5,6,7.5,8]); const n = rnd([-1,-2,-3,-4]);
+  const c = m*Math.pow(10,n); const pH = -lg(c);
+  return {
+    stem:`Berechne den pH-Wert einer ${acid} mit c(Säure) = ${conc(c)}.`,
+    options: pick({html:'pH = '+num(pH)}, [
+      {html:'pH = '+num(lg(c)), why:'Das Minuszeichen fehlt: pH = <b>−</b>lg '+H3O+'.'},
+      {html:'pH = '+num(14-pH), why:'Das wäre richtig, wenn die Konzentration c(OH<sup>−</sup>) wäre. Hier ist es aber eine Säure, also '+H3O+'.'},
+      {html:'pH = '+num(-Math.log(c)), why:'Hier wurde ln statt lg verwendet. Der pH-Wert ist über den dekadischen Logarithmus definiert.'},
+      {html:'pH = '+num(-n), why:'Hier wurde nur der Exponent abgelesen und der Vorfaktor ignoriert.'}
+    ]),
+    sol:`Starke Säure → vollständige Protolyse: ${H3O} = c₀ = ${conc(c)}<br>pH = −lg(${pot(c)}) = <b>${num(pH)}</b>`,
+    ph:pH
+  };
+}
+function genPH2C(){
+  const pH = Math.round((0.5+Math.random()*4.5)*10)/10; const c = Math.pow(10,-pH);
+  return {
+    stem:`Eine Salzsäure hat den pH-Wert ${num(pH,1)}. Berechne die Konzentration der Salzsäure.`,
+    options: pick({html:'c(HCl) = '+conc(c)}, [
+      {html:'c(HCl) = '+conc(Math.pow(10,pH)), why:'Das Vorzeichen im Exponenten fehlt: c = 10<sup>−pH</sup>.'},
+      {html:'c(HCl) = '+conc(Math.pow(10,-(14-pH))), why:'Das ist c(OH<sup>−</sup>) der Lösung, nicht '+H3O+'.'},
+      {html:'c(HCl) = '+conc(Math.exp(-pH)), why:'Hier wurde e<sup>−pH</sup> gerechnet, also ln mit lg verwechselt.'},
+      {html:'c(HCl) = '+conc(1/pH), why:'Hier wurde der Kehrwert des pH-Werts gebildet. Richtig ist die Zehnerpotenz 10<sup>−pH</sup>.'}
+    ]),
+    sol:`${H3O} = 10<sup>−pH</sup> mol/L = 10<sup>−${num(pH,1)}</sup> mol/L = ${conc(c)}<br>Starke Säure, vollständig protolysiert → <b>c(HCl) = ${conc(c)}</b>`,
+    ph:pH
+  };
+}
+function genWeak(){
+  const a = rnd(WEAK); const c0 = rnd([0.5,0.1,0.05,0.01]);
+  const pH = 0.5*(a.pks - lg(c0));
+  return {
+    stem:`Berechne den pH-Wert einer ${a.n}-Lösung (${a.f}) mit c₀ = ${dec(c0)} mol/L. pKₛ = ${num(a.pks)}`,
+    options: pick({html:'pH = '+num(pH)}, [
+      {html:'pH = '+num(a.pks-lg(c0)), why:'Der Faktor ½ fehlt: pH = <b>½</b> · (pKₛ − lg c₀).'},
+      {html:'pH = '+num(-lg(c0)), why:'Die Säure wurde wie eine starke Säure behandelt. Schwache Säuren protolysieren nur zu einem kleinen Teil, daher ist '+H3O+' viel kleiner als c₀.'},
+      {html:'pH = '+num(0.5*(a.pks+lg(c0))), why:'Vorzeichenfehler: Es heißt pKₛ <b>−</b> lg c₀.'},
+      {html:'pH = '+num(0.5*a.pks), why:'Die Konzentration wurde nicht berücksichtigt.'}
+    ]),
+    sol:`pH = ½ · (pKₛ − lg c₀)<br>pH = ½ · (${num(a.pks)} − (${num(lg(c0))})) = <b>${num(pH)}</b>`,
+    ph:pH
+  };
+}
+const CONCEPT = [
+  {q:'Was gibt der pH-Wert einer Lösung an?',
+   c:'den negativen dekadischen Logarithmus des Zahlenwerts der Oxonium-Ionen-Konzentration',
+   d:[{html:'die Konzentration der gelösten Säure in mol/L', why:'Der pH-Wert bezieht sich auf '+H3O+', nicht auf die Säurekonzentration. Bei schwachen Säuren unterscheiden sich beide deutlich.'},
+      {html:'die Stärke der gelösten Säure', why:'Die Säurestärke beschreibt der pKₛ-Wert. Der pH-Wert hängt zusätzlich von der Konzentration ab.'},
+      {html:'den natürlichen Logarithmus der Oxonium-Ionen-Konzentration', why:'Es ist der negative <b>dekadische</b> Logarithmus.'}],
+   sol:'pH = −lg '+H3O+' (mit '+H3O+' als Zahlenwert in mol/L)'},
+  {q:'Lösung A hat den pH-Wert 2, Lösung B den pH-Wert 5. Wie verhalten sich die Oxonium-Ionen-Konzentrationen?',
+   c:H3O+' ist in A 1000-mal so groß wie in B.',
+   d:[{html:H3O+' ist in A 3-mal so groß wie in B.', why:'Die pH-Skala ist logarithmisch: Eine pH-Stufe entspricht dem Faktor 10.'},
+      {html:H3O+' ist in B 1000-mal so groß wie in A.', why:'Je kleiner der pH-Wert, desto größer '+H3O+'.'},
+      {html:H3O+' ist in A 2,5-mal so groß wie in B.', why:'Ein Quotient von pH-Werten hat keine Bedeutung, da die Skala logarithmisch ist.'}],
+   sol:'ΔpH = 3 → Faktor 10³ = 1000. A ist saurer.'},
+  {q:'Die Oxonium-Ionen-Konzentration einer Lösung wird verdoppelt. Wie ändert sich der pH-Wert?',
+   c:'Er sinkt um etwa 0,3.',
+   d:[{html:'Er halbiert sich.', why:'Der pH-Wert ist ein Logarithmus: lg 2 ≈ 0,30. Er sinkt also nur um 0,3.'},
+      {html:'Er sinkt um 2.', why:'Um 1 sinkt er erst bei Verzehnfachung von '+H3O+'.'},
+      {html:'Er steigt um etwa 0,3.', why:'Mehr H<sub>3</sub>O<sup>+</sup> bedeutet saurer. Der pH-Wert sinkt.'}],
+   sol:'ΔpH = −lg 2 ≈ −0,30'},
+  {q:'Was gilt für eine neutrale wässrige Lösung bei 25 °C?',
+   c:H3O+' = c(OH<sup>−</sup>) = 10<sup>−7</sup> mol/L',
+   d:[{html:'Es liegen keine Oxonium-Ionen vor.', why:'Durch die Autoprotolyse des Wassers sind immer H<sub>3</sub>O<sup>+</sup> und OH<sup>−</sup> vorhanden.'},
+      {html:H3O+' = 7 mol/L', why:'pH 7 bedeutet '+H3O+' = 10<sup>−7</sup> mol/L.'},
+      {html:H3O+' = c(OH<sup>−</sup>) = 10<sup>−14</sup> mol/L', why:'10<sup>−14</sup> mol²/L² ist das Ionenprodukt K<sub>W</sub>, also das Produkt beider Konzentrationen.'}],
+   sol:'K<sub>W</sub> = '+H3O+' · c(OH<sup>−</sup>) = 10<sup>−14</sup> mol²/L² → beide 10<sup>−7</sup> mol/L'},
+  {q:'Eine Salzsäure mit pH 5 wird 1 : 1000 mit Wasser verdünnt. Welcher pH-Wert stellt sich ungefähr ein?',
+   c:'knapp unter 7',
+   d:[{html:'8', why:'Durch Verdünnen einer Säure entsteht keine basische Lösung. Bei sehr kleinem c(Säure) bestimmt die Autoprotolyse des Wassers den pH-Wert.'},
+      {html:'5', why:'Verdünnen verringert '+H3O+'. Der pH-Wert steigt.'},
+      {html:'2', why:'Verdünnen macht die Lösung weniger sauer, der pH-Wert steigt.'}],
+   sol:'c(HCl) = 10<sup>−8</sup> mol/L ist kleiner als die 10<sup>−7</sup> mol/L aus der Autoprotolyse. Die Lösung bleibt schwach sauer, pH ≈ 6,98.'}
+];
+function genDilute(){
+  const p = Math.round((1+Math.random()*2.5)*10)/10; const f = rnd([10,100]); const r = p+lg(f);
+  return {
+    stem:`Eine Salzsäure hat den pH-Wert ${num(p,1)}. Du verdünnst 10 mL davon mit Wasser auf ${10*f} mL. Welchen pH-Wert hat die verdünnte Lösung?`,
+    options: pick({html:'pH = '+num(r,1)}, [
+      {html:'pH = '+num(p-lg(f),1), why:'Verdünnen verringert '+H3O+'. Der pH-Wert steigt, er sinkt nicht.'},
+      {html:'pH = '+num(p,1), why:'Die Stoffmenge an H<sub>3</sub>O<sup>+</sup> bleibt gleich, aber das Volumen wird größer. Die Konzentration sinkt.'},
+      {html:'pH = '+num(p+(f===10?2:1),1), why:'Ein Verdünnungsfaktor 10 entspricht genau einer pH-Stufe.'}
+    ]),
+    sol:`Verdünnung um den Faktor ${f} → ${H3O} wird ${f}-mal kleiner → pH steigt um lg ${f} = ${lg(f)}<br>pH = ${num(p,1)} + ${lg(f)} = <b>${num(r,1)}</b>`,
+    ph:r
+  };
+}
+const COMPARE = [
+  {q:'Salzsäure und Essigsäure haben beide c₀ = 0,1 mol/L. Welche Aussage ist richtig?',
+   c:'Die Essigsäure hat den höheren pH-Wert, weil sie nur zu einem kleinen Teil protolysiert.',
+   d:[{html:'Beide haben denselben pH-Wert, weil die Konzentrationen gleich sind.', why:'Gleiche Ausgangskonzentration bedeutet nicht gleiche '+H3O+'. Das Protolysegleichgewicht der Essigsäure liegt weit auf der Seite der Edukte.'},
+      {html:'Die Essigsäure hat den niedrigeren pH-Wert, weil sie mehr H-Atome enthält.', why:'Nur das H-Atom der Carboxygruppe wird abgegeben. Entscheidend ist die Lage des Gleichgewichts.'},
+      {html:'Die Essigsäure hat den höheren pH-Wert, weil ihre Lösung weniger konzentriert ist.', why:'Die Ausgangskonzentrationen sind gleich. Der Unterschied liegt im Anteil der protolysierten Moleküle.'}],
+   sol:'HCl: pH = −lg 0,1 = 1,00<br>CH<sub>3</sub>COOH: pH = ½ · (4,75 + 1) = 2,88'},
+  {q:'Eine Essigsäure wird auf das Zehnfache verdünnt. Um wie viel steigt ihr pH-Wert?',
+   c:'um 0,5',
+   d:[{html:'um 1', why:'Das gilt für starke Säuren. Bei schwachen Säuren geht lg c₀ nur zur Hälfte ein: pH = ½ · (pKₛ − lg c₀).'},
+      {html:'gar nicht', why:'Der pH-Wert hängt von c₀ ab. Er steigt beim Verdünnen, nur weniger stark als bei einer starken Säure.'},
+      {html:'um 0,1', why:'Aus der Formel folgt ΔpH = ½ · lg 10 = 0,5.'}],
+   sol:'ΔpH = ½ · lg 10 = 0,5'},
+  {q:'Warum hat eine schwache Säure einen höheren pH-Wert als eine starke Säure gleicher Ausgangskonzentration?',
+   c:'Ihr Protolysegleichgewicht liegt auf der Seite der Edukte, daher ist '+H3O+' viel kleiner als c₀.',
+   d:[{html:'Ihr pKₛ-Wert ist kleiner als der einer starken Säure.', why:'Umgekehrt: Schwache Säuren haben größere pKₛ-Werte.'},
+      {html:'Schwache Säuren reagieren nicht mit Wasser.', why:'Sie reagieren, aber nur unvollständig. Es stellt sich ein Gleichgewicht ein.'},
+      {html:'Bei starken Säuren ist '+H3O+' größer als c₀.', why:'Bei vollständiger Protolyse einer einprotonigen Säure gilt '+H3O+' = c₀, nicht mehr.'}],
+   sol:'Starke Säure: '+H3O+' = c₀. Schwache Säure: '+H3O+' = √(Kₛ · c₀) ≪ c₀'}
+];
+function genLowest(){
+  for (let t=0;t<40;t++){
+    const set = [];
+    const nStrong = rnd([1,2]);
+    for (let i=0;i<nStrong;i++){ const c = rnd([0.01,0.001,0.0001]); set.push({name:'Salzsäure', c, pH:-lg(c)}); }
+    while (set.length<4){ const a = rnd(WEAK); const c = rnd([1,0.5,0.1]); set.push({name:a.n, c, pH:0.5*(a.pks-lg(c)), pks:a.pks}); }
+    const keys = new Set(set.map(s=>s.name+s.c)); if (keys.size<4) continue;
+    const sorted = set.slice().sort((x,y)=>x.pH-y.pH);
+    if (sorted[1].pH-sorted[0].pH < 0.15) continue;
+    const lab = s => `${s.name}, c₀ = ${dec(s.c)} mol/L${s.pks?` (pKₛ = ${num(s.pks)})`:''}`;
+    const best = sorted[0];
+    const opts = shuffle(set.map(s => s===best ? {html:lab(s), correct:true} : {html:lab(s), why:`Diese Lösung hat pH = ${num(s.pH)} und ist damit nicht die sauerste.`}));
+    return {
+      stem:'Welche Lösung hat den niedrigsten pH-Wert?', options:opts,
+      sol: sorted.map(s=>`${s.name} (${dec(s.c)} mol/L): pH = ${num(s.pH)}`).join('<br>') + (best.pks?'<br>Die schwache Säure gewinnt hier, weil ihre Konzentration viel höher ist.':''),
+      ph:best.pH
+    };
+  }
+  return fromPool(COMPARE);
+}
+
+const EX = {
+  konzept:{item:16, title:'pH-Wert verstehen', gen:()=> Math.random()<0.5 ? fromPool(CONCEPT) : genDilute(),
+    hint:'pH = −lg '+H3O+'<div class="formula">Faktor 10 in '+H3O+' ↔ 1 pH-Stufe</div>'},
+  c2ph:{item:17, title:'c → pH', gen:genC2pH,
+    hint:'Starke Säuren protolysieren vollständig: '+H3O+' = c₀<div class="formula">pH = −lg c₀</div>'},
+  ph2c:{item:18, title:'pH → c', gen:genPH2C,
+    hint:'Umkehrung der pH-Definition:<div class="formula">'+H3O+' = 10<sup>−pH</sup> mol/L</div>'},
+  schwach:{item:19, title:'Schwache Säuren', gen:genWeak,
+    hint:'Formel aus der Formelsammlung:<div class="formula">pH = ½ · (pKₛ − lg c₀)</div>'},
+  vergleich:{item:20, title:'Stark vs. schwach', gen:()=> Math.random()<0.5 ? fromPool(COMPARE) : genLowest(),
+    hint:'Starke Säure: pH = −lg c₀<div class="formula">Schwache Säure: pH = ½ · (pKₛ − lg c₀)</div>'}
+};
+
+/* ========== Kategorie 1: Säure-Base-Konzepte ========== */
+const sH2O = 'H<sub>2</sub>O', sH3O = 'H<sub>3</sub>O<sup>+</sup>', sOH = 'OH<sup>−</sup>';
+const EQ = '&nbsp;⇌&nbsp;', TO = '&nbsp;→&nbsp;';
+const aq = x => x+'(aq)', lq = x => x+'(l)', src = x => x==='HCl' ? x+'(g)' : x+'(aq)';
+
+/* Aussagen: Arrhenius, Brönsted oder beide */
+const STATEMENTS = [
+  {s:'Eine Säure ist ein Stoff, der in wässriger Lösung H<sup>+</sup>-Ionen bildet.', a:'A', item:2,
+   e:'Das ist die Definition nach Arrhenius. Nach Brönsted ist eine Säure ein Teilchen, das ein Proton abgibt, unabhängig vom Lösungsmittel.'},
+  {s:'Eine Base ist ein Stoff, der in wässriger Lösung OH<sup>−</sup>-Ionen bildet.', a:'A', item:2,
+   e:'Das ist die Definition nach Arrhenius. Nach Brönsted ist eine Base ein Protonenakzeptor.'},
+  {s:'Eine Säure ist ein Teilchen, das Protonen abgibt.', a:'B', item:4,
+   e:'Das ist die Definition nach Brönsted: Säuren sind Protonendonatoren.'},
+  {s:'Eine Base ist ein Teilchen, das Protonen aufnimmt.', a:'B', item:4,
+   e:'Das ist die Definition nach Brönsted: Basen sind Protonenakzeptoren.'},
+  {s:'Ammoniak (NH<sub>3</sub>) ist eine Base.', a:'B', item:3,
+   e:'NH<sub>3</sub> enthält keine OH<sup>−</sup>-Ionen. Arrhenius kann seine basische Wirkung nicht erklären. Nach Brönsted nimmt NH<sub>3</sub> ein Proton von Wasser auf.'},
+  {s:'Säure-Base-Reaktionen laufen auch ohne Wasser ab, z. B. HCl(g) + NH<sub>3</sub>(g) → NH<sub>4</sub>Cl(s).', a:'B', item:3,
+   e:'Arrhenius bezieht sich auf wässrige Lösungen. Brönsted beschreibt jede Protonenübertragung, auch in der Gasphase.'},
+  {s:'Das Carbonat-Ion CO<sub>3</sub><sup>2−</sup> ist eine Base.', a:'B', item:3,
+   e:'Nur Brönsted ordnet einzelne Ionen als Base ein: CO<sub>3</sub><sup>2−</sup> nimmt ein Proton auf und wird zu HCO<sub>3</sub><sup>−</sup>.'},
+  {s:'Das Ammonium-Ion NH<sub>4</sub><sup>+</sup> ist eine Säure.', a:'B', item:4,
+   e:'NH<sub>4</sub><sup>+</sup> gibt ein Proton ab und wird zu NH<sub>3</sub>. Ionen als Säuren gibt es nur bei Brönsted.'},
+  {s:'Die Begriffe Säure und Base bezeichnen Stoffe, nicht einzelne Teilchen.', a:'A', item:2,
+   e:'Arrhenius ordnet Stoffe ein. Brönsted ordnet Teilchen nach ihrer Funktion in einer Reaktion ein.'},
+  {s:'Wasser kann je nach Reaktionspartner als Säure oder als Base reagieren.', a:'B', item:9,
+   e:'Ampholyte gibt es nur im Brönsted-Konzept, weil die Einordnung von der Reaktion abhängt.'},
+  {s:'Säure-Base-Reaktionen sind Protonenübertragungen.', a:'B', item:4,
+   e:'Das ist der Kern des Brönsted-Konzepts. Arrhenius beschreibt die Bildung von H<sup>+</sup>- und OH<sup>−</sup>-Ionen.'},
+  {s:'Bei der Neutralisation reagieren H<sup>+</sup>- und OH<sup>−</sup>-Ionen zu Wasser.', a:'A', item:2,
+   e:'Das ist die Arrhenius-Sicht. Nach Brönsted überträgt H<sub>3</sub>O<sup>+</sup> ein Proton auf OH<sup>−</sup>: H<sub>3</sub>O<sup>+</sup>(aq) + OH<sup>−</sup>(aq) → 2 H<sub>2</sub>O(l).'},
+  {s:'Salzsäure reagiert sauer, weil beim Lösen von Chlorwasserstoff in Wasser saure Teilchen entstehen.', a:'AB', item:4,
+   e:'Beide Konzepte erklären das: Nach Arrhenius entstehen H<sup>+</sup>-Ionen, nach Brönsted überträgt HCl ein Proton auf Wasser (→ H<sub>3</sub>O<sup>+</sup>).'},
+  {s:'Natronlauge reagiert alkalisch, weil sie Hydroxid-Ionen enthält.', a:'AB', item:2,
+   e:'Beide Konzepte erklären das: OH<sup>−</sup>-Ionen sind nach Arrhenius die basischen Teilchen und nach Brönsted Protonenakzeptoren.'}
+];
+const AB_LABEL = {A:'nur nach Arrhenius', B:'nur nach Brönsted', AB:'nach beiden Konzepten'};
+function genStatement(){
+  const st = rnd(STATEMENTS);
+  return {
+    stem:`Nach welchem Konzept ist diese Aussage richtig?<br><b>„${st.s}“</b>`,
+    options: Object.keys(AB_LABEL).map(k => k===st.a ? {html:AB_LABEL[k], correct:true} : {html:AB_LABEL[k], why:st.e}),
+    sol: st.e, item: st.item
+  };
+}
+
+/* Teilchen: Säure, Base, Ampholyt oder weder noch */
+const PARTICLES = [
+  {f:'HCl', t:'S', d:'Cl<sup>−</sup>'}, {f:'HNO<sub>3</sub>', t:'S', d:'NO<sub>3</sub><sup>−</sup>'},
+  {f:'NH<sub>4</sub><sup>+</sup>', t:'S', d:'NH<sub>3</sub>'}, {f:sH3O, t:'S', d:sH2O},
+  {f:'CH<sub>3</sub>COOH', t:'S', d:'CH<sub>3</sub>COO<sup>−</sup>'}, {f:'HCOOH', t:'S', d:'HCOO<sup>−</sup>'},
+  {f:'NH<sub>3</sub>', t:'B', p:'NH<sub>4</sub><sup>+</sup>'}, {f:'CO<sub>3</sub><sup>2−</sup>', t:'B', p:'HCO<sub>3</sub><sup>−</sup>'},
+  {f:'CH<sub>3</sub>COO<sup>−</sup>', t:'B', p:'CH<sub>3</sub>COOH'}, {f:'PO<sub>4</sub><sup>3−</sup>', t:'B', p:'HPO<sub>4</sub><sup>2−</sup>'},
+  {f:sOH, t:'B', p:sH2O}, {f:'S<sup>2−</sup>', t:'B', p:'HS<sup>−</sup>'},
+  {f:sH2O, t:'A', d:sOH, p:sH3O}, {f:'HCO<sub>3</sub><sup>−</sup>', t:'A', d:'CO<sub>3</sub><sup>2−</sup>', p:'H<sub>2</sub>CO<sub>3</sub>'},
+  {f:'HSO<sub>4</sub><sup>−</sup>', t:'A', d:'SO<sub>4</sub><sup>2−</sup>', p:'H<sub>2</sub>SO<sub>4</sub>'},
+  {f:'H<sub>2</sub>PO<sub>4</sub><sup>−</sup>', t:'A', d:'HPO<sub>4</sub><sup>2−</sup>', p:'H<sub>3</sub>PO<sub>4</sub>'},
+  {f:'HPO<sub>4</sub><sup>2−</sup>', t:'A', d:'PO<sub>4</sub><sup>3−</sup>', p:'H<sub>2</sub>PO<sub>4</sub><sup>−</sup>'},
+  {f:'HS<sup>−</sup>', t:'A', d:'S<sup>2−</sup>', p:'H<sub>2</sub>S'},
+  {f:'Na<sup>+</sup>', t:'N', r:'Es besitzt kein abgebbares Proton und kein freies Elektronenpaar, an das ein Proton binden könnte.'},
+  {f:'CH<sub>4</sub>', t:'N', r:'Die C–H-Bindungen sind kaum polar, und das Molekül hat kein freies Elektronenpaar.'}
+];
+const P_LABEL = {S:'Brönsted-Säure', B:'Brönsted-Base', A:'Ampholyt', N:'weder Säure noch Base'};
+function genParticle(){
+  const p = rnd(PARTICLES);
+  const e = p.t==='S' ? `${p.f} kann ein Proton abgeben (→ ${p.d}). In wässriger Lösung nimmt es kein Proton auf.`
+          : p.t==='B' ? `${p.f} kann ein Proton aufnehmen (→ ${p.p}). In wässriger Lösung gibt es kein Proton ab.`
+          : p.t==='A' ? `${p.f} kann ein Proton abgeben (→ ${p.d}) und ein Proton aufnehmen (→ ${p.p}).`
+          : `${p.f}: ${p.r}`;
+  return {
+    stem:`Wie lässt sich dieses Teilchen in wässriger Lösung nach Brönsted einordnen?<br><span class="big">${p.f}</span>`,
+    options: Object.keys(P_LABEL).map(k => k===p.t ? {html:P_LABEL[k], correct:true} : {html:P_LABEL[k], why:e}),
+    sol: e, item: p.t==='A' ? 9 : 5
+  };
+}
+
+/* Protolysegleichungen mit Wasser */
+const ACID_RX = [
+  {a:'HCl', b:'Cl<sup>−</sup>', bw:'Cl'},
+  {a:'HNO<sub>3</sub>', b:'NO<sub>3</sub><sup>−</sup>', bw:'NO<sub>3</sub>'},
+  {a:'CH<sub>3</sub>COOH', b:'CH<sub>3</sub>COO<sup>−</sup>', bw:'CH<sub>3</sub>COO'},
+  {a:'HCOOH', b:'HCOO<sup>−</sup>', bw:'HCOO'},
+  {a:'NH<sub>4</sub><sup>+</sup>', b:'NH<sub>3</sub>', bw:'NH<sub>3</sub><sup>−</sup>'},
+  {a:'H<sub>2</sub>SO<sub>4</sub>', b:'HSO<sub>4</sub><sup>−</sup>', bw:'HSO<sub>4</sub><sup>2−</sup>', st:'1. Protolysestufe',
+   all:aq('H<sub>2</sub>SO<sub>4</sub>')+' + 2 '+lq(sH2O)+EQ+'2 '+aq(sH3O)+' + '+aq('SO<sub>4</sub><sup>2−</sup>')},
+  {a:'HSO<sub>4</sub><sup>−</sup>', b:'SO<sub>4</sub><sup>2−</sup>', bw:'SO<sub>4</sub><sup>−</sup>', st:'2. Protolysestufe der Schwefelsäure'},
+  {a:'H<sub>3</sub>PO<sub>4</sub>', b:'H<sub>2</sub>PO<sub>4</sub><sup>−</sup>', bw:'H<sub>2</sub>PO<sub>4</sub><sup>2−</sup>', st:'1. Protolysestufe',
+   all:aq('H<sub>3</sub>PO<sub>4</sub>')+' + 3 '+lq(sH2O)+EQ+'3 '+aq(sH3O)+' + '+aq('PO<sub>4</sub><sup>3−</sup>')},
+  {a:'H<sub>2</sub>PO<sub>4</sub><sup>−</sup>', b:'HPO<sub>4</sub><sup>2−</sup>', bw:'HPO<sub>4</sub><sup>−</sup>', st:'2. Protolysestufe der Phosphorsäure',
+   all:aq('H<sub>2</sub>PO<sub>4</sub><sup>−</sup>')+' + 2 '+lq(sH2O)+EQ+'2 '+aq(sH3O)+' + '+aq('PO<sub>4</sub><sup>3−</sup>')},
+  {a:'HPO<sub>4</sub><sup>2−</sup>', b:'PO<sub>4</sub><sup>3−</sup>', bw:'PO<sub>4</sub><sup>2−</sup>', st:'3. Protolysestufe der Phosphorsäure'},
+  {a:'H<sub>2</sub>CO<sub>3</sub>', b:'HCO<sub>3</sub><sup>−</sup>', bw:'HCO<sub>3</sub><sup>2−</sup>', st:'1. Protolysestufe',
+   all:aq('H<sub>2</sub>CO<sub>3</sub>')+' + 2 '+lq(sH2O)+EQ+'2 '+aq(sH3O)+' + '+aq('CO<sub>3</sub><sup>2−</sup>')},
+  {a:'HCO<sub>3</sub><sup>−</sup>', b:'CO<sub>3</sub><sup>2−</sup>', bw:'CO<sub>3</sub><sup>−</sup>', st:'2. Protolysestufe der Kohlensäure'}
+];
+const BASE_RX = [
+  {b:'NH<sub>3</sub>', hb:'NH<sub>4</sub><sup>+</sup>', hbw:'NH<sub>4</sub>'},
+  {b:'CO<sub>3</sub><sup>2−</sup>', hb:'HCO<sub>3</sub><sup>−</sup>', hbw:'HCO<sub>3</sub><sup>2−</sup>'},
+  {b:'CH<sub>3</sub>COO<sup>−</sup>', hb:'CH<sub>3</sub>COOH', hbw:'CH<sub>3</sub>COOH<sup>−</sup>'},
+  {b:'PO<sub>4</sub><sup>3−</sup>', hb:'HPO<sub>4</sub><sup>2−</sup>', hbw:'HPO<sub>4</sub><sup>3−</sup>'},
+  {b:'HCO<sub>3</sub><sup>−</sup>', hb:'H<sub>2</sub>CO<sub>3</sub>', hbw:'H<sub>2</sub>CO<sub>3</sub><sup>−</sup>'},
+  {b:'HPO<sub>4</sub><sup>2−</sup>', hb:'H<sub>2</sub>PO<sub>4</sub><sup>−</sup>', hbw:'H<sub>2</sub>PO<sub>4</sub><sup>2−</sup>'},
+  {b:'S<sup>2−</sup>', hb:'HS<sup>−</sup>', hbw:'HS<sup>2−</sup>'}
+];
+function genEquation(){
+  if (Math.random() < 0.6){
+    const r = rnd(ACID_RX);
+    const ok = `${src(r.a)} + ${lq(sH2O)}${EQ}${aq(sH3O)} + ${aq(r.b)}`;
+    const d = [
+      {html:`${src(r.a)}${TO}${aq('H<sup>+</sup>')} + ${aq(r.b)}`, why:'Das ist die Schreibweise nach Arrhenius. Nach Brönsted wird das Proton auf ein Wassermolekül übertragen, es entsteht H<sub>3</sub>O<sup>+</sup>.'},
+      {html:`${src(r.a)} + ${lq(sH2O)}${EQ}${aq(sOH)} + ${aq(r.b)}`, why:'Wasser nimmt hier als Base ein Proton auf und wird zu H<sub>3</sub>O<sup>+</sup>, nicht zu OH<sup>−</sup>. Stoff- und Ladungsbilanz stimmen so nicht.'},
+      {html:`${src(r.a)} + ${lq(sH2O)}${EQ}${aq(sH3O)} + ${aq(r.bw)}`, why:'Ladungsfehler: Gibt ein Teilchen ein Proton (H<sup>+</sup>) ab, sinkt seine Ladung um eins.'}
+    ];
+    if (r.all) d.push({html:r.all, why:'Mehrprotonige Säuren protolysieren stufenweise. Gefragt ist ein einzelner Protolyseschritt.'});
+    return {
+      stem:`Welche Gleichung beschreibt die Reaktion von ${r.a} als Säure mit Wasser${r.st?` (${r.st})`:''} richtig?`,
+      options: pick({html:ok}, d),
+      sol:`${r.a} gibt ein Proton an ${sH2O} ab:<br>${ok}`
+    };
+  }
+  const r = rnd(BASE_RX);
+  const ok = `${aq(r.b)} + ${lq(sH2O)}${EQ}${aq(r.hb)} + ${aq(sOH)}`;
+  return {
+    stem:`Welche Gleichung beschreibt die Reaktion von ${r.b} als Base mit Wasser richtig?`,
+    options: pick({html:ok}, [
+      {html:`${aq(r.b)} + ${lq(sH2O)}${EQ}${aq(r.hb)} + ${aq(sH3O)}`, why:'Wasser gibt hier als Säure ein Proton ab und wird dadurch zu OH<sup>−</sup>, nicht zu H<sub>3</sub>O<sup>+</sup>.'},
+      {html:`${aq(r.b)} + ${lq(sH2O)}${EQ}${aq(r.hbw)} + ${aq(sOH)}`, why:'Ladungsfehler: Nimmt ein Teilchen ein Proton (H<sup>+</sup>) auf, steigt seine Ladung um eins.'},
+      {html:`${aq(r.b)} + ${aq('H<sup>+</sup>')}${TO}${aq(r.hb)}`, why:'In wässriger Lösung gibt es keine freien Protonen. Gefragt ist die Reaktion mit Wasser als Protonendonator.'}
+    ]),
+    sol:`${r.b} nimmt ein Proton von ${sH2O} auf:<br>${ok}`
+  };
+}
+
+/* Korrespondierende Säure-Base-Paare: S1 + B2 ⇌ S2 + B1 */
+function allReactions(){
+  const L = [];
+  ACID_RX.forEach(r => L.push({eq:`${src(r.a)} + ${lq(sH2O)}${EQ}${aq(sH3O)} + ${aq(r.b)}`, S1:r.a, B2:sH2O, S2:sH3O, B1:r.b}));
+  BASE_RX.forEach(r => L.push({eq:`${aq(r.b)} + ${lq(sH2O)}${EQ}${aq(r.hb)} + ${aq(sOH)}`, S1:sH2O, B2:r.b, S2:r.hb, B1:sOH}));
+  L.push({eq:`HCl(aq) + NH<sub>3</sub>(aq)${TO}NH<sub>4</sub><sup>+</sup>(aq) + Cl<sup>−</sup>(aq)`, S1:'HCl', B2:'NH<sub>3</sub>', S2:'NH<sub>4</sub><sup>+</sup>', B1:'Cl<sup>−</sup>'});
+  L.push({eq:`CH<sub>3</sub>COOH(aq) + ${aq(sOH)}${TO}CH<sub>3</sub>COO<sup>−</sup>(aq) + ${lq(sH2O)}`, S1:'CH<sub>3</sub>COOH', B2:sOH, S2:sH2O, B1:'CH<sub>3</sub>COO<sup>−</sup>'});
+  L.push({eq:`${aq(sH3O)} + ${aq(sOH)}${TO}${lq(sH2O)} + ${lq(sH2O)}`, S1:sH3O, B2:sOH, S2:sH2O, B1:sH2O});
+  L.push({eq:`NH<sub>4</sub><sup>+</sup>(aq) + ${aq(sOH)}${EQ}NH<sub>3</sub>(aq) + ${lq(sH2O)}`, S1:'NH<sub>4</sub><sup>+</sup>', B2:sOH, S2:sH2O, B1:'NH<sub>3</sub>'});
+  L.push({eq:`HCO<sub>3</sub><sup>−</sup>(aq) + ${aq(sH3O)}${EQ}H<sub>2</sub>CO<sub>3</sub>(aq) + ${lq(sH2O)}`, S1:sH3O, B2:'HCO<sub>3</sub><sup>−</sup>', S2:'H<sub>2</sub>CO<sub>3</sub>', B1:sH2O});
+  return L;
+}
+const REACTIONS = allReactions();
+function genPair(){
+  const r = rnd(REACTIONS);
+  const first = Math.random() < 0.5;
+  const tS = first ? r.S1 : r.S2, tB = first ? r.B1 : r.B2;
+  const pr = (x,y) => `${x} / ${y}`;
+  return {
+    stem:`${r.eq}<br>Welches Teilchenpaar ist ein korrespondierendes Säure-Base-Paar dieser Reaktion? (Schreibweise: Säure / Base)`,
+    options: pick({html:pr(tS,tB)}, [
+      {html:pr(r.S1,r.B2), why:'Das sind die beiden Reaktionspartner: Säure und Base, die miteinander reagieren. Ein korrespondierendes Paar unterscheidet sich dagegen um genau ein Proton.'},
+      {html:pr(r.S1,r.S2), why:'Beide Teilchen reagieren hier als Säure. Ein Paar besteht aus einer Säure und der Base, die nach Abgabe des Protons entsteht.'},
+      {html:pr(r.B2,r.B1), why:'Beide Teilchen reagieren hier als Base. Ein Paar besteht aus einer Säure und der Base, die nach Abgabe des Protons entsteht.'},
+      {html:pr(tB,tS), why:'Säure und Base sind vertauscht. Die Säure ist das Teilchen mit dem zusätzlichen Proton.'}
+    ]),
+    sol:`Paar 1: ${pr(r.S1,r.B1)}<br>Paar 2: ${pr(r.S2,r.B2)}<br>Die Teilchen eines Paares unterscheiden sich jeweils um genau ein Proton (H<sup>+</sup>).`,
+    item: 7
+  };
+}
+
+/* Konzepte und Grenzen */
+const KONZEPTE = [
+  {item:1, q:'Welche Eigenschaft ist typisch für saure Lösungen?',
+   c:'Sie färben Universalindikator rot und reagieren mit Magnesium unter Bildung von Wasserstoff.',
+   d:[{html:'Sie fühlen sich seifig an.', why:'Das ist typisch für alkalische Lösungen: Basen greifen die Fette der Haut an.'},
+      {html:'Sie färben Phenolphthalein pinkviolett.', why:'Phenolphthalein färbt sich nur in alkalischer Lösung pinkviolett. In saurer Lösung bleibt es farblos.'},
+      {html:'Sie leiten den elektrischen Strom nicht, weil sie keine Ionen enthalten.', why:'Saure Lösungen enthalten Ionen (H<sub>3</sub>O<sup>+</sup> und Säurerest-Ionen) und leiten daher den Strom.'}],
+   sol:'Saure Lösungen: Universalindikator rot, pH < 7, elektrisch leitfähig, Reaktion mit unedlen Metallen zu Wasserstoff.'},
+  {item:1, q:'Welche Eigenschaft ist typisch für alkalische Lösungen?',
+   c:'Sie färben Phenolphthalein pinkviolett und leiten den elektrischen Strom.',
+   d:[{html:'Sie färben Universalindikator rot.', why:'Rot zeigt eine saure Lösung an. Alkalische Lösungen färben Universalindikator blau bis violett.'},
+      {html:'Sie haben einen pH-Wert unter 7.', why:'Alkalische Lösungen haben bei 25 °C einen pH-Wert über 7.'},
+      {html:'Sie enthalten mehr Oxonium-Ionen als Hydroxid-Ionen.', why:'Umgekehrt: In alkalischen Lösungen gilt c(OH<sup>−</sup>) > c(H<sub>3</sub>O<sup>+</sup>).'}],
+   sol:'Alkalische Lösungen: Universalindikator blau, Phenolphthalein pinkviolett, pH > 7, elektrisch leitfähig, seifiges Gefühl auf der Haut.'},
+  {item:3, q:'Beim Ammoniak-Springbrunnen färbt sich das Wasser mit Phenolphthalein pinkviolett, obwohl NH<sub>3</sub> keine Hydroxid-Ionen enthält. Was folgt daraus?',
+   c:'Arrhenius kann die basische Wirkung von NH<sub>3</sub> nicht erklären. Nach Brönsted nimmt NH<sub>3</sub> ein Proton von Wasser auf, dabei entstehen OH<sup>−</sup>-Ionen.',
+   d:[{html:'NH<sub>3</sub> ist nach Arrhenius eine Säure, weil es H-Atome enthält.', why:'Nach Arrhenius ist eine Säure ein Stoff, der in Wasser H<sup>+</sup> bildet. Das tut NH<sub>3</sub> nicht.'},
+      {html:'Ammoniak reagiert nicht mit Wasser. Die Färbung entsteht durch das Gas selbst.', why:'NH<sub>3</sub> reagiert mit Wasser: NH<sub>3</sub>(g) + H<sub>2</sub>O(l) ⇌ NH<sub>4</sub><sup>+</sup>(aq) + OH<sup>−</sup>(aq). Die OH<sup>−</sup>-Ionen färben den Indikator.'},
+      {html:'NH<sub>3</sub> enthält Hydroxid-Ionen, die beim Lösen frei werden.', why:'NH<sub>3</sub> besteht aus Molekülen ohne O-Atom. Die OH<sup>−</sup>-Ionen stammen aus den Wassermolekülen.'}],
+   sol:'NH<sub>3</sub>(g) + H<sub>2</sub>O(l) ⇌ NH<sub>4</sub><sup>+</sup>(aq) + OH<sup>−</sup>(aq)<br>Grenze des Arrhenius-Konzepts: Basen ohne OH-Gruppe sind nicht erklärbar.'},
+  {item:3, q:'Chlorwasserstoff und Ammoniak reagieren in der Gasphase zu Ammoniumchlorid: HCl(g) + NH<sub>3</sub>(g) → NH<sub>4</sub>Cl(s). Warum lässt sich das nach Arrhenius nicht als Säure-Base-Reaktion beschreiben?',
+   c:'Die Reaktion findet ohne Wasser statt. Arrhenius ist auf wässrige Lösungen beschränkt, obwohl auch hier ein Proton übertragen wird.',
+   d:[{html:'Weil dabei kein Salz entsteht.', why:'Ammoniumchlorid ist ein Salz. Das Problem ist das fehlende Wasser.'},
+      {html:'Weil HCl nach Arrhenius eine Base ist.', why:'HCl ist nach Arrhenius eine Säure, aber nur in wässriger Lösung.'},
+      {html:'Weil bei der Reaktion keine Protonen übertragen werden.', why:'Es wird ein Proton von HCl auf NH<sub>3</sub> übertragen. Genau das beschreibt Brönsted.'}],
+   sol:'HCl gibt ein Proton an NH<sub>3</sub> ab. Brönsted beschreibt das als Säure-Base-Reaktion, Arrhenius nicht, da kein Wasser beteiligt ist.'},
+  {item:5, q:'Was ist nach Brönsted eine Base?',
+   c:'ein Teilchen, das ein Proton aufnehmen kann (Protonenakzeptor)',
+   d:[{html:'ein Stoff, der in Wasser OH<sup>−</sup>-Ionen bildet', why:'Das ist die Definition nach Arrhenius.'},
+      {html:'ein Teilchen, das ein Proton abgibt', why:'Das ist eine Brönsted-Säure (Protonendonator).'},
+      {html:'ein Teilchen, das Elektronen abgibt', why:'Elektronenübertragungen sind Redoxreaktionen. Bei Säure-Base-Reaktionen werden Protonen übertragen.'}],
+   sol:'Säure = Protonendonator, Base = Protonenakzeptor.'},
+  {item:5, q:'Welche Voraussetzung muss ein Teilchen erfüllen, um als Brönsted-Base reagieren zu können?',
+   c:'Es besitzt ein freies Elektronenpaar, an das ein Proton gebunden werden kann.',
+   d:[{html:'Es enthält eine OH-Gruppe.', why:'NH<sub>3</sub> oder CO<sub>3</sub><sup>2−</sup> sind Basen ohne OH-Gruppe. Entscheidend ist ein freies Elektronenpaar.'},
+      {html:'Es ist negativ geladen.', why:'NH<sub>3</sub> ist ungeladen und trotzdem eine Base.'},
+      {html:'Es enthält ein H-Atom.', why:'Ein abgebbares H-Atom ist die Voraussetzung für eine Säure, nicht für eine Base.'}],
+   sol:'Das Proton bindet an ein freies Elektronenpaar der Base (z. B. am N-Atom von NH<sub>3</sub>).'},
+  {item:5, q:'Welche Voraussetzung muss ein Teilchen erfüllen, um als Brönsted-Säure reagieren zu können?',
+   c:'Es enthält ein polar gebundenes H-Atom, das als Proton abgegeben werden kann.',
+   d:[{html:'Es enthält irgendein H-Atom.', why:'Methan (CH<sub>4</sub>) enthält H-Atome, ist aber keine Säure: Die C–H-Bindung ist kaum polar.'},
+      {html:'Es ist positiv geladen.', why:'HCl oder CH<sub>3</sub>COOH sind ungeladen und trotzdem Säuren.'},
+      {html:'Es enthält Sauerstoff.', why:'HCl enthält keinen Sauerstoff und ist eine Säure.'}],
+   sol:'Die Säure gibt ein Proton aus einer polaren Bindung ab (z. B. H–Cl, O–H).'},
+  {item:8, q:'Warum beschreibt man Säure-Base-Reaktionen als Donator-Akzeptor-Reaktionen?',
+   c:'Ein Teilchen gibt ein Proton ab (Donator), ein anderes nimmt es gleichzeitig auf (Akzeptor).',
+   d:[{html:'Weil dabei Elektronen übertragen werden.', why:'Elektronenübertragungen sind Redoxreaktionen. Hier wird ein Proton übertragen.'},
+      {html:'Weil die Säure Protonen aufnimmt und die Base sie abgibt.', why:'Die Rollen sind vertauscht: Die Säure ist der Donator, die Base der Akzeptor.'},
+      {html:'Weil Säure und Base Hydroxid-Ionen austauschen.', why:'Übertragen wird ein Proton (H<sup>+</sup>), kein OH<sup>−</sup>-Ion.'}],
+   sol:'Protonenabgabe und -aufnahme sind gekoppelt: Ohne Akzeptor kann kein Donator reagieren.'},
+  {item:8, q:'Kann eine Brönsted-Säure ein Proton abgeben, wenn keine Base vorhanden ist?',
+   c:'Nein. Ein Proton wird nur übertragen, wenn ein Teilchen es aufnehmen kann.',
+   d:[{html:'Ja, das Proton liegt danach frei in der Lösung vor.', why:'Freie Protonen gibt es in Lösung nicht. In Wasser bindet das Proton sofort an ein H<sub>2</sub>O-Molekül.'},
+      {html:'Ja, aber nur bei starken Säuren.', why:'Auch starke Säuren brauchen einen Akzeptor. In Wasser übernimmt H<sub>2</sub>O diese Rolle.'},
+      {html:'Nein, weil Säuren nur mit Metallen reagieren.', why:'Säuren reagieren mit jedem geeigneten Protonenakzeptor, z. B. mit Wasser.'}],
+   sol:'Säure-Base-Reaktionen sind immer gekoppelt: Donator und Akzeptor reagieren gemeinsam.'},
+  {item:9, q:'Warum kann Wasser sowohl als Säure als auch als Base reagieren?',
+   c:'H<sub>2</sub>O kann ein Proton abgeben (→ OH<sup>−</sup>) und mit einem freien Elektronenpaar am O-Atom ein Proton aufnehmen (→ H<sub>3</sub>O<sup>+</sup>).',
+   d:[{html:'Weil Wasser neutral ist.', why:'Neutral beschreibt den pH-Wert. Die Ampholyt-Eigenschaft folgt aus dem Bau des Moleküls.'},
+      {html:'Weil Wasser aus H<sup>+</sup>- und OH<sup>−</sup>-Ionen besteht.', why:'Wasser besteht aus H<sub>2</sub>O-Molekülen. Ionen entstehen nur in sehr geringem Maß durch Autoprotolyse.'},
+      {html:'Weil Wasser zwei H-Atome hat und deshalb zwei Protonen gleichzeitig abgibt.', why:'Wasser gibt höchstens ein Proton ab. Als Base nimmt es eins auf.'}],
+   sol:'Als Säure: H<sub>2</sub>O(l) + NH<sub>3</sub>(g) ⇌ OH<sup>−</sup>(aq) + NH<sub>4</sub><sup>+</sup>(aq)<br>Als Base: H<sub>2</sub>O(l) + HCl(g) → H<sub>3</sub>O<sup>+</sup>(aq) + Cl<sup>−</sup>(aq)'},
+  {item:9, q:'Welche Rolle spielt Wasser in der Reaktion NH<sub>3</sub>(g) + H<sub>2</sub>O(l) ⇌ NH<sub>4</sub><sup>+</sup>(aq) + OH<sup>−</sup>(aq)?',
+   c:'Wasser reagiert als Säure, weil es ein Proton an NH<sub>3</sub> abgibt.',
+   d:[{html:'Wasser reagiert als Base, weil OH<sup>−</sup> entsteht.', why:'OH<sup>−</sup> entsteht, weil Wasser ein Proton abgibt. Wer ein Proton abgibt, ist die Säure.'},
+      {html:'Wasser ist nur Lösungsmittel und reagiert nicht.', why:'Wasser ist hier Reaktionspartner. Es liefert das Proton für NH<sub>4</sub><sup>+</sup>.'},
+      {html:'Wasser reagiert als Säure und Base zugleich.', why:'In einer einzelnen Reaktion hat jedes Teilchen eine Rolle. Hier gibt Wasser ein Proton ab.'}],
+   sol:'H<sub>2</sub>O gibt ein Proton ab → Säure. NH<sub>3</sub> nimmt es auf → Base.'}
+];
+function genKonzept(){ const q = rnd(KONZEPTE); return { stem:q.q, options:pick({html:q.c}, q.d), sol:q.sol, item:q.item }; }
+
+/* ========== Kategorie 2: Starke und schwache Säuren ========== */
+const KS_ACIDS = [
+  {n:'Salzsäure', f:'HCl', pks:-6},
+  {n:'Salpetersäure', f:'HNO<sub>3</sub>', pks:-1.32},
+  {n:'Hydrogensulfat-Ion', f:'HSO<sub>4</sub><sup>−</sup>', pks:1.92},
+  {n:'Phosphorsäure', f:'H<sub>3</sub>PO<sub>4</sub>', pks:2.13},
+  {n:'Flusssäure', f:'HF', pks:3.17},
+  {n:'Ameisensäure', f:'HCOOH', pks:3.75},
+  {n:'Benzoesäure', f:'C<sub>6</sub>H<sub>5</sub>COOH', pks:4.20},
+  {n:'Essigsäure', f:'CH<sub>3</sub>COOH', pks:4.75},
+  {n:'Kohlensäure', f:'H<sub>2</sub>CO<sub>3</sub>', pks:6.35},
+  {n:'Schwefelwasserstoff', f:'H<sub>2</sub>S', pks:7.06},
+  {n:'Ammonium-Ion', f:'NH<sub>4</sub><sup>+</sup>', pks:9.25},
+  {n:'Hydrogencarbonat-Ion', f:'HCO<sub>3</sub><sup>−</sup>', pks:10.33}
+];
+const acidLab = a => `${a.n} (${a.f})`;
+
+/* Teilchenbilder */
+const P = {
+  ha:(x,y)=>`<circle class="pc-a" cx="${x}" cy="${y}" r="7"/><circle class="pc-h" cx="${x+7.5}" cy="${y-5}" r="3.5"/>`,
+  a:(x,y)=>`<circle class="pc-a" cx="${x}" cy="${y}" r="7"/><text class="pc-q" x="${x+9}" y="${y-5}">−</text>`,
+  h3o:(x,y)=>{ let o=''; [-90,30,150].forEach(w=>{ const r=w*Math.PI/180; o+=`<circle class="pc-h" cx="${(x+8*Math.cos(r)).toFixed(1)}" cy="${(y+8*Math.sin(r)).toFixed(1)}" r="3.5"/>`; });
+    return o+`<circle class="pc-o" cx="${x}" cy="${y}" r="6"/><text class="pc-q" x="${x+11}" y="${y-6}">+</text>`; }
+};
+function beaker(ha, h, a){
+  const slots = shuffle([...Array(24).keys()]); let k = 0, out = '';
+  const pos = () => { const s = slots[k++]; return [18 + (s%6)*26, 18 + Math.floor(s/6)*24]; };
+  for (let i=0;i<ha;i++) out += P.ha(...pos());
+  for (let i=0;i<h;i++) out += P.h3o(...pos());
+  for (let i=0;i<a;i++) out += P.a(...pos());
+  return `<svg class="beaker" viewBox="0 0 166 104" role="img" aria-label="${ha} HA, ${h} H3O+, ${a} A-"><rect x="1" y="1" width="164" height="102" rx="6" class="pc-box"/>${out}</svg>`;
+}
+const LEGEND = `<span class="legend">
+  <span><svg viewBox="0 0 26 22" width="26" height="22">${P.ha(10,12)}</svg>HA</span>
+  <span><svg viewBox="0 0 28 24" width="28" height="24">${P.h3o(12,13)}</svg>H<sub>3</sub>O<sup>+</sup></span>
+  <span><svg viewBox="0 0 26 22" width="26" height="22">${P.a(10,12)}</svg>A<sup>−</sup></span>
+  <span class="ldot"><svg viewBox="0 0 10 10" width="10" height="10"><circle class="pc-h" cx="5" cy="5" r="3.5"/></svg>H</span>
+  <span class="ldot"><svg viewBox="0 0 14 14" width="14" height="14"><circle class="pc-o" cx="7" cy="7" r="6"/></svg>O</span>
+  <span class="lnote">Wassermoleküle sind nicht dargestellt.</span></span>`;
+function genBeaker(){
+  const N = rnd([5,6,7]); const weak = Math.random() < 0.6;
+  const W = {html:beaker(N-1,1,1)}, S = {html:beaker(0,N,N)};
+  const d = [
+    {html:beaker(N,0,0), why:'Hier hat keine Protolyse stattgefunden. Auch schwache Säuren geben einen kleinen Teil ihrer Protonen an Wasser ab.'},
+    {html:beaker(N-2,2,0), why:'Die Ladungsbilanz stimmt nicht: Zu jedem H<sub>3</sub>O<sup>+</sup>-Ion entsteht ein A<sup>−</sup>-Ion.'},
+  ];
+  if (weak){
+    const h = Math.floor(N/2);
+    d.push({html:S.html, why:'Hier ist jedes HA-Molekül protolysiert. Das zeigt eine starke Säure.'});
+    d.push({html:beaker(N-h,h,h), why:'Bei schwachen Säuren protolysiert nur ein kleiner Teil, nicht etwa die Hälfte. Gleichgewicht heißt nicht gleiche Mengen.'});
+  } else {
+    d.push({html:W.html, why:'Hier liegt der Großteil als HA vor. Das zeigt eine schwache Säure mit Gleichgewicht weit auf der Eduktseite.'});
+  }
+  return {
+    stem:`${LEGEND}Welches Teilchenbild zeigt die Lösung einer <b>${weak?'schwachen':'starken'}</b> Säure HA?`,
+    options: pick(weak ? W : S, d), grid:true,
+    sol: weak ? 'Schwache Säure: Die meisten Moleküle liegen als HA vor, nur wenige sind zu H<sub>3</sub>O<sup>+</sup> und A<sup>−</sup> protolysiert. Das Gleichgewicht liegt auf der Eduktseite.'
+              : 'Starke Säure: Alle HA-Moleküle sind protolysiert. Es liegen nur H<sub>3</sub>O<sup>+</sup> und A<sup>−</sup> vor, das Gleichgewicht liegt vollständig auf der Produktseite.',
+    item: weak ? 12 : 10
+  };
+}
+
+const STARK = [
+  {item:10, q:'Worin unterscheiden sich starke und schwache Säuren?',
+   c:'Starke Säuren protolysieren in Wasser praktisch vollständig, schwache Säuren nur zu einem kleinen Teil.',
+   d:[{html:'Starke Säuren sind höher konzentriert.', why:'Die Säurestärke ist eine Stoffeigenschaft. Eine sehr verdünnte Salzsäure ist trotzdem eine starke Säure.'},
+      {html:'Starke Säuren enthalten mehr H-Atome pro Molekül.', why:'CH<sub>3</sub>COOH hat vier H-Atome und ist schwach, HCl hat eins und ist stark. Entscheidend ist, wie leicht das Proton abgegeben wird.'},
+      {html:'Schwache Säuren reagieren gar nicht mit Wasser.', why:'Sie reagieren teilweise. Es stellt sich ein Gleichgewicht ein.'}],
+   sol:'Starke Säure: vollständige Protolyse. Schwache Säure: unvollständige Protolyse, Gleichgewicht.'},
+  {item:10, q:'Welche Aussage über Salzsäure mit c₀ = 0,1 mol/L ist richtig?',
+   c:'c(H<sub>3</sub>O<sup>+</sup>) = 0,1 mol/L, HCl-Moleküle liegen praktisch nicht mehr vor.',
+   d:[{html:'c(H<sub>3</sub>O<sup>+</sup>) ≈ 0,001 mol/L, der Rest liegt als HCl vor.', why:'So verhält sich eine schwache Säure. HCl protolysiert vollständig.'},
+      {html:'c(HCl) = c(H<sub>3</sub>O<sup>+</sup>) = 0,05 mol/L', why:'Es protolysiert nicht die Hälfte, sondern praktisch alles.'},
+      {html:'c(H<sub>3</sub>O<sup>+</sup>) = 0,2 mol/L', why:'HCl ist einprotonig. Aus einem HCl-Molekül entsteht genau ein H<sub>3</sub>O<sup>+</sup>-Ion.'}],
+   sol:'HCl(g) + H<sub>2</sub>O(l) → H<sub>3</sub>O<sup>+</sup>(aq) + Cl<sup>−</sup>(aq) (vollständig) → c(H<sub>3</sub>O<sup>+</sup>) = c₀'},
+  {item:11, q:'Wo liegt das Protolysegleichgewicht einer starken Säure HA mit Wasser?',
+   c:'praktisch vollständig auf der Seite der Produkte (H<sub>3</sub>O<sup>+</sup> + A<sup>−</sup>)',
+   d:[{html:'weit auf der Seite der Edukte (HA + H<sub>2</sub>O)', why:'Das gilt für schwache Säuren.'},
+      {html:'genau in der Mitte: 50 % sind protolysiert', why:'Die Lage eines Gleichgewichts ist nicht automatisch „halb und halb“. Bei starken Säuren liegt es ganz rechts.'},
+      {html:'Es stellt sich kein Gleichgewicht ein, weil keine Reaktion abläuft.', why:'Die Protolyse läuft ab, und zwar fast vollständig.'}],
+   sol:'Starke Säure: HA(aq) + H<sub>2</sub>O(l) → H<sub>3</sub>O<sup>+</sup>(aq) + A<sup>−</sup>(aq), Gleichgewicht ganz auf der Produktseite.'},
+  {item:11, q:'Wo liegt das Gleichgewicht CH<sub>3</sub>COOH(aq) + H<sub>2</sub>O(l) ⇌ H<sub>3</sub>O<sup>+</sup>(aq) + CH<sub>3</sub>COO<sup>−</sup>(aq)?',
+   c:'weit auf der Seite der Edukte',
+   d:[{html:'weit auf der Seite der Produkte', why:'Essigsäure ist eine schwache Säure (pKₛ = 4,75). Nur etwa 1 % der Moleküle protolysiert bei c₀ = 0,1 mol/L.'},
+      {html:'genau in der Mitte', why:'Gleichgewicht bedeutet konstante, nicht gleiche Konzentrationen.'},
+      {html:'Das hängt nur von der Temperatur ab, nicht von der Säure.', why:'Die Temperatur beeinflusst K<sub>S</sub>, aber die Lage wird vor allem durch die Säure selbst bestimmt.'}],
+   sol:'Schwache Säure → Gleichgewicht auf der Eduktseite, CH<sub>3</sub>COOH-Moleküle überwiegen.'},
+  {item:12, q:'Was bedeutet „Gleichgewicht“ in der Lösung einer schwachen Säure?',
+   c:'Hin- und Rückreaktion laufen gleich schnell ab. Die Konzentrationen von HA, H<sub>3</sub>O<sup>+</sup> und A<sup>−</sup> bleiben konstant.',
+   d:[{html:'Die Reaktion ist zum Stillstand gekommen.', why:'Das Gleichgewicht ist dynamisch: Hin- und Rückreaktion laufen weiter, nur gleich schnell.'},
+      {html:'HA, H<sub>3</sub>O<sup>+</sup> und A<sup>−</sup> liegen in gleichen Konzentrationen vor.', why:'Die Konzentrationen sind konstant, aber nicht gleich. HA überwiegt deutlich.'},
+      {html:'Es liegen nur noch Produkte vor.', why:'Das beschreibt eine vollständige Reaktion, also eine starke Säure.'}],
+   sol:'Dynamisches Gleichgewicht: v(Hin) = v(Rück), Konzentrationen konstant.'},
+  {item:12, q:'Welche Teilchen liegen in einer Essigsäure-Lösung (c₀ = 0,1 mol/L) außer Wasser in der höchsten Konzentration vor?',
+   c:'CH<sub>3</sub>COOH-Moleküle',
+   d:[{html:'CH<sub>3</sub>COO<sup>−</sup>-Ionen', why:'Nur etwa 1 % der Moleküle ist protolysiert.'},
+      {html:'H<sub>3</sub>O<sup>+</sup>-Ionen', why:'Nur etwa 1 % der Moleküle ist protolysiert. c(H<sub>3</sub>O<sup>+</sup>) ≈ 1,3 · 10<sup>−3</sup> mol/L.'},
+      {html:'OH<sup>−</sup>-Ionen', why:'In saurer Lösung ist c(OH<sup>−</sup>) sehr klein.'}],
+   sol:'c(H<sub>3</sub>O<sup>+</sup>) = √(K<sub>S</sub> · c₀) ≈ 1,3 · 10<sup>−3</sup> mol/L ≪ c(CH<sub>3</sub>COOH) ≈ 0,1 mol/L'}
+];
+
+const KONZ = [
+  {q:'Eine Salzsäure wird auf das Hundertfache verdünnt. Was passiert mit der Säurestärke von HCl?',
+   c:'Sie bleibt gleich. Nur c(H<sub>3</sub>O<sup>+</sup>) sinkt.',
+   d:[{html:'Sie nimmt ab.', why:'Die Säurestärke ist eine Stoffeigenschaft (pKₛ) und hängt nicht von der Konzentration ab.'},
+      {html:'Aus der starken wird eine schwache Säure.', why:'HCl protolysiert auch in verdünnter Lösung vollständig. Die Lösung ist weniger sauer, die Säure bleibt stark.'},
+      {html:'Sie nimmt zu, weil mehr Wasser zum Protolysieren da ist.', why:'Der pKₛ-Wert bleibt bei Verdünnung gleich.'}],
+   sol:'Säurestärke (pKₛ) ≠ Konzentration. Verdünnen ändert c(H<sub>3</sub>O<sup>+</sup>) und den pH-Wert, nicht den pKₛ-Wert.'},
+  {q:'Welche Größe beschreibt die Säurestärke unabhängig von der Konzentration?',
+   c:'der pKₛ-Wert',
+   d:[{html:'der pH-Wert', why:'Der pH-Wert hängt von der Säurestärke und von der Konzentration ab.'},
+      {html:'die Ausgangskonzentration c₀', why:'c₀ sagt nur, wie viel Säure gelöst ist, nicht wie leicht sie Protonen abgibt.'},
+      {html:'die elektrische Leitfähigkeit der Lösung', why:'Die Leitfähigkeit hängt von der Ionenkonzentration ab und damit auch von c₀.'}],
+   sol:'pKₛ = −lg Kₛ ist eine Stoffkonstante (bei gegebener Temperatur).'},
+  {q:'Eine Essigsäure wird verdünnt. Welche Aussage ist richtig?',
+   c:'Der Anteil protolysierter Moleküle steigt, der pKₛ-Wert bleibt gleich.',
+   d:[{html:'Der pKₛ-Wert sinkt, die Essigsäure wird stärker.', why:'Kₛ und pKₛ sind Konstanten und ändern sich beim Verdünnen nicht.'},
+      {html:'Der Anteil protolysierter Moleküle bleibt gleich.', why:'Verdünnen verschiebt das Gleichgewicht zur Seite mit mehr gelösten Teilchen (H<sub>3</sub>O<sup>+</sup> + A<sup>−</sup>). Der Protolysegrad steigt.'},
+      {html:'Die Essigsäure wird zu einer starken Säure.', why:'Sie bleibt schwach (pKₛ = 4,75). Nur der Anteil protolysierter Moleküle steigt etwas.'}],
+   sol:'Säurestärke = Konstante. Verdünnung ändert die Lage des Gleichgewichts, nicht Kₛ.'},
+  {q:'Was ist mit „konzentrierter Säure“ und was mit „starker Säure“ gemeint?',
+   c:'konzentriert: viel Säure pro Volumen gelöst. Stark: hohe Neigung zur Protonenabgabe (kleiner pKₛ-Wert).',
+   d:[{html:'Beide Begriffe bedeuten dasselbe.', why:'Eine konzentrierte Essigsäure bleibt eine schwache Säure, eine verdünnte Salzsäure bleibt eine starke.'},
+      {html:'konzentriert: kleiner pKₛ-Wert. Stark: viel Säure pro Volumen.', why:'Die Begriffe sind vertauscht.'},
+      {html:'stark: niedriger pH-Wert der Lösung.', why:'Der pH-Wert hängt auch von der Konzentration ab und taugt daher nicht als Maß für die Säurestärke.'}],
+   sol:'Konzentration = Menge (c₀). Stärke = Lage des Protolysegleichgewichts (pKₛ).'}
+];
+function genStrengthConc(){
+  for (let t=0;t<40;t++){
+    const w = rnd(WEAK); const cw = rnd([1,0.5,0.1]); const cs = rnd([0.01,0.001,0.0001]);
+    const pw = 0.5*(w.pks-lg(cw)), ps = -lg(cs);
+    if (Math.abs(pw-ps) < 0.15) continue;
+    const S = `Salzsäure (c₀ = ${dec(cs)} mol/L)`, Wn = `${w.n} (c₀ = ${dec(cw)} mol/L, pKₛ = ${num(w.pks)})`;
+    const low = pw < ps ? 'W' : 'S';
+    const nm = k => k==='S' ? 'die Salzsäure' : 'die '+w.n;
+    const st = (x,y) => `${x==='S'?'Die Salzsäure':'Die '+w.n} hat den niedrigeren pH-Wert, ${y==='S'?'HCl':w.n} ist die stärkere Säure.`;
+    const calc = `pH(Salzsäure) = ${num(ps)}, pH(${w.n}) = ½ · (${num(w.pks)} − (${num(lg(cw))})) = ${num(pw)}`;
+    const opts = ['S','W'].flatMap(x => ['S','W'].map(y => {
+      const ok = x===low && y==='S';
+      const why = y!=='S' ? `HCl (pKₛ ≈ −6) ist die stärkere Säure, unabhängig von der Konzentration. ${w.n} hat pKₛ = ${num(w.pks)}.`
+                          : `Rechne nach: ${calc}`;
+      return ok ? {html:st(x,y), correct:true} : {html:st(x,y), why};
+    }));
+    return {
+      stem:`Vergleiche zwei Lösungen:<br>① ${S}<br>② ${Wn}<br>Welche Aussage ist richtig?`,
+      options: shuffle(opts),
+      sol:`${calc}<br>Säurestärke: HCl > ${w.n}, weil der pKₛ-Wert von HCl kleiner ist. Den pH-Wert bestimmen Stärke <i>und</i> Konzentration.`,
+      item:13
+    };
+  }
+  return null;
+}
+function genKonz(){ const g = Math.random()<0.5 ? genStrengthConc() : null; if (g) return g; const q = rnd(KONZ); return {stem:q.q, options:pick({html:q.c}, q.d), sol:q.sol, item:13}; }
+
+/* MWG, Kₛ und pKₛ */
+const frac = (a,b) => `<span class="frac"><span>${a}</span><span>${b}</span></span>`;
+function genMWG(){
+  const r = rnd(ACID_RX);
+  const c = x => `c(${x})`;
+  const ok = 'K<sub>S</sub> = '+frac(c(sH3O)+' · '+c(r.b), c(r.a));
+  return {
+    stem:`${src(r.a)} + ${lq(sH2O)}${EQ}${aq(sH3O)} + ${aq(r.b)}<br>Welcher Ausdruck beschreibt die Säurekonstante K<sub>S</sub>?`,
+    options: pick({html:ok}, [
+      {html:'K<sub>S</sub> = '+frac(c(r.a), c(sH3O)+' · '+c(r.b)), why:'Das ist der Kehrwert. Im Massenwirkungsgesetz stehen die Produkte im Zähler.'},
+      {html:'K<sub>S</sub> = '+frac(c(sH3O)+' · '+c(r.b), c(r.a)+' · '+c(sH2O)), why:'Wasser liegt in großem Überschuss vor. c(H<sub>2</sub>O) ist praktisch konstant und wird in K<sub>S</sub> einbezogen.'},
+      {html:'K<sub>S</sub> = '+frac(c(sH3O)+' + '+c(r.b), c(r.a)), why:'Im Massenwirkungsgesetz werden die Konzentrationen multipliziert, nicht addiert.'}
+    ]),
+    sol:`MWG: Produkte im Zähler, Edukte im Nenner, c(H<sub>2</sub>O) in K<sub>S</sub> einbezogen.<br>${ok}`,
+    item:14
+  };
+}
+function genKsConvert(){
+  if (Math.random() < 0.5){
+    const m = rnd([1,1.3,1.8,2.5,3.2,4.5,6.3,7.9]); const n = rnd([-2,-3,-4,-5,-6,-7,-8,-9,-10]);
+    const ks = m*Math.pow(10,n); const pk = -lg(ks);
+    return {
+      stem:`Eine Säure hat K<sub>S</sub> = ${conc(ks)}. Berechne den pKₛ-Wert.`,
+      options: pick({html:'pKₛ = '+num(pk)}, [
+        {html:'pKₛ = '+num(lg(ks)), why:'Das Minuszeichen fehlt: pKₛ = <b>−</b>lg Kₛ.'},
+        {html:'pKₛ = '+num(-Math.log(ks)), why:'Hier wurde ln statt lg verwendet.'},
+        {html:'pKₛ = '+num(-n), why:'Hier wurde nur der Exponent abgelesen und der Vorfaktor ignoriert.'},
+        {html:'pKₛ = '+num(14-pk), why:'Das ist der pK<sub>B</sub>-Wert der korrespondierenden Base (pKₛ + pK<sub>B</sub> = 14).'}
+      ]),
+      sol:`pKₛ = −lg Kₛ = −lg(${pot(ks)}) = <b>${num(pk)}</b>`, item:14
+    };
+  }
+  const pk = Math.round((2+Math.random()*8)*10)/10; const ks = Math.pow(10,-pk);
+  return {
+    stem:`Eine Säure hat den pKₛ-Wert ${num(pk,1)}. Berechne K<sub>S</sub>.`,
+    options: pick({html:'K<sub>S</sub> = '+conc(ks)}, [
+      {html:'K<sub>S</sub> = '+conc(Math.pow(10,pk)), why:'Das Vorzeichen im Exponenten fehlt: Kₛ = 10<sup>−pKₛ</sup>.'},
+      {html:'K<sub>S</sub> = '+conc(Math.exp(-pk)), why:'Hier wurde e<sup>−pKₛ</sup> gerechnet, also ln mit lg verwechselt.'},
+      {html:'K<sub>S</sub> = '+conc(Math.pow(10,-(14-pk))), why:'Das ist K<sub>B</sub> der korrespondierenden Base.'}
+    ]),
+    sol:`Kₛ = 10<sup>−pKₛ</sup> mol/L = 10<sup>−${num(pk,1)}</sup> mol/L = <b>${conc(ks)}</b>`, item:14
+  };
+}
+const MWG_POOL = [
+  {q:'Was sagt ein großer K<sub>S</sub>-Wert über eine Säure aus?',
+   c:'Das Protolysegleichgewicht liegt weit auf der Produktseite, die Säure ist stark.',
+   d:[{html:'Das Gleichgewicht liegt auf der Eduktseite, die Säure ist schwach.', why:'Großer Kₛ heißt großer Zähler (Produkte) im MWG, also Gleichgewicht auf der Produktseite.'},
+      {html:'Die Säure liegt in hoher Konzentration vor.', why:'Kₛ ist eine Konstante und hängt nicht von c₀ ab.'},
+      {html:'Die Säure hat auch einen großen pKₛ-Wert.', why:'pKₛ = −lg Kₛ: Großer Kₛ-Wert bedeutet kleiner pKₛ-Wert.'}],
+   sol:'Großer Kₛ ↔ kleiner pKₛ ↔ Gleichgewicht rechts ↔ starke Säure'},
+  {q:'Warum taucht c(H<sub>2</sub>O) im Ausdruck für K<sub>S</sub> nicht auf?',
+   c:'Wasser liegt in großem Überschuss vor. Seine Konzentration ist nahezu konstant und in K<sub>S</sub> einbezogen.',
+   d:[{html:'Weil Wasser nicht an der Reaktion beteiligt ist.', why:'Wasser ist Reaktionspartner: Es nimmt als Base das Proton auf.'},
+      {html:'Weil c(H<sub>2</sub>O) = 0 ist.', why:'Im Gegenteil: c(H<sub>2</sub>O) ≈ 55,5 mol/L ist sehr groß.'},
+      {html:'Weil Wasser ein Ampholyt ist.', why:'Das erklärt nicht, warum es im MWG fehlt. Grund ist die praktisch konstante Konzentration.'}],
+   sol:'K<sub>S</sub> = K<sub>C</sub> · c(H<sub>2</sub>O), mit c(H<sub>2</sub>O) ≈ 55,5 mol/L = konstant'},
+  {q:'Säure A hat pKₛ = 3, Säure B hat pKₛ = 5. Wie verhalten sich ihre K<sub>S</sub>-Werte?',
+   c:'K<sub>S</sub> von A ist 100-mal so groß wie der von B.',
+   d:[{html:'K<sub>S</sub> von B ist 100-mal so groß wie der von A.', why:'Kleinerer pKₛ-Wert bedeutet größerer Kₛ-Wert.'},
+      {html:'K<sub>S</sub> von A ist 2-mal so groß wie der von B.', why:'pKₛ ist logarithmisch: Eine Differenz von 2 bedeutet den Faktor 10² = 100.'},
+      {html:'Beide K<sub>S</sub>-Werte sind gleich groß, nur die Konzentration unterscheidet sich.', why:'Unterschiedliche pKₛ-Werte bedeuten unterschiedliche Kₛ-Werte.'}],
+   sol:'Kₛ(A) = 10<sup>−3</sup>, Kₛ(B) = 10<sup>−5</sup> → Faktor 100'}
+];
+function genKs(){
+  const r = Math.random();
+  if (r < 0.35) return genMWG();
+  if (r < 0.7) return genKsConvert();
+  const q = rnd(MWG_POOL); return {stem:q.q, options:pick({html:q.c}, q.d), sol:q.sol, item:14};
+}
+
+/* Säurestärke abschätzen */
+function genRank(){
+  const mode = rnd(['pks','pks','ks','order']);
+  if (mode === 'order'){
+    const set = shuffle(KS_ACIDS.slice()).slice(0,3);
+    const asc = set.slice().sort((x,y)=>y.pks-x.pks); // schwächste zuerst
+    const fmt = a => a.map(x=>x.f).join(' &lt; ');
+    const wrong = shuffle([[asc[1],asc[0],asc[2]],[asc[0],asc[2],asc[1]],[asc[2],asc[0],asc[1]],[asc[1],asc[2],asc[0]]]).slice(0,2);
+    return {
+      stem:`Ordne nach <b>zunehmender</b> Säurestärke:<br>${set.map(x=>`${acidLab(x)}: pKₛ = ${num(x.pks)}`).join('<br>')}`,
+      options: pick({html:fmt(asc)}, [
+        {html:fmt(asc.slice().reverse()), why:'Das ist die Reihenfolge nach abnehmender Säurestärke. Je kleiner der pKₛ-Wert, desto stärker die Säure.'},
+        ...wrong.map(w => ({html:fmt(w), why:'Vergleiche die pKₛ-Werte: Der größte pKₛ-Wert gehört zur schwächsten Säure, der kleinste zur stärksten.'}))
+      ]),
+      sol:`Je kleiner der pKₛ-Wert, desto stärker die Säure:<br>${asc.map(x=>`${x.f} (${num(x.pks)})`).join(' &lt; ')}`,
+      item:15
+    };
+  }
+  const set = shuffle(KS_ACIDS.slice()).slice(0,4);
+  const strongest = Math.random() < 0.6;
+  const sorted = set.slice().sort((x,y)=>x.pks-y.pks);
+  const target = strongest ? sorted[0] : sorted[3];
+  const useKs = mode === 'ks';
+  const val = x => useKs ? `K<sub>S</sub> = ${conc(Math.pow(10,-x.pks))}` : `pKₛ = ${num(x.pks)}`;
+  const opts = shuffle(set.map(x => x===target ? {html:`${acidLab(x)}: ${val(x)}`, correct:true}
+    : {html:`${acidLab(x)}: ${val(x)}`, why: useKs
+        ? `Großer Kₛ-Wert bedeutet starke Säure. ${target.f} hat den ${strongest?'größten':'kleinsten'} Kₛ-Wert.`
+        : `Je kleiner der pKₛ-Wert, desto stärker die Säure. ${target.f} hat den ${strongest?'kleinsten':'größten'} pKₛ-Wert.`}));
+  return {
+    stem:`Welche Säure ist die <b>${strongest?'stärkste':'schwächste'}</b>?`,
+    options: opts,
+    sol: useKs ? `Großer Kₛ ↔ kleiner pKₛ ↔ starke Säure.<br>${sorted.map(x=>`${x.f}: pKₛ = ${num(x.pks)}`).join('<br>')}`
+               : `Je kleiner der pKₛ-Wert, desto stärker die Säure:<br>${sorted.map(x=>`${x.f}: ${num(x.pks)}`).join(' &lt; ')}`,
+    item:15
+  };
+}
+
+const CAT_STAERKE = {
+  title:'Starke und schwache Säuren',
+  items:{
+    10:'…den Unterschied zwischen einer starken und einer schwachen Säure erklären.',
+    11:'…den Unterschied mithilfe der Lage des Protolysegleichgewichts erklären.',
+    12:'…darstellen, dass bei einer schwachen Säure ein Gleichgewicht zwischen Edukten und Produkten vorliegt.',
+    13:'…erklären, warum die Säurestärke nicht einfach mit der Konzentration einer Säure gleichgesetzt werden darf.',
+    14:'…den Zusammenhang zwischen Protolysegleichgewicht, Säurestärke und pKₛ-Wert unter Berücksichtigung des Massenwirkungsgesetzes erläutern.',
+    15:'…die Säurestärke verschiedener Säuren anhand von pKₛ-Werten abschätzen.'
+  },
+  ex:{
+    bild:{nr:'10, 12', title:'Teilchenbilder', gen:genBeaker,
+      hint:'Starke Säure: alle HA protolysiert. Schwache Säure: nur wenige HA protolysiert.<div class="formula">Zu jedem H<sub>3</sub>O<sup>+</sup> gehört ein A<sup>−</sup>.</div>'},
+    stark:{nr:'10–12', title:'Stark oder schwach?', gen:()=>{ const q = rnd(STARK); return {stem:q.q, options:pick({html:q.c}, q.d), sol:q.sol, item:q.item}; },
+      hint:'Starke Säure: HA(aq) + H<sub>2</sub>O(l) → H<sub>3</sub>O<sup>+</sup>(aq) + A<sup>−</sup>(aq) (vollständig)<div class="formula">Schwache Säure: HA(aq) + H<sub>2</sub>O(l) ⇌ H<sub>3</sub>O<sup>+</sup>(aq) + A<sup>−</sup>(aq) (Gleichgewicht links)</div>'},
+    konz:{item:13, nr:'13', title:'Stärke ≠ Konzentration', gen:genKonz,
+      hint:'Säurestärke = Stoffeigenschaft (pKₛ). Konzentration = gelöste Menge (c₀).<div class="formula">Der pH-Wert hängt von beidem ab.</div>'},
+    ks:{item:14, nr:'14', title:'MWG, Kₛ und pKₛ', gen:genKs,
+      hint:'HA(aq) + H<sub>2</sub>O(l) ⇌ H<sub>3</sub>O<sup>+</sup>(aq) + A<sup>−</sup>(aq)<div class="formula">Kₛ = c(H<sub>3</sub>O<sup>+</sup>) · c(A<sup>−</sup>) / c(HA) &nbsp;&nbsp; pKₛ = −lg Kₛ</div>'},
+    rang:{item:15, nr:'15', title:'Säurestärke abschätzen', gen:genRank,
+      hint:'Je kleiner der pKₛ-Wert, desto stärker die Säure.<div class="formula">Je größer der Kₛ-Wert, desto stärker die Säure.</div>'}
+  },
+  first:'bild',
+  where:'Wiederholung chemisches Gleichgewicht, AB Schwache Säuren (eigene Lernübersicht), Lernübersichten in Teams',
+  info:`
+    <p><b>Starke Säuren</b> wie HCl oder HNO<sub>3</sub> protolysieren in Wasser praktisch vollständig. Das Gleichgewicht liegt ganz auf der Produktseite, es gilt c(H<sub>3</sub>O<sup>+</sup>) = c₀.</p>
+    <p><b>Schwache Säuren</b> wie CH<sub>3</sub>COOH protolysieren nur zu einem kleinen Teil. Es stellt sich ein dynamisches Gleichgewicht ein, das weit auf der Eduktseite liegt. HA-Moleküle überwiegen.</p>
+    <div class="formula">HA(aq) + H<sub>2</sub>O(l) ⇌ H<sub>3</sub>O<sup>+</sup>(aq) + A<sup>−</sup>(aq)</div>
+    <p>Aus dem Massenwirkungsgesetz folgt die Säurekonstante. c(H<sub>2</sub>O) ist praktisch konstant und wird einbezogen:</p>
+    <div class="formula">Kₛ = c(H<sub>3</sub>O<sup>+</sup>) · c(A<sup>−</sup>) / c(HA) &nbsp;&nbsp; pKₛ = −lg Kₛ</div>
+    <ul class="rules">
+      <li>Je kleiner der pKₛ-Wert (je größer Kₛ), desto stärker die Säure.</li>
+      <li>Säurestärke ist eine Stoffeigenschaft. Sie hängt nicht von der Konzentration ab.</li>
+      <li>Der pH-Wert einer Lösung hängt von Säurestärke <i>und</i> Konzentration ab.</li>
+    </ul>`
+};
+
+/* ========== Kategorie 4: Säure-Base-Titration mit Indikator ========== */
+/* Versuchsaufbau als Abbildung */
+const T_LABELS = ['Bürette','Maßlösung (bekannte Konzentration)','Hahn zum Dosieren','Erlenmeyerkolben','Probelösung mit Indikator','Magnetrührer mit Rührfisch','Stativ mit Bürettenklemme'];
+function titrFig(){
+  let ticks=''; for (let y=54;y<=204;y+=10) ticks += `<line x1="118" y1="${y}" x2="${(y-54)%50===0?124:121}" y2="${y}" class="tf-line"/>`;
+  const marks = [[130,30,232,30],[130,130,232,130],[140,220,232,214],[139,262,232,250],[148,286,232,282],[170,306,232,312]];
+  let lab=''; marks.forEach(([x1,y1,x2,y2],i)=>{ lab += `<line x1="${x1}" y1="${y1}" x2="${x2-9}" y2="${y2}" class="tf-lead"/><circle cx="${x2}" cy="${y2}" r="9" class="tf-num"/><text x="${x2}" y="${y2+4}" class="tf-numt">${i+1}</text>`; });
+  lab += `<line x1="50" y1="180" x2="27" y2="180" class="tf-lead"/><circle cx="18" cy="180" r="9" class="tf-num"/><text x="18" y="184" class="tf-numt">7</text>`;
+  return `<svg class="tfig" viewBox="0 0 252 334" role="img" aria-label="Versuchsaufbau einer Titration mit nummerierten Bauteilen">
+    <rect x="30" y="318" width="170" height="8" rx="2" class="tf-metal"/>
+    <rect x="50" y="14" width="5" height="304" class="tf-metal"/>
+    <rect x="55" y="74" width="63" height="6" class="tf-metal"/>
+    <rect x="114" y="70" width="20" height="14" rx="2" class="tf-clamp"/>
+    <rect x="118" y="44" width="12" height="170" class="tf-mass"/>
+    <rect x="118" y="14" width="12" height="200" class="tf-glass"/>
+    ${ticks}
+    <rect x="117" y="214" width="14" height="12" rx="2" class="tf-tap"/>
+    <rect x="108" y="218" width="32" height="4" rx="2" class="tf-tap"/>
+    <path d="M122 226 L122 240 L124 244 L126 240 L126 226" class="tf-glass"/>
+    <rect x="78" y="294" width="92" height="24" rx="3" class="tf-stir"/>
+    <circle cx="160" cy="306" r="4" class="tf-knob"/>
+    <polygon points="100.3,276 147.7,276 160,294 88,294" class="tf-probe"/>
+    <path d="M114 238 L114 256 L88 294 L160 294 L134 256 L134 238" class="tf-glass"/>
+    <rect x="116" y="289" width="16" height="3" rx="1.5" class="tf-bar"/>
+    ${lab}
+  </svg>`;
+}
+function genSetupLabel(){
+  const i = Math.floor(Math.random()*T_LABELS.length);
+  const others = shuffle(T_LABELS.map((n,k)=>({n,k})).filter(o=>o.k!==i)).slice(0,3);
+  return {
+    stem:`<span class="figwrap">${titrFig()}</span>Welches Bauteil ist mit Nummer <b>${i+1}</b> gekennzeichnet?`,
+    options: shuffle([{html:T_LABELS[i], correct:true}, ...others.map(o=>({html:o.n, why:`Das ist Nummer ${o.k+1}.`}))]),
+    sol: T_LABELS.map((n,k)=>`${k+1} ${n}`).join('<br>'), item:22
+  };
+}
+const SETUP_POOL = [
+  {q:'Womit misst man das Volumen der Probelösung genau ab?', c:'mit einer Vollpipette',
+   d:[{html:'mit einem Messzylinder', why:'Ein Messzylinder ist für eine quantitative Bestimmung zu ungenau.'},
+      {html:'mit einem Becherglas', why:'Die Skala eines Becherglases dient nur zur groben Orientierung.'},
+      {html:'mit dem Erlenmeyerkolben', why:'Der Erlenmeyerkolben hat keine genaue Volumenskala.'}],
+   sol:'Vollpipette: genau ein festes Volumen, z. B. 20,0 mL.'},
+  {q:'Warum titriert man im Erlenmeyerkolben statt im Becherglas?', c:'Durch die schräge Wand und die enge Öffnung spritzt beim Schwenken und Rühren nichts heraus.',
+   d:[{html:'Weil man am Erlenmeyerkolben das Volumen genau ablesen kann.', why:'Die Skala am Erlenmeyerkolben ist ungenau. Das Volumen wird mit Pipette und Bürette gemessen.'},
+      {html:'Weil der Indikator nur im Erlenmeyerkolben umschlägt.', why:'Der Farbumschlag hängt vom pH-Wert ab, nicht vom Gefäß.'},
+      {html:'Weil die Reaktion im Erlenmeyerkolben schneller abläuft.', why:'Die Neutralisation läuft in jedem Gefäß sehr schnell ab.'}],
+   sol:'Erlenmeyerkolben: kein Verlust von Probelösung beim Schwenken.'},
+  {q:'Warum spült man die Bürette vor dem Befüllen mit etwas Maßlösung aus?', c:'Wasserreste in der Bürette würden die Maßlösung verdünnen.',
+   d:[{html:'Um die Bürette zu desinfizieren.', why:'Es geht nicht um Keime, sondern um die genaue Konzentration der Maßlösung.'},
+      {html:'Damit der Indikator besser wirkt.', why:'Der Indikator befindet sich in der Probelösung, nicht in der Bürette.'},
+      {html:'Damit die Skala besser lesbar ist.', why:'Die Skala ändert sich nicht. Entscheidend ist, dass die Konzentration der Maßlösung stimmt.'}],
+   sol:'Vorspülen mit Maßlösung → Konzentration bleibt exakt.'},
+  {q:'Wie liest man den Stand der Maßlösung an der Bürette richtig ab?', c:'auf Augenhöhe am unteren Rand des Meniskus',
+   d:[{html:'von schräg oben am oberen Rand', why:'Schräges Ablesen führt zu einem Parallaxenfehler. Man liest auf Augenhöhe ab.'},
+      {html:'am oberen Rand des Meniskus', why:'Bei farblosen Lösungen liest man am unteren Rand des Meniskus ab.'},
+      {html:'nur der Startwert wird abgelesen, der Endwert geschätzt', why:'Der Verbrauch ist die Differenz aus End- und Startwert. Beide müssen genau abgelesen werden.'}],
+   sol:'Augenhöhe, unterer Meniskusrand, Start- und Endwert notieren.'}
+];
+function genSetup(){ if (Math.random()<0.6) return genSetupLabel(); const q = rnd(SETUP_POOL); return {stem:q.q, options:pick({html:q.c}, q.d), sol:q.sol, item:22}; }
+
+/* Prinzip und Äquivalenzpunkt */
+const PRINZIP = [
+  {item:21, q:'Was ist das Prinzip einer Säure-Base-Titration?',
+   c:'Zu einer Probelösung mit unbekannter Konzentration gibt man eine Maßlösung bekannter Konzentration, bis die Neutralisation vollständig ist. Aus dem Verbrauch berechnet man die unbekannte Konzentration.',
+   d:[{html:'Man misst den pH-Wert der Probelösung und liest daraus die Konzentration ab.', why:'Das ist eine pH-Messung. Bei einer Titration wird die Stoffmenge über eine Neutralisationsreaktion bestimmt.'},
+      {html:'Die Maßlösung hat eine unbekannte, die Probelösung eine bekannte Konzentration.', why:'Die Rollen sind vertauscht: Die Maßlösung in der Bürette hat eine genau bekannte Konzentration.'},
+      {html:'Man gibt so lange Maßlösung zu, bis sich ein Niederschlag bildet.', why:'Bei der Säure-Base-Titration entsteht kein Niederschlag. Das Ende zeigt der Farbumschlag des Indikators.'}],
+   sol:'Quantitative Analyse: bekannte c und V der Maßlösung → n → unbekannte c der Probe.'},
+  {item:21, q:'Warum gibt man die Maßlösung gegen Ende der Titration nur noch tropfenweise zu?',
+   c:'Kurz vor dem Äquivalenzpunkt kann ein einzelner Tropfen den Farbumschlag bewirken. So überschreitet man ihn nicht.',
+   d:[{html:'Damit der Indikator nicht verbraucht wird.', why:'Der Indikator wird nicht verbraucht, er zeigt nur den pH-Wert an.'},
+      {html:'Weil die Reaktion gegen Ende langsamer wird.', why:'Die Neutralisation läuft immer sehr schnell ab. Es geht um die genaue Dosierung.'},
+      {html:'Damit die Lösung nicht zu warm wird.', why:'Die Erwärmung ist gering und hat keinen Einfluss auf den Endpunkt.'}],
+   sol:'Tropfenweise Zugabe → Umschlag wird genau getroffen, Verbrauch wird nicht zu groß.'},
+  {item:24, q:'Was bedeutet der Äquivalenzpunkt einer Titration?',
+   c:'Die zugegebene Stoffmenge an Hydroxid-Ionen entspricht der ursprünglich vorhandenen Stoffmenge an Säure.',
+   d:[{html:'Der pH-Wert beträgt genau 7.', why:'Das gilt nur bei der Titration einer starken Säure mit einer starken Base. Bei einer schwachen Säure liegt er im basischen Bereich.'},
+      {html:'Die Volumina von Maßlösung und Probelösung sind gleich.', why:'Gleich sind die Stoffmengen (bei einprotoniger Säure), nicht die Volumina.'},
+      {html:'Der Indikator ändert seine Farbe.', why:'Das ist der Endpunkt (Umschlagspunkt). Bei geeignetem Indikator liegt er nahe am Äquivalenzpunkt, ist aber nicht dasselbe.'}],
+   sol:'Äquivalenzpunkt: n(OH<sup>−</sup>)<sub>zugegeben</sub> = n(Säure)<sub>Probe</sub> (einprotonige Säure)'},
+  {item:24, q:'Worin unterscheiden sich Äquivalenzpunkt und Endpunkt?',
+   c:'Der Äquivalenzpunkt ist erreicht, wenn die Stoffmengen äquivalent sind. Der Endpunkt ist der beobachtete Farbumschlag. Ein geeigneter Indikator lässt beide fast zusammenfallen.',
+   d:[{html:'Es gibt keinen Unterschied, beide Begriffe bedeuten dasselbe.', why:'Ein ungeeigneter Indikator schlägt deutlich vor oder nach dem Äquivalenzpunkt um. Dann fallen beide auseinander.'},
+      {html:'Der Endpunkt liegt immer bei pH 7, der Äquivalenzpunkt nie.', why:'Beide hängen von der Titration bzw. vom Indikator ab.'},
+      {html:'Der Endpunkt ist erreicht, wenn die Bürette leer ist.', why:'Der Endpunkt ist der Farbumschlag des Indikators.'}],
+   sol:'Äquivalenzpunkt = theoretisch (Stoffmengen), Endpunkt = beobachtet (Farbumschlag).'},
+  {item:24, q:'Bei welchem pH-Wert liegt der Äquivalenzpunkt bei der Titration von Salzsäure mit Natronlauge?',
+   c:'pH = 7',
+   d:[{html:'pH > 7', why:'Das gilt für schwache Säuren. Bei HCl entstehen nur Cl<sup>−</sup>-Ionen, die nicht basisch reagieren.'},
+      {html:'pH < 7', why:'Am Äquivalenzpunkt ist die Säure vollständig neutralisiert.'},
+      {html:'pH = 0', why:'pH 0 entspricht c(H<sub>3</sub>O<sup>+</sup>) = 1 mol/L, also einer stark sauren Lösung.'}],
+   sol:'Am Äquivalenzpunkt liegt eine NaCl-Lösung vor: Na<sup>+</sup> und Cl<sup>−</sup> reagieren nicht mit Wasser → pH = 7.'},
+  {item:24, q:'Essigsäure wird mit Natronlauge titriert. Wo liegt der Äquivalenzpunkt?',
+   c:'im basischen Bereich, weil die entstandenen Acetat-Ionen als Base mit Wasser reagieren',
+   d:[{html:'genau bei pH 7', why:'Die Acetat-Ionen sind die korrespondierende Base der Essigsäure und bilden OH<sup>−</sup>-Ionen.'},
+      {html:'im sauren Bereich, weil Essigsäure eine Säure ist', why:'Am Äquivalenzpunkt ist die Essigsäure vollständig umgesetzt. Es liegen Acetat-Ionen vor.'},
+      {html:'bei pH 14', why:'Die Acetat-Ionen sind nur eine schwache Base. Der pH-Wert liegt bei etwa 8 bis 9.'}],
+   sol:'CH<sub>3</sub>COO<sup>−</sup>(aq) + H<sub>2</sub>O(l) ⇌ CH<sub>3</sub>COOH(aq) + OH<sup>−</sup>(aq) → pH ≈ 8,7 (c₀ = 0,1 mol/L)'}
+];
+
+/* Neutralisationsgleichungen */
+const T_ACIDS = [{n:'Salzsäure', x:'Cl<sup>−</sup>', s:'NaCl'}, {n:'Salpetersäure', x:'NO<sub>3</sub><sup>−</sup>', s:'NO<sub>3</sub>'}];
+const T_BASES = [{n:'Natronlauge', m:'Na<sup>+</sup>', s:'Na'}, {n:'Kalilauge', m:'K<sup>+</sup>', s:'K'}];
+function genNeutral(){
+  const r = Math.random();
+  if (r < 0.4){
+    const A = rnd(T_ACIDS), B = rnd(T_BASES);
+    const salt = B.s + (A.n==='Salzsäure' ? 'Cl' : 'NO<sub>3</sub>');
+    const L = `${aq(sH3O)} + ${aq(A.x)} + ${aq(B.m)} + ${aq(sOH)}`;
+    const ok = `${L}${TO}2 ${lq(sH2O)} + ${aq(B.m)} + ${aq(A.x)}`;
+    return {
+      stem:`Welche Gleichung beschreibt die Neutralisation von ${A.n} mit ${B.n} in Ionenschreibweise richtig?`,
+      options: pick({html:ok}, [
+        {html:`${L}${TO}2 ${lq(sH2O)} + ${salt}(s)`, why:`${salt} ist gut wasserlöslich. Die Ionen bleiben als Begleit-Ionen gelöst.`},
+        {html:`${L}${TO}${lq(sH2O)} + ${aq(B.m)} + ${aq(A.x)}`, why:'Die Stoffbilanz stimmt nicht: Aus H<sub>3</sub>O<sup>+</sup> und OH<sup>−</sup> entstehen zwei Wassermoleküle.'},
+        {html:`${L}${TO}${aq(sH3O)} + ${aq(sOH)} + ${B.s}${A.n==='Salzsäure'?'Cl':'NO<sub>3</sub>'}(aq)`, why:'Hier reagieren die Begleit-Ionen statt der Oxonium- und Hydroxid-Ionen. Die Neutralisation ist die Reaktion von H<sub>3</sub>O<sup>+</sup> mit OH<sup>−</sup>.'}
+      ]),
+      sol:`${ok}<br>Eigentliche Neutralisation: ${aq(sH3O)} + ${aq(sOH)}${TO}2 ${lq(sH2O)}`, item:23
+    };
+  }
+  if (r < 0.65){
+    const ok = `${aq(sH3O)} + ${aq(sOH)}${TO}2 ${lq(sH2O)}`;
+    return {
+      stem:'Welche Gleichung beschreibt die eigentliche Neutralisationsreaktion bei der Titration einer starken Säure mit Natronlauge?',
+      options: pick({html:ok}, [
+        {html:`${aq('Na<sup>+</sup>')} + ${aq('Cl<sup>−</sup>')}${TO}NaCl(s)`, why:'Na<sup>+</sup> und Cl<sup>−</sup> sind Begleit-Ionen. Sie nehmen an der Neutralisation nicht teil und bleiben gelöst.'},
+        {html:`${aq(sH3O)} + ${aq(sOH)}${TO}${lq(sH2O)}`, why:'Die Stoffbilanz stimmt nicht: Es entstehen zwei Wassermoleküle.'},
+        {html:`2 ${lq(sH2O)}${TO}${aq(sH3O)} + ${aq(sOH)}`, why:'Das ist die Autoprotolyse des Wassers, also die Umkehrung der Neutralisation.'}
+      ]),
+      sol:`${ok}<br>H<sub>3</sub>O<sup>+</sup> gibt ein Proton an OH<sup>−</sup> ab.`, item:23
+    };
+  }
+  if (r < 0.85){
+    const ok = `CH<sub>3</sub>COOH(aq) + ${aq(sOH)}${TO}CH<sub>3</sub>COO<sup>−</sup>(aq) + ${lq(sH2O)}`;
+    return {
+      stem:'Essigsäure wird mit Natronlauge titriert. Welche Gleichung beschreibt die Neutralisation am besten?',
+      options: pick({html:ok}, [
+        {html:`${aq(sH3O)} + ${aq(sOH)}${TO}2 ${lq(sH2O)}`, why:'Essigsäure ist eine schwache Säure und liegt überwiegend als Molekül vor. Die CH<sub>3</sub>COOH-Moleküle reagieren direkt mit den OH<sup>−</sup>-Ionen.'},
+        {html:`CH<sub>3</sub>COO<sup>−</sup>(aq) + ${lq(sH2O)}${EQ}CH<sub>3</sub>COOH(aq) + ${aq(sOH)}`, why:'Das ist die Reaktion des Acetat-Ions als Base. Sie erklärt den pH-Wert am Äquivalenzpunkt, ist aber nicht die Neutralisation.'},
+        {html:`CH<sub>3</sub>COOH(aq) + ${aq('Na<sup>+</sup>')}${TO}CH<sub>3</sub>COONa(s) + ${aq('H<sup>+</sup>')}`, why:'Na<sup>+</sup> ist ein Begleit-Ion und nimmt kein Proton auf. Der Protonenakzeptor ist OH<sup>−</sup>.'}
+      ]),
+      sol:`${ok}<br>Säure (CH<sub>3</sub>COOH) gibt ein Proton an die Base (OH<sup>−</sup>) ab.`, item:23
+    };
+  }
+  return {
+    stem:'In welchem Stoffmengenverhältnis reagieren Schwefelsäure (H<sub>2</sub>SO<sub>4</sub>) und Natriumhydroxid bis zum Äquivalenzpunkt?',
+    options: pick({html:'n(H<sub>2</sub>SO<sub>4</sub>) : n(NaOH) = 1 : 2'}, [
+      {html:'n(H<sub>2</sub>SO<sub>4</sub>) : n(NaOH) = 1 : 1', why:'Schwefelsäure ist zweiprotonig. Jedes Molekül gibt zwei Protonen ab und braucht zwei OH<sup>−</sup>-Ionen.'},
+      {html:'n(H<sub>2</sub>SO<sub>4</sub>) : n(NaOH) = 2 : 1', why:'Das Verhältnis ist vertauscht. Pro H<sub>2</sub>SO<sub>4</sub> braucht man zwei NaOH.'},
+      {html:'n(H<sub>2</sub>SO<sub>4</sub>) : n(NaOH) = 1 : 4', why:'H<sub>2</sub>SO<sub>4</sub> hat zwei abgebbare Protonen, nicht vier.'}
+    ]),
+    sol:`H<sub>2</sub>SO<sub>4</sub>(aq) + 2 NaOH(aq)${TO}Na<sub>2</sub>SO<sub>4</sub>(aq) + 2 ${lq(sH2O)}<br>Ionisch: 2 ${aq(sH3O)} + 2 ${aq(sOH)}${TO}4 ${lq(sH2O)}`, item:23
+  };
+}
+
+/* Indikator wählen */
+const INDIK = [
+  {n:'Methylorange', lo:3.1, hi:4.4, c:'rot → gelborange'},
+  {n:'Methylrot', lo:4.4, hi:6.2, c:'rot → gelb'},
+  {n:'Bromthymolblau', lo:6.0, hi:7.6, c:'gelb → blau'},
+  {n:'Phenolphthalein', lo:8.2, hi:10.0, c:'farblos → pinkviolett'},
+  {n:'Thymolphthalein', lo:9.3, hi:10.5, c:'farblos → blau'}
+];
+const T_SCEN = [
+  {t:'Salzsäure wird mit Natronlauge titriert (c jeweils 0,1 mol/L).', ph:7.0, extra:'Wegen des großen pH-Sprungs (etwa pH 4 bis 10) wären hier auch Methylrot oder Phenolphthalein noch brauchbar. Am besten passt aber Bromthymolblau.'},
+  {t:'Essigsäure wird mit Natronlauge titriert (c jeweils 0,1 mol/L).', ph:8.7, extra:'Die Acetat-Ionen reagieren basisch, der Äquivalenzpunkt liegt im basischen Bereich.'},
+  {t:'Ammoniak-Lösung wird mit Salzsäure titriert (c jeweils 0,1 mol/L).', ph:5.3, extra:'Die NH<sub>4</sub><sup>+</sup>-Ionen reagieren schwach sauer, der Äquivalenzpunkt liegt im sauren Bereich.'},
+  {t:'Natriumhydrogencarbonat-Lösung wird mit Salzsäure titriert.', ph:3.8, extra:'Am Äquivalenzpunkt liegt Kohlensäure vor, die Lösung ist sauer.'}
+];
+function genIndicator(){
+  let ph, intro, extra = '';
+  if (Math.random() < 0.55){ const s = rnd(T_SCEN); ph = s.ph; intro = `${s.t} Der Äquivalenzpunkt liegt bei pH ≈ ${num(ph,1)}.`; extra = s.extra; }
+  else { ph = rnd([3.5,4.0,4.9,5.6,6.6,7.2,8.5,9.0,10.2,10.4]); intro = `Bei einer Titration liegt der Äquivalenzpunkt bei pH ≈ ${num(ph,1)}.`; }
+  const right = INDIK.find(i => ph>=i.lo && ph<=i.hi);
+  const others = shuffle(INDIK.filter(i => i!==right)).slice(0,3);
+  const lab = i => `${i.n} (pH ${num(i.lo,1)}–${num(i.hi,1)})`;
+  return {
+    stem:`${intro} Welcher Indikator ist am besten geeignet?`,
+    options: shuffle([{html:lab(right), correct:true}, ...others.map(i => ({html:lab(i), why:`Der Umschlagsbereich ${num(i.lo,1)}–${num(i.hi,1)} enthält den pH-Wert am Äquivalenzpunkt (${num(ph,1)}) nicht. Der Farbumschlag läge ${i.hi<ph?'vor':'hinter'} dem Äquivalenzpunkt.`}))]),
+    sol:`Der Umschlagsbereich muss den pH-Wert am Äquivalenzpunkt enthalten: ${right.n} (${num(right.lo,1)}–${num(right.hi,1)}, ${right.c}).${extra?'<br>'+extra:''}`,
+    item:25
+  };
+}
+const INDIK_POOL = [
+  {q:'Wann ist ein Indikator für eine Titration geeignet?', c:'wenn sein Umschlagsbereich den pH-Wert am Äquivalenzpunkt enthält',
+   d:[{html:'wenn er bei pH 7 umschlägt', why:'Nur bei starker Säure und starker Base liegt der Äquivalenzpunkt bei pH 7.'},
+      {html:'wenn er eine möglichst kräftige Farbe hat', why:'Die Farbe erleichtert das Erkennen, entscheidend ist aber der Umschlagsbereich.'},
+      {html:'wenn er dieselbe Farbe wie die Maßlösung hat', why:'Die Maßlösung ist meist farblos. Entscheidend ist der pH-Bereich des Umschlags.'}],
+   sol:'Umschlagsbereich ∋ pH(Äquivalenzpunkt) → Endpunkt ≈ Äquivalenzpunkt'},
+  {q:'Warum gibt man nur wenige Tropfen Indikator zur Probelösung?', c:'Indikatoren sind selbst schwache Säuren und würden sonst merklich Maßlösung verbrauchen.',
+   d:[{html:'Weil Indikatoren sehr teuer sind.', why:'Das ist nicht der chemische Grund. Ein Indikator reagiert selbst mit der Maßlösung.'},
+      {html:'Weil sonst der Äquivalenzpunkt verschoben wird.', why:'Der Äquivalenzpunkt hängt von der Probe ab. Verfälscht wird der gemessene Verbrauch.'},
+      {html:'Weil die Lösung sonst zu warm wird.', why:'Die Menge des Indikators hat darauf keinen Einfluss.'}],
+   sol:'Indikator = schwache Säure HInd → reagiert mit OH<sup>−</sup> → zusätzlicher Verbrauch.'},
+  {q:'Phenolphthalein wird bei der Titration einer Säure mit Natronlauge verwendet. Welchen Farbwechsel beobachtet man am Endpunkt?', c:'farblos → pinkviolett',
+   d:[{html:'pinkviolett → farblos', why:'Die Probe ist zu Beginn sauer, Phenolphthalein ist dort farblos. Es färbt sich erst im Basischen.'},
+      {html:'gelb → blau', why:'Das ist der Farbwechsel von Bromthymolblau.'},
+      {html:'rot → gelb', why:'Das ist der Farbwechsel von Methylrot.'}],
+   sol:'Phenolphthalein: farblos (pH < 8,2) → pinkviolett (pH > 10)'}
+];
+function genIndik(){ if (Math.random()<0.7) return genIndicator(); const q = rnd(INDIK_POOL); return {stem:q.q, options:pick({html:q.c}, q.d), sol:q.sol, item:25}; }
+
+/* Konzentration aus dem Verbrauch berechnen */
+const T_CALC = [
+  {n:'Salzsäure', f:'HCl', z:1},
+  {n:'Essigsäure', f:'CH<sub>3</sub>COOH', z:1},
+  {n:'Schwefelsäure', f:'H<sub>2</sub>SO<sub>4</sub>', z:2},
+  {n:'Milchsäure', f:'CH<sub>3</sub>CH(OH)COOH', z:1, milk:true}
+];
+function genTitCalc(){
+  const a = rnd(T_CALC);
+  const VP = rnd([10,20,25]); const cM = rnd([0.1,0.2,0.05]); const VM = Math.round((6+Math.random()*16)*10)/10;
+  const nM = cM*VM/1000, nS = nM/a.z, cS = nS/(VP/1000);
+  const askC = Math.random() < 0.55;
+  const probe = a.milk ? `${VP},0 mL Milch` : `${VP},0 mL ${a.n} (${a.f})`;
+  const target = a.milk ? 'der Milchsäure in der Milch' : `der ${a.n}`;
+  const stem = `Du titrierst ${probe} mit Natronlauge, c(NaOH) = ${dec(cM)} mol/L. Bis zum Farbumschlag verbrauchst du ${num(VM,1)} mL Natronlauge. Berechne ${askC?'die Stoffmengenkonzentration':'die Stoffmenge'} ${target}.`;
+  const ratio = a.z===2 ? `n(H<sub>2</sub>SO<sub>4</sub>) = ½ · n(NaOH) = <b>${pot(nS)} mol</b>` : `n(${a.milk?'Milchsäure':a.f}) = n(NaOH) = ${pot(nS)} mol (Verhältnis 1 : 1)`;
+  const step1 = `n(NaOH) = c · V = ${dec(cM)} mol/L · ${num(VM,1)} · 10<sup>−3</sup> L = ${pot(nM)} mol`;
+  if (!askC){
+    const d = [
+      {html:pot(cM*VM/a.z)+' mol', why:'Das Volumen muss in Liter umgerechnet werden: 1 mL = 10<sup>−3</sup> L.'},
+      {html:pot(cM*VP/1000/a.z)+' mol', why:'Hier wurde mit dem Volumen der Probe gerechnet. Die Stoffmenge der Maßlösung ergibt sich aus ihrem Verbrauch.'},
+      {html:pot(cM/(VM/1000)/a.z)+' mol', why:'Hier wurde dividiert statt multipliziert: n = c · V.'}
+    ];
+    if (a.z===2){ d.push({html:pot(nM)+' mol', why:'Schwefelsäure ist zweiprotonig: n(H<sub>2</sub>SO<sub>4</sub>) = ½ · n(NaOH).'}); d.push({html:pot(2*nM)+' mol', why:'Der Faktor ist falsch herum: Ein H<sub>2</sub>SO<sub>4</sub> reagiert mit zwei NaOH, also n(H<sub>2</sub>SO<sub>4</sub>) = ½ · n(NaOH).'}); }
+    return { stem, options:pick({html:pot(nS)+' mol'}, d), sol:`${step1}<br>${ratio}`, item:26 };
+  }
+  const d = [
+    {html:conc(cM*VP/VM/a.z), why:'Die Volumina sind vertauscht: c(Säure) = n(Säure) / V(Probe).'},
+    {html:conc(cS/1000), why:'Das Probevolumen muss ebenfalls in Liter umgerechnet werden.'},
+    {html:conc(cM), why:'Das ist die Konzentration der Maßlösung. Die Konzentration der Probe ergibt sich erst aus der Rechnung.'},
+    {html:conc(nS), why:'Hier fehlt die Division durch das Volumen der Probe: c = n / V.'}
+  ];
+  if (a.z===2) d.push({html:conc(2*cS), why:'Schwefelsäure ist zweiprotonig: n(H<sub>2</sub>SO<sub>4</sub>) = ½ · n(NaOH).'});
+  return {
+    stem, options:pick({html:conc(cS)}, d),
+    sol:`${step1}<br>${ratio}<br>c = n / V(Probe) = ${pot(nS)} mol / (${VP} · 10<sup>−3</sup> L) = <b>${conc(cS)}</b>`, item:26
+  };
+}
+
+/* Fehlerquellen */
+const FEHLER = [
+  {s:'Die Bürette wurde vor dem Befüllen nur mit destilliertem Wasser gespült.', a:'hoch', e:'Wasserreste verdünnen die Maßlösung. Man braucht mehr Volumen, und das Ergebnis wird zu hoch berechnet.'},
+  {s:'Du hast über den Farbumschlag hinaus titriert.', a:'hoch', e:'Der abgelesene Verbrauch ist größer als bis zum Äquivalenzpunkt nötig. Die berechnete Stoffmenge der Säure wird zu groß.'},
+  {s:'Der Erlenmeyerkolben war innen noch nass von destilliertem Wasser.', a:'kein', e:'Die Stoffmenge der Säure in der Probe ändert sich durch zusätzliches Wasser nicht. Der Verbrauch bleibt gleich.'},
+  {s:'Nach dem Abpipettieren der Probe gibst du noch etwas destilliertes Wasser in den Erlenmeyerkolben.', a:'kein', e:'Die Stoffmenge der Säure bleibt gleich. Zur Berechnung nutzt du weiterhin das abpipettierte Probevolumen.'},
+  {s:'Eine Luftblase in der Bürettenspitze entweicht während der Titration.', a:'hoch', e:'Der Flüssigkeitsstand sinkt, ohne dass Maßlösung in die Probe gelangt. Der abgelesene Verbrauch ist zu groß.'},
+  {s:'Du hast aufgehört, als sich die Lösung kurz verfärbt hat. Beim Schwenken verschwand die Farbe wieder.', a:'niedrig', e:'Der Äquivalenzpunkt war noch nicht erreicht. Der Verbrauch ist zu klein.'},
+  {s:'Die Natronlauge stand längere Zeit offen an der Luft.', a:'hoch', e:'CO<sub>2</sub> aus der Luft reagiert mit OH<sup>−</sup>. Die tatsächliche Konzentration der Maßlösung ist kleiner als angegeben, der Verbrauch steigt.'},
+  {s:'Du hast deutlich mehr Indikator zugegeben als üblich.', a:'hoch', e:'Der Indikator ist selbst eine schwache Säure und verbraucht zusätzlich Maßlösung.'},
+  {s:'Beim Schwenken sind Tropfen der Probelösung an die Kolbenwand gespritzt und wurden nicht heruntergespült.', a:'niedrig', e:'Diese Säure hat nicht mit der Maßlösung reagiert. Der Verbrauch ist zu klein.'},
+  {s:'Ein Tropfen Maßlösung hängt am Ende noch an der Bürettenspitze, ist aber schon im abgelesenen Verbrauch enthalten.', a:'hoch', e:'Der abgelesene Verbrauch ist größer als die Menge, die tatsächlich mit der Probe reagiert hat.'},
+  {s:'Die Vollpipette wurde nicht mit Probelösung vorgespült. Es hingen noch Wassertropfen darin.', a:'niedrig', e:'Die Probe wird verdünnt, im abgemessenen Volumen ist weniger Säure. Der Verbrauch ist kleiner als er sein müsste.'}
+];
+const F_LABEL = {hoch:'Die berechnete Konzentration wird zu hoch.', niedrig:'Die berechnete Konzentration wird zu niedrig.', kein:'Das hat keinen Einfluss auf das Ergebnis.'};
+function genFehler(){
+  const f = rnd(FEHLER);
+  return {
+    stem:`Titration einer Säure mit Natronlauge:<br><b>${f.s}</b><br>Wie wirkt sich das auf das Ergebnis aus?`,
+    options: ['hoch','niedrig','kein'].map(k => k===f.a ? {html:F_LABEL[k], correct:true} : {html:F_LABEL[k], why:f.e}),
+    sol: f.e, item:27
+  };
+}
+
+const CAT_TITRATION = {
+  title:'Titration mit Indikator',
+  items:{
+    21:'…das Prinzip einer Säure-Base-Titration erklären.',
+    22:'…einen beschrifteten Versuchsaufbau für eine Säure-Base-Titration mit Indikator zeichnen.',
+    23:'…die Reaktionsgleichung der Neutralisation einer Säure mit einer Base formulieren.',
+    24:'…erklären, was der Äquivalenzpunkt bedeutet.',
+    25:'…anhand des Umschlagsbereichs eines Indikators beurteilen, ob dieser für eine bestimmte Titration geeignet ist.',
+    26:'…aus dem Verbrauch der Maßlösung die Stoffmenge der unbekannten Säure und mithilfe des Volumens der Probelösung die Stoffmengenkonzentration der unbekannten Säure bestimmen.',
+    27:'…Ursachen für Messungenauigkeiten und Fehlerquellen bei der Säure-Base-Titration mit Indikator darstellen.'
+  },
+  ex:{
+    aufbau:{nr:'22', title:'Versuchsaufbau', gen:genSetup,
+      hint:'Oben: Bürette mit Maßlösung und Hahn. Unten: Erlenmeyerkolben mit Probelösung und Indikator auf dem Magnetrührer.'},
+    prinzip:{nr:'21, 24', title:'Prinzip und Äquivalenzpunkt', gen:()=>{ const q = rnd(PRINZIP); return {stem:q.q, options:pick({html:q.c}, q.d), sol:q.sol, item:q.item}; },
+      hint:'Am Äquivalenzpunkt gilt (einprotonige Säure):<div class="formula">n(OH<sup>−</sup>)<sub>zugegeben</sub> = n(Säure)<sub>Probe</sub></div>'},
+    gleichung:{item:23, nr:'23', title:'Neutralisation', gen:genNeutral,
+      hint:'Starke Säure: H<sub>3</sub>O<sup>+</sup> reagiert mit OH<sup>−</sup>. Schwache Säure: Das Säuremolekül reagiert direkt mit OH<sup>−</sup>.<div class="formula">H<sub>3</sub>O<sup>+</sup>(aq) + OH<sup>−</sup>(aq) → 2 H<sub>2</sub>O(l)</div>'},
+    indikator:{item:25, nr:'25', title:'Indikator wählen', gen:genIndik,
+      hint:'Der Umschlagsbereich muss den pH-Wert am Äquivalenzpunkt enthalten.<div class="formula">starke S. + starke B. → pH 7 · schwache S. + starke B. → pH > 7</div>'},
+    rechnen:{item:26, nr:'26', title:'Konzentration bestimmen', gen:genTitCalc,
+      hint:'1. n(NaOH) = c(NaOH) · V(NaOH) &nbsp; 2. Stoffmengenverhältnis &nbsp; 3. c(Säure) = n(Säure) / V(Probe)<div class="formula">Volumina in Liter: 1 mL = 10<sup>−3</sup> L</div>'},
+    fehler:{item:27, nr:'27', title:'Fehlerquellen', gen:genFehler,
+      hint:'Frage dich: Wird der abgelesene Verbrauch dadurch größer oder kleiner als der richtige?<div class="formula">mehr Verbrauch → Ergebnis zu hoch</div>'}
+  },
+  first:'aufbau',
+  where:'Wiederholung Säure-Base-Titration mit Indikator, AB Säure-Base-Titration mit Indikator am Beispiel Milch, Lernübersichten in Teams',
+  info:`
+    <p><b>Prinzip:</b> Im Erlenmeyerkolben befindet sich die Probelösung mit unbekannter Konzentration, genau abgemessen mit der Vollpipette, und einige Tropfen Indikator. Aus der Bürette tropft man die Maßlösung mit bekannter Konzentration zu, bis der Indikator umschlägt.</p>
+    <div class="formula">${aq(sH3O)} + ${aq(sOH)} → 2 ${lq(sH2O)}</div>
+    <p><b>Äquivalenzpunkt:</b> Die zugegebene Stoffmenge an OH<sup>−</sup> entspricht der Stoffmenge der Säure in der Probe. Der <b>Endpunkt</b> ist der beobachtete Farbumschlag. Er soll möglichst nah am Äquivalenzpunkt liegen.</p>
+    <p><b>Auswertung</b> (einprotonige Säure, bei H<sub>2</sub>SO<sub>4</sub> mit Faktor ½):</p>
+    <div class="formula">n(Säure) = c(Maßlösung) · V(Maßlösung) &nbsp;→&nbsp; c(Säure) = n(Säure) / V(Probe)</div>
+    <p><b>Indikatorwahl:</b> Der Umschlagsbereich muss den pH-Wert am Äquivalenzpunkt enthalten.</p>
+    <div class="tablewrap"><table class="ind">
+      <thead><tr><th>Indikator</th><th>Umschlagsbereich</th><th>Farbwechsel</th></tr></thead>
+      <tbody>${INDIK.map(i=>`<tr><td>${i.n}</td><td>pH ${num(i.lo,1)}–${num(i.hi,1)}</td><td>${i.c}</td></tr>`).join('')}</tbody>
+    </table></div>`
+};
+
+/* ========== Kategorie 5: pH-metrische Titration ========== */
+/* exakte Titrationskurve über die Ladungsbilanz (Säure HnA mit NaOH) */
+function phAt(pks, ca, Va, cb, Vb){
+  const V = (Va+Vb)/1000, C = ca*Va/1000/V, Na = cb*Vb/1000/V, Ka = pks.map(p=>Math.pow(10,-p));
+  const f = pH => {
+    const h = Math.pow(10,-pH), oh = 1e-14/h;
+    const t = [1]; let pr = 1; Ka.forEach(k => { pr *= k/h; t.push(pr); });
+    const sum = t.reduce((a,b)=>a+b,0); let ch = 0; t.forEach((x,i)=> ch += i*x/sum);
+    return h + Na - oh - C*ch;
+  };
+  let lo = 0, hi = 14;
+  for (let i=0;i<60;i++){ const m = (lo+hi)/2; if (f(m) > 0) lo = m; else hi = m; }
+  return (lo+hi)/2;
+}
+const HCL = {n:'Salzsäure', f:'HCl', pks:[-6]};
+const H3PO4 = {n:'Phosphorsäure', f:'H<sub>3</sub>PO<sub>4</sub>', pks:[2.13,7.21,12.32]};
+const weakAcid = () => { const a = rnd(WEAK); return {n:a.n, f:a.f, pks:[a.pks]}; };
+
+function plot(spec){
+  const {vmax, lines, marks=[], Va=20, cb=0.1} = spec;
+  const L=44, R=350, T=12, B=204;
+  const sx = v => L + v/vmax*(R-L), sy = p => B - p/14*(B-T);
+  const vstep = vmax > 40 ? 10 : 5;
+  let g = '';
+  for (let p=0;p<=14;p+=1) g += `<line x1="${L}" x2="${R}" y1="${sy(p).toFixed(1)}" y2="${sy(p).toFixed(1)}" class="${p%2?'ch-grid2':'ch-grid'}"/>`;
+  for (let v=0; v<=vmax+0.01; v+=vstep/2) g += `<line y1="${T}" y2="${B}" x1="${sx(v).toFixed(1)}" x2="${sx(v).toFixed(1)}" class="${(v/vstep)%1?'ch-grid2':'ch-grid'}"/>`;
+  let ticks = '';
+  for (let p=0;p<=14;p+=2) ticks += `<text x="${L-6}" y="${(sy(p)+3.5).toFixed(1)}" class="ch-tick" text-anchor="end">${p}</text>`;
+  for (let v=0; v<=vmax+0.01; v+=vstep) ticks += `<text x="${sx(v).toFixed(1)}" y="${B+14}" class="ch-tick" text-anchor="middle">${v}</text>`;
+  let paths = '';
+  lines.forEach((ln,k) => {
+    let d = ''; const N = 320;
+    for (let i=0;i<=N;i++){ const v = vmax*i/N; const p = phAt(ln.pks, ln.ca, Va, cb, v); d += (i?'L':'M')+sx(v).toFixed(1)+' '+sy(p).toFixed(1); }
+    paths += `<path d="${d}" class="ch-line${ln.alt?' alt':''}"/>`;
+    if (ln.label) paths += `<text x="${sx(vmax*0.3).toFixed(1)}" y="${(sy(phAt(ln.pks, ln.ca, Va, cb, vmax*0.3))-9).toFixed(1)}" class="ch-lab${ln.alt?' alt':''}" text-anchor="middle">${ln.label}</text>`;
+  });
+  let mk = '';
+  marks.forEach(m => {
+    const p = phAt(lines[0].pks, lines[0].ca, Va, cb, m.v); const x = sx(m.v), y = sy(p);
+    mk += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" class="ch-mk"/><text x="${(m.v<vmax*0.05?x+8:x-8).toFixed(1)}" y="${(y-8).toFixed(1)}" class="ch-mkt" text-anchor="${m.v<vmax*0.05?'start':'end'}">${m.label}</text>`;
+  });
+  return `<svg class="chart" viewBox="0 0 360 236" role="img" aria-label="Titrationskurve: pH gegen Volumen Natronlauge">
+    ${g}<line x1="${L}" y1="${B}" x2="${R}" y2="${B}" class="ch-axis"/><line x1="${L}" y1="${T}" x2="${L}" y2="${B}" class="ch-axis"/>
+    ${ticks}<text x="${(L+R)/2}" y="232" class="ch-title" text-anchor="middle">V(NaOH) in mL, c(NaOH) = ${dec(cb)} mol/L</text>
+    <text x="12" y="${(T+B)/2}" class="ch-title" text-anchor="middle" transform="rotate(-90 12 ${(T+B)/2})">pH</text>
+    ${paths}${mk}</svg>`;
+}
+const chartBox = (svg, cap) => `<span class="chartwrap">${svg}${cap?`<span class="chcap">${cap}</span>`:''}</span>`;
+const roundUp = (x,s) => Math.ceil(x/s)*s;
+
+/* Kurve lesen */
+function genCurve(){
+  const strong = Math.random() < 0.25;
+  const acid = strong ? HCL : weakAcid();
+  const ca = rnd([0.1,0.05,0.08,0.12]); const Va = 20, cb = 0.1;
+  const Veq = ca*Va/cb; const vmax = roundUp(Veq*1.6,5);
+  const ph = v => phAt(acid.pks, ca, Va, cb, v);
+  const intro = `${Va} mL einer Säure wurden mit Natronlauge (c = ${dec(cb)} mol/L) titriert.`;
+  const types = strong ? ['aep','conc'] : ['aep','conc','points','pks','which'];
+  const t = rnd(types);
+  if (t === 'aep'){
+    let d = [
+      {html:`V = ${num(Veq/2,1)} mL`, why:'Das ist der Halbäquivalenzpunkt. Der Äquivalenzpunkt liegt in der Mitte des steilen pH-Sprungs.'},
+      {html:`V = ${num(Veq*1.5,1)} mL`, why:'Hier ist der Sprung schon vorbei. Der Äquivalenzpunkt liegt in der Mitte des steilen Anstiegs.'}
+    ];
+    if (!strong){ let lo=0, hi=Veq; for (let i=0;i<50;i++){ const m=(lo+hi)/2; if (ph(m)<7) lo=m; else hi=m; } if (Veq-lo > 0.4) d.push({html:`V = ${num(lo,1)} mL`, why:'Hier ist pH = 7 erreicht. Bei einer schwachen Säure liegt der Äquivalenzpunkt aber im basischen Bereich.'}); }
+    d.push({html:`V = ${num(Veq*0.8,1)} mL`, why:'Der Anstieg beginnt hier erst. Der Äquivalenzpunkt ist der Wendepunkt in der Mitte des Sprungs.'});
+    return { stem:chartBox(plot({vmax, lines:[{pks:acid.pks, ca}], Va, cb}))+`${intro} Bei welchem Volumen liegt der Äquivalenzpunkt?`,
+      options:pick({html:`V = ${num(Veq,1)} mL`}, d),
+      sol:`Äquivalenzpunkt = Wendepunkt im steilsten Bereich des Sprungs: V ≈ ${num(Veq,1)} mL, pH ≈ ${num(ph(Veq),1)}.`, item:32 };
+  }
+  if (t === 'conc'){
+    const c = ca;
+    return { stem:chartBox(plot({vmax, lines:[{pks:acid.pks, ca}], Va, cb}))+`${intro} Bestimme die Konzentration der Säure (einprotonig).`,
+      options:pick({html:conc(c)}, [
+        {html:conc(cb*Va/Veq), why:'Die Volumina sind vertauscht: c(Säure) = c(NaOH) · V(ÄP) / V(Probe).'},
+        {html:conc(cb*Veq/2/Va), why:'Hier wurde das Volumen am Halbäquivalenzpunkt verwendet. Entscheidend ist der Äquivalenzpunkt.'},
+        {html:conc(cb), why:'Das ist die Konzentration der Natronlauge. Die Konzentration der Säure folgt aus V(ÄP).'},
+        {html:conc(cb*Veq*1.5/Va), why:'Lies den Äquivalenzpunkt in der Mitte des Sprungs ab, nicht am Ende.'}
+      ]),
+      sol:`V(ÄP) ≈ ${num(Veq,1)} mL → n(NaOH) = ${dec(cb)} mol/L · ${num(Veq,1)} · 10<sup>−3</sup> L = ${pot(cb*Veq/1000)} mol = n(Säure)<br>c(Säure) = n / V(Probe) = ${pot(cb*Veq/1000)} mol / 0,020 L = <b>${conc(c)}</b>`, item:39 };
+  }
+  if (t === 'points'){
+    const roles = shuffle([{k:'start', v:0, nm:'Anfangspunkt'}, {k:'half', v:Veq/2, nm:'Halbäquivalenzpunkt'}, {k:'aep', v:Veq, nm:'Äquivalenzpunkt'}, {k:'after', v:Math.min(Veq*1.45, vmax*0.95), nm:'Punkt im Überschuss an Natronlauge'}]);
+    roles.forEach((r,i) => r.label = 'ABCD'[i]);
+    const target = rnd(roles.filter(r => r.k!=='after'));
+    const marks = roles.slice().sort((a,b)=>a.v-b.v).map(r => ({v:r.v, label:r.label}));
+    const itm = {start:34, half:33, aep:32}[target.k];
+    return { stem:chartBox(plot({vmax, lines:[{pks:acid.pks, ca}], marks, Va, cb}))+`Titration einer schwachen Säure mit Natronlauge. Welcher Punkt ist der <b>${target.nm}</b>?`,
+      options: roles.slice().sort((a,b)=>a.label<b.label?-1:1).map(r => r===target ? {html:`Punkt ${r.label}`, correct:true} : {html:`Punkt ${r.label}`, why:`Punkt ${r.label} ist der ${r.nm}.`}),
+      sol: roles.slice().sort((a,b)=>a.v-b.v).map(r=>`${r.label}: ${r.nm}`).join('<br>'), item:itm };
+  }
+  if (t === 'pks'){
+    const pk = ph(Veq/2), p0 = ph(0), pe = ph(Veq);
+    const d = [{html:`pKₛ ≈ ${num(p0,1)}`, why:'Das ist der Anfangs-pH. Den pKₛ-Wert liest man am Halbäquivalenzpunkt ab.'},
+               {html:`pKₛ ≈ ${num(pe,1)}`, why:'Das ist der pH-Wert am Äquivalenzpunkt. Den pKₛ-Wert liest man am Halbäquivalenzpunkt ab.'},
+               {html:`pKₛ ≈ ${num(14-pk,1)}`, why:'Hier wurde 14 − pH gerechnet. Am Halbäquivalenzpunkt gilt direkt pH = pKₛ.'}].filter(o => Math.abs(parseFloat(o.html.split('≈ ')[1].replace(',','.').replace('−','-'))-pk) > 0.4);
+    return { stem:chartBox(plot({vmax, lines:[{pks:acid.pks, ca}], Va, cb}))+`${intro} Bestimme aus der Kurve den pKₛ-Wert der Säure.`,
+      options:pick({html:`pKₛ ≈ ${num(pk,1)}`}, d),
+      sol:`V(ÄP) ≈ ${num(Veq,1)} mL → Halbäquivalenzpunkt bei ${num(Veq/2,1)} mL.<br>Dort gilt c(HA) = c(A<sup>−</sup>), also pH = pKₛ ≈ <b>${num(pk,1)}</b>.`, item:33 };
+  }
+  // which
+  const pk = acid.pks[0];
+  const others = shuffle(WEAK.filter(w => Math.abs(w.pks-pk) >= 0.3)).slice(0,3);
+  return { stem:chartBox(plot({vmax, lines:[{pks:acid.pks, ca}], Va, cb}))+`${intro} Um welche Säure handelt es sich?`,
+    options: shuffle([{html:`${acid.n} (pKₛ = ${num(pk)})`, correct:true}, ...others.map(w => ({html:`${w.n} (pKₛ = ${num(w.pks)})`, why:`Am Halbäquivalenzpunkt (V ≈ ${num(Veq/2,1)} mL) liest man pH ≈ ${num(ph(Veq/2),1)} ab. Das passt nicht zu pKₛ = ${num(w.pks)}.`}))]),
+    sol:`Halbäquivalenzpunkt bei V ≈ ${num(Veq/2,1)} mL: pH = pKₛ ≈ ${num(ph(Veq/2),1)} → ${acid.n}`, item:39 };
+}
+
+/* starke, schwache, mehrprotonige Säure unterscheiden */
+const KURVE_DESC = {
+  strong:'Starke Säure: niedriger Anfangs-pH (≈ −lg c), kein flacher Pufferbereich, großer pH-Sprung mit Äquivalenzpunkt bei pH 7.',
+  weak:'Schwache Säure: höherer Anfangs-pH, flacher Pufferbereich um den Halbäquivalenzpunkt, kleinerer Sprung, Äquivalenzpunkt im basischen Bereich.',
+  poly:'Mehrprotonige Säure: mehrere pH-Sprünge, weil die Protonen stufenweise abgegeben werden.'
+};
+const KURVE_LAB = {strong:'eine starke, einprotonige Säure', weak:'eine schwache, einprotonige Säure', poly:'eine mehrprotonige Säure'};
+const VERGLEICH = [
+  {item:38, q:'Woran erkennt man in der Titrationskurve, dass eine schwache Säure vorliegt (verglichen mit Salzsäure gleicher Konzentration)?',
+   c:'höherer Anfangs-pH, flacher Pufferbereich, kleinerer pH-Sprung und Äquivalenzpunkt im basischen Bereich',
+   d:[{html:'niedrigerer Anfangs-pH und größerer pH-Sprung', why:'Umgekehrt: Die schwache Säure ist kaum protolysiert, ihr Anfangs-pH ist höher und der Sprung kleiner.'},
+      {html:'Der Äquivalenzpunkt liegt bei einem größeren Volumen.', why:'Bei gleicher Konzentration und gleichem Volumen enthalten beide Proben die gleiche Stoffmenge Säure. Der Äquivalenzpunkt liegt beim gleichen Volumen.'},
+      {html:'Es gibt keinen Äquivalenzpunkt.', why:'Auch schwache Säuren werden vollständig neutralisiert und haben einen Äquivalenzpunkt.'}],
+   sol:KURVE_DESC.weak},
+  {item:35, q:'Je 20 mL Salzsäure und Essigsäure (c jeweils 0,1 mol/L) werden mit Natronlauge (0,1 mol/L) titriert. Was gilt für das Volumen bis zum Äquivalenzpunkt?',
+   c:'Es ist gleich (20 mL), weil beide Proben die gleiche Stoffmenge Säure enthalten.',
+   d:[{html:'Bei Essigsäure ist es kleiner, weil sie weniger protolysiert ist.', why:'NaOH reagiert auch mit den nicht protolysierten CH<sub>3</sub>COOH-Molekülen. Es zählt die gesamte Stoffmenge Säure.'},
+      {html:'Bei Salzsäure ist es kleiner, weil HCl stärker ist.', why:'Die Säurestärke beeinflusst die Form der Kurve, nicht das Volumen bis zum Äquivalenzpunkt.'},
+      {html:'Bei Essigsäure ist es doppelt so groß, weil sie zwei O-Atome hat.', why:'Essigsäure ist einprotonig. Das Verhältnis zu NaOH ist 1 : 1.'}],
+   sol:'n(Säure) = 0,1 mol/L · 0,020 L = 2 · 10<sup>−3</sup> mol in beiden Fällen → V(ÄP) = 20 mL'},
+  {item:35, q:'Warum liegt der Anfangs-pH der Essigsäure höher als der von Salzsäure gleicher Konzentration?',
+   c:'Essigsäure protolysiert nur zu einem kleinen Teil, daher ist c(H<sub>3</sub>O<sup>+</sup>) viel kleiner als c₀.',
+   d:[{html:'Weil Essigsäure verdünnter ist.', why:'Die Konzentrationen sind gleich. Der Unterschied liegt im Protolysegrad.'},
+      {html:'Weil Essigsäure eine Base ist.', why:'Essigsäure ist eine schwache Säure.'},
+      {html:'Weil die Natronlauge mit Essigsäure schneller reagiert.', why:'Am Anfang wurde noch keine Natronlauge zugegeben.'}],
+   sol:'HCl: pH = −lg 0,1 = 1,0. CH<sub>3</sub>COOH: pH = ½ · (4,75 + 1) ≈ 2,9.'}
+];
+function genCompare(){
+  if (Math.random() < 0.35){ const q = rnd(VERGLEICH); return {stem:q.q, options:pick({html:q.c}, q.d), sol:q.sol, item:q.item}; }
+  if (Math.random() < 0.3){
+    const w = weakAcid();
+    return { stem:chartBox(plot({vmax:30, lines:[{pks:HCL.pks, ca:0.1, label:'A'}, {pks:w.pks, ca:0.1, alt:true, label:'B'}]}))+`Zwei Säuren (je 20 mL, c = 0,1 mol/L) wurden titriert. Welche Aussage ist richtig?`,
+      options:pick({html:'A ist die starke Säure, B die schwache: B startet höher, hat einen Pufferbereich und einen Äquivalenzpunkt im Basischen.'}, [
+        {html:'B ist die starke Säure, weil ihr Äquivalenzpunkt höher liegt.', why:'Ein Äquivalenzpunkt im basischen Bereich ist typisch für eine schwache Säure.'},
+        {html:'A ist die schwache Säure, weil ihr Sprung größer ist.', why:'Ein großer Sprung und niedriger Anfangs-pH sind typisch für eine starke Säure.'},
+        {html:'Beide Säuren sind gleich stark, weil der Äquivalenzpunkt beim gleichen Volumen liegt.', why:'Das Volumen zeigt nur die gleiche Stoffmenge. Die Stärke erkennt man am Kurvenverlauf.'}
+      ]),
+      sol:`${KURVE_DESC.strong}<br>${KURVE_DESC.weak}`, item:38 };
+  }
+  const k = rnd(['strong','weak','weak','poly']);
+  const acid = k==='strong' ? HCL : k==='poly' ? H3PO4 : weakAcid();
+  const ca = k==='poly' ? 0.05 : 0.1; const vmax = k==='poly' ? 30 : 30;
+  return { stem:chartBox(plot({vmax, lines:[{pks:acid.pks, ca}]}))+'Welche Art von Säure wurde hier titriert (20 mL Probe)?',
+    options:['strong','weak','poly'].map(x => x===k ? {html:KURVE_LAB[x], correct:true} : {html:KURVE_LAB[x], why:KURVE_DESC[k]}),
+    sol:KURVE_DESC[k]+` (Hier: ${acid.n})`, item:38 };
+}
+
+/* Teilchenebene */
+const ROLE_TXT = {
+  start:{t:'fast nur HA-Moleküle, wenig H<sub>3</sub>O<sup>+</sup> und A<sup>−</sup>', e:'Vor der Zugabe von Natronlauge liegt nur die schwache Säure vor. Sie ist kaum protolysiert.'},
+  half:{t:'HA und A<sup>−</sup> in gleicher Konzentration', e:'Die Hälfte der Säure ist zu A<sup>−</sup> umgesetzt: c(HA) = c(A<sup>−</sup>), daher pH = pKₛ (Puffer).'},
+  aep:{t:'fast nur A<sup>−</sup>-Ionen (und Na<sup>+</sup>)', e:'Die Säure ist vollständig zu A<sup>−</sup> umgesetzt. A<sup>−</sup> reagiert als Base schwach basisch.'},
+  after:{t:'A<sup>−</sup>-Ionen und überschüssige OH<sup>−</sup>-Ionen (und Na<sup>+</sup>)', e:'Die Säure ist verbraucht. Weitere Natronlauge bleibt als OH<sup>−</sup> im Überschuss.'}
+};
+const TEILCHEN = [
+  {item:36, q:'Warum verläuft die Kurve einer schwachen Säure um den Halbäquivalenzpunkt so flach?',
+   c:'Es liegt ein Puffer aus HA und A<sup>−</sup> vor. Zugegebene OH<sup>−</sup>-Ionen reagieren mit HA zu A<sup>−</sup> und Wasser, der pH-Wert ändert sich kaum.',
+   d:[{html:'Weil dort keine Reaktion stattfindet.', why:'Jede zugegebene OH<sup>−</sup>-Portion reagiert mit HA. Das Verhältnis HA/A<sup>−</sup> ändert sich nur langsam.'},
+      {html:'Weil dort die Natronlauge verbraucht ist.', why:'Natronlauge wird laufend zugegeben. Sie wird aber von HA abgefangen.'},
+      {html:'Weil dort pH = 7 erreicht ist.', why:'Der Pufferbereich liegt um pH = pKₛ, bei Essigsäure also um 4,75.'}],
+   sol:'HA(aq) + OH<sup>−</sup>(aq) → A<sup>−</sup>(aq) + H<sub>2</sub>O(l): OH<sup>−</sup> wird abgefangen → Puffer'},
+  {item:36, q:'Warum steigt der pH-Wert in der Nähe des Äquivalenzpunkts sprunghaft an?',
+   c:'Die Säure ist fast vollständig umgesetzt. Schon wenige Tropfen Natronlauge liefern OH<sup>−</sup>-Ionen, die nicht mehr abgefangen werden.',
+   d:[{html:'Weil dort die Säure plötzlich stärker wird.', why:'Die Säurestärke ist konstant. Es fehlt einfach Säure, die OH<sup>−</sup> abfangen könnte.'},
+      {html:'Weil die Natronlauge dort schneller zutropft.', why:'Man gibt gleichmäßig oder sogar langsamer zu. Der Sprung entsteht durch die Teilchen in der Lösung.'},
+      {html:'Weil sich dort ein Niederschlag bildet.', why:'Es entsteht kein Niederschlag. Das Salz bleibt gelöst.'}],
+   sol:'Kein HA mehr als Protonendonator → OH<sup>−</sup> reichert sich an → pH steigt stark'},
+  {item:33, q:'Was gilt am Halbäquivalenzpunkt einer schwachen Säure?',
+   c:'c(HA) = c(A<sup>−</sup>). Aus dem MWG folgt pH = pKₛ.',
+   d:[{html:'c(H<sub>3</sub>O<sup>+</sup>) = c(OH<sup>−</sup>), also pH = 7.', why:'Das gilt am Äquivalenzpunkt einer starken Säure, nicht am Halbäquivalenzpunkt.'},
+      {html:'Die Hälfte des Volumens der Probelösung ist verdampft.', why:'„Halb“ bezieht sich auf die Hälfte der zur Neutralisation nötigen Natronlauge.'},
+      {html:'pH = ½ · pKₛ', why:'Aus Kₛ = c(H<sub>3</sub>O<sup>+</sup>) · c(A<sup>−</sup>) / c(HA) mit c(HA) = c(A<sup>−</sup>) folgt c(H<sub>3</sub>O<sup>+</sup>) = Kₛ, also pH = pKₛ.'}],
+   sol:'Kₛ = c(H<sub>3</sub>O<sup>+</sup>) · c(A<sup>−</sup>)/c(HA), mit c(HA) = c(A<sup>−</sup>) → c(H<sub>3</sub>O<sup>+</sup>) = Kₛ → pH = pKₛ'},
+  {item:37, q:'Warum liegt der Äquivalenzpunkt bei der Titration einer schwachen Säure mit Natronlauge im basischen Bereich?',
+   c:'Am Äquivalenzpunkt liegt die korrespondierende Base A<sup>−</sup> vor. Sie reagiert mit Wasser zu HA und OH<sup>−</sup>.',
+   d:[{html:'Weil man zu viel Natronlauge zugegeben hat.', why:'Am Äquivalenzpunkt sind die Stoffmengen genau äquivalent. Der basische pH kommt von A<sup>−</sup>.'},
+      {html:'Weil schwache Säuren basisch sind.', why:'Die Säure ist am Äquivalenzpunkt verbraucht. Ihre korrespondierende Base reagiert basisch.'},
+      {html:'Weil Na<sup>+</sup>-Ionen basisch reagieren.', why:'Na<sup>+</sup> ist ein Begleit-Ion und reagiert nicht mit Wasser.'}],
+   sol:'A<sup>−</sup>(aq) + H<sub>2</sub>O(l) ⇌ HA(aq) + OH<sup>−</sup>(aq) → pH > 7'}
+];
+function genTeilchen(){
+  if (Math.random() < 0.45){ const q = rnd(TEILCHEN); return {stem:q.q, options:pick({html:q.c}, q.d), sol:q.sol, item:q.item}; }
+  const acid = weakAcid(); const ca = 0.1, Veq = 20, vmax = 30;
+  const k = rnd(['start','half','aep','after']);
+  const v = {start:0, half:10, aep:20, after:27}[k];
+  return { stem:chartBox(plot({vmax, lines:[{pks:acid.pks, ca}], marks:[{v, label:'X'}]}))+`Titration einer schwachen Säure HA mit Natronlauge. Welche Teilchen liegen an Punkt X (außer Wasser) überwiegend vor?`,
+    options: Object.keys(ROLE_TXT).map(r => r===k ? {html:ROLE_TXT[r].t, correct:true} : {html:ROLE_TXT[r].t, why:ROLE_TXT[k].e}),
+    sol: ROLE_TXT[k].e, item: k==='aep' ? 37 : 36 };
+}
+
+/* Mehrprotonige Säuren */
+function genPoly(){
+  const ca = rnd([0.05,0.04,0.06]); const Va = 20, cb = 0.1; const V1 = ca*Va/cb, V2 = 2*V1; const vmax = roundUp(V2*1.25,5);
+  const ph = v => phAt(H3PO4.pks, ca, Va, cb, v);
+  const t = rnd(['particles','conc','pks2','why','ratio']);
+  const fig = marks => chartBox(plot({vmax, lines:[{pks:H3PO4.pks, ca}], marks, Va, cb}));
+  const intro = `${Va} mL Phosphorsäure wurden mit Natronlauge titriert.`;
+  if (t === 'particles'){
+    const P = [
+      {v:0, t:'H<sub>3</sub>PO<sub>4</sub>-Moleküle', e:'Am Anfang liegt nur Phosphorsäure vor.'},
+      {v:V1, t:'H<sub>2</sub>PO<sub>4</sub><sup>−</sup>-Ionen', e:'Am 1. Äquivalenzpunkt hat jedes H<sub>3</sub>PO<sub>4</sub> ein Proton abgegeben.'},
+      {v:1.5*V1, t:'H<sub>2</sub>PO<sub>4</sub><sup>−</sup> und HPO<sub>4</sub><sup>2−</sup> in gleicher Konzentration', e:'Das ist der 2. Halbäquivalenzpunkt: Die Hälfte des H<sub>2</sub>PO<sub>4</sub><sup>−</sup> ist zu HPO<sub>4</sub><sup>2−</sup> umgesetzt.'},
+      {v:V2, t:'HPO<sub>4</sub><sup>2−</sup>-Ionen', e:'Am 2. Äquivalenzpunkt hat jedes H<sub>3</sub>PO<sub>4</sub> zwei Protonen abgegeben.'}
+    ];
+    const k = rnd(P);
+    return { stem:fig([{v:k.v, label:'X'}])+`${intro} Welche phosphorhaltigen Teilchen liegen an Punkt X überwiegend vor?`,
+      options: P.map(p => p===k ? {html:p.t, correct:true} : {html:p.t, why:k.e}),
+      sol:k.e, item:40 };
+  }
+  if (t === 'conc'){
+    const c = ca;
+    return { stem:fig([])+`${intro} c(NaOH) = ${dec(cb)} mol/L. Bestimme die Konzentration der Phosphorsäure.`,
+      options:pick({html:conc(c)}, [
+        {html:conc(cb*V2/Va), why:'Am 2. Äquivalenzpunkt haben zwei Protonen pro Molekül reagiert. Mit V(ÄP<sub>2</sub>) gilt n(H<sub>3</sub>PO<sub>4</sub>) = ½ · n(NaOH).'},
+        {html:conc(cb*Va/V1), why:'Die Volumina sind vertauscht: c = c(NaOH) · V(ÄP<sub>1</sub>) / V(Probe).'},
+        {html:conc(cb), why:'Das ist die Konzentration der Natronlauge.'}
+      ]),
+      sol:`1. Äquivalenzpunkt bei V ≈ ${num(V1,1)} mL: n(H<sub>3</sub>PO<sub>4</sub>) = n(NaOH) = ${pot(cb*V1/1000)} mol<br>c = ${pot(cb*V1/1000)} mol / 0,020 L = <b>${conc(c)}</b><br>(Alternativ: ½ · n(NaOH) am 2. Äquivalenzpunkt)`, item:40 };
+  }
+  if (t === 'pks2'){
+    const pk = ph(1.5*V1);
+    return { stem:fig([{v:1.5*V1, label:'X'}])+`${intro} Punkt X liegt genau zwischen dem 1. und 2. Äquivalenzpunkt. Was kann man dort ablesen?`,
+      options:pick({html:`pKₛ₂ (H<sub>2</sub>PO<sub>4</sub><sup>−</sup>) ≈ ${num(pk,1)}`}, [
+        {html:`pKₛ₁ (H<sub>3</sub>PO<sub>4</sub>) ≈ ${num(pk,1)}`, why:'Punkt X ist der 2. Halbäquivalenzpunkt. Hier gilt c(H<sub>2</sub>PO<sub>4</sub><sup>−</sup>) = c(HPO<sub>4</sub><sup>2−</sup>), also pH = pKₛ₂.'},
+        {html:`den pH-Wert des 2. Äquivalenzpunkts (${num(pk,1)})`, why:'Der 2. Äquivalenzpunkt liegt erst in der Mitte des zweiten Sprungs.'},
+        {html:`die Konzentration der Phosphorsäure (${num(pk,1)} mol/L)`, why:'Die Konzentration folgt aus dem Volumen am Äquivalenzpunkt, nicht aus dem pH-Wert.'}
+      ]),
+      sol:`2. Halbäquivalenzpunkt: c(H<sub>2</sub>PO<sub>4</sub><sup>−</sup>) = c(HPO<sub>4</sub><sup>2−</sup>) → pH = pKₛ₂ ≈ ${num(pk,1)} (Tabellenwert 7,21)`, item:40 };
+  }
+  if (t === 'ratio'){
+    return { stem:fig([])+`${intro} Wie verhalten sich die Volumina am 1. und 2. Äquivalenzpunkt?`,
+      options:pick({html:'V(ÄP<sub>2</sub>) = 2 · V(ÄP<sub>1</sub>)'}, [
+        {html:'V(ÄP<sub>2</sub>) = V(ÄP<sub>1</sub>) + 1 mL', why:'Für die zweite Stufe braucht man genauso viel Natronlauge wie für die erste.'},
+        {html:'V(ÄP<sub>2</sub>) = 3 · V(ÄP<sub>1</sub>)', why:'Bis zum 2. Äquivalenzpunkt haben zwei Protonen reagiert, nicht drei.'},
+        {html:'V(ÄP<sub>2</sub>) = ½ · V(ÄP<sub>1</sub>)', why:'Der 2. Äquivalenzpunkt kommt nach dem ersten, er braucht also mehr Natronlauge.'}
+      ]),
+      sol:`Jede Stufe verbraucht n(NaOH) = n(H<sub>3</sub>PO<sub>4</sub>): V(ÄP<sub>1</sub>) ≈ ${num(V1,1)} mL, V(ÄP<sub>2</sub>) ≈ ${num(V2,1)} mL`, item:40 };
+  }
+  return { stem:fig([])+`${intro} Warum zeigt die Kurve zwei pH-Sprünge, obwohl H<sub>3</sub>PO<sub>4</sub> drei Protonen abgeben kann?`,
+    options:pick({html:'Die Protonen werden stufenweise abgegeben, jede Stufe hat einen eigenen Äquivalenzpunkt. Der dritte Sprung fehlt, weil HPO<sub>4</sub><sup>2−</sup> eine sehr schwache Säure ist (pKₛ₃ = 12,32).'}, [
+      {html:'Weil das dritte Proton nicht abgegeben werden kann, da H<sub>3</sub>PO<sub>4</sub> nur zweiprotonig ist.', why:'H<sub>3</sub>PO<sub>4</sub> ist dreiprotonig. Das dritte Proton wird mit Natronlauge aber nur unvollständig abgegeben.'},
+      {html:'Weil die Natronlauge nicht ausgereicht hat.', why:'Auch bei mehr Natronlauge entsteht kein deutlicher dritter Sprung, da der pH dann schon um 12 liegt.'},
+      {html:'Weil alle drei Protonen gleichzeitig abgegeben werden.', why:'Dann gäbe es nur einen Sprung. Die Stufen unterscheiden sich in ihren pKₛ-Werten.'}
+    ]),
+    sol:'pKₛ₁ = 2,13, pKₛ₂ = 7,21, pKₛ₃ = 12,32 → zwei sichtbare Sprünge', item:40 };
+}
+
+/* Prinzip, Aufbau, Messung */
+const PH_LABELS = ['Bürette','Maßlösung (Natronlauge)','Becherglas mit Probelösung','pH-Elektrode','pH-Meter','Magnetrührer mit Rührfisch','Stativ mit Bürettenklemme'];
+function phFig(){
+  let ticks=''; for (let y=54;y<=204;y+=10) ticks += `<line x1="118" y1="${y}" x2="${(y-54)%50===0?124:121}" y2="${y}" class="tf-line"/>`;
+  const badges = [[100,36],[100,140],[78,272],[166,214],[212,292],[94,306],[34,180]];
+  const b = badges.map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="9" class="tf-num"/><text x="${x}" y="${y+4}" class="tf-numt">${i+1}</text>`).join('');
+  return `<svg class="tfig" viewBox="0 0 252 334" role="img" aria-label="Versuchsaufbau einer pH-metrischen Titration mit nummerierten Bauteilen">
+    <rect x="22" y="318" width="226" height="8" rx="2" class="tf-metal"/>
+    <rect x="50" y="14" width="5" height="304" class="tf-metal"/>
+    <rect x="55" y="74" width="63" height="6" class="tf-metal"/>
+    <rect x="114" y="70" width="20" height="14" rx="2" class="tf-clamp"/>
+    <rect x="118" y="44" width="12" height="170" class="tf-mass"/>
+    <rect x="118" y="14" width="12" height="200" class="tf-glass"/>
+    ${ticks}
+    <rect x="117" y="214" width="14" height="12" rx="2" class="tf-tap"/>
+    <rect x="108" y="218" width="32" height="4" rx="2" class="tf-tap"/>
+    <path d="M122 226 L122 240 L124 244 L126 240 L126 226" class="tf-glass"/>
+    <rect x="78" y="294" width="92" height="24" rx="3" class="tf-stir"/>
+    <rect x="92" y="262" width="64" height="32" class="tf-probe"/>
+    <path d="M92 244 L92 294 L156 294 L156 244" class="tf-glass"/>
+    <rect x="104" y="289" width="16" height="3" rx="1.5" class="tf-bar"/>
+    <path d="M146 196 C146 170, 200 170, 212 236" class="tf-cable"/>
+    <rect x="142" y="196" width="8" height="86" rx="3" class="tf-elec"/>
+    <circle cx="146" cy="285" r="5" class="tf-elec"/>
+    <rect x="180" y="236" width="64" height="40" rx="4" class="tf-meter"/>
+    <rect x="186" y="242" width="52" height="18" rx="2" class="tf-disp"/>
+    <text x="212" y="255" class="tf-dispt">pH 4,52</text>
+    ${b}
+  </svg>`;
+}
+const PRINZIP_PH = [
+  {item:28, q:'Was ist das Prinzip einer pH-metrischen Titration?',
+   c:'Man gibt die Maßlösung schrittweise zu und misst nach jeder Zugabe den pH-Wert mit einem pH-Meter. Aus der Titrationskurve bestimmt man den Äquivalenzpunkt.',
+   d:[{html:'Man gibt Maßlösung zu, bis ein Indikator umschlägt.', why:'Das ist die Titration mit Indikator. Bei der pH-metrischen Titration misst man den pH-Wert fortlaufend.'},
+      {html:'Man misst nur den pH-Wert am Anfang und am Ende.', why:'Man misst nach jeder Zugabe, um die ganze Kurve zu erhalten.'},
+      {html:'Man misst nach jeder Zugabe die elektrische Leitfähigkeit.', why:'Das ist eine konduktometrische Titration.'}],
+   sol:'Messwertpaare (V, pH) → Titrationskurve → Äquivalenzpunkt'},
+  {item:28, q:'Welchen Vorteil hat die pH-metrische Titration gegenüber der Titration mit Indikator?',
+   c:'Man erhält den ganzen Kurvenverlauf und kann daraus Äquivalenzpunkt, Halbäquivalenzpunkt und pKₛ-Wert bestimmen, auch bei gefärbten Proben.',
+   d:[{html:'Sie kommt ohne Maßlösung aus.', why:'Auch hier braucht man eine Maßlösung bekannter Konzentration.'},
+      {html:'Sie ist schneller, weil man nur einmal misst.', why:'Man misst viele Werte. Dafür erhält man mehr Informationen.'},
+      {html:'Sie funktioniert nur bei farblosen Lösungen.', why:'Gerade bei gefärbten Lösungen wie Cola ist sie im Vorteil, weil man keinen Farbumschlag erkennen muss.'}],
+   sol:'Vorteile: vollständige Kurve, pKₛ bestimmbar, mehrprotonige Säuren erkennbar, unabhängig von der Farbe der Probe'},
+  {item:29, q:'Warum muss die Probelösung während der Messung gerührt werden?',
+   c:'Damit sich die zugegebene Maßlösung sofort verteilt und die Elektrode den pH-Wert der gesamten Lösung misst.',
+   d:[{html:'Damit die Lösung warm bleibt.', why:'Rühren dient der Durchmischung, nicht dem Heizen.'},
+      {html:'Damit die Elektrode nicht austrocknet.', why:'Die Elektrode taucht ohnehin in die Lösung. Es geht um gleichmäßige Durchmischung.'},
+      {html:'Damit der Indikator besser wirkt.', why:'Bei der pH-metrischen Titration braucht man keinen Indikator.'}],
+   sol:'Rühren → homogene Lösung → stabiler, repräsentativer Messwert'},
+  {item:29, q:'Warum darf der Rührfisch die pH-Elektrode nicht berühren?',
+   c:'Die dünne Glasmembran der Elektrode kann dabei zerbrechen.',
+   d:[{html:'Weil der Rührfisch sonst magnetisch wird.', why:'Das Problem ist mechanisch: Die Glasmembran ist sehr empfindlich.'},
+      {html:'Weil sonst der Indikator umschlägt.', why:'Bei der pH-metrischen Titration wird kein Indikator verwendet.'},
+      {html:'Weil sich sonst der pH-Wert der Lösung ändert.', why:'Der pH-Wert ändert sich nicht durch Berührung. Die Elektrode kann aber beschädigt werden.'}],
+   sol:'Elektrode so einspannen, dass die Glasmembran eintaucht, aber Abstand zum Rührfisch hat.'},
+  {item:30, q:'Was misst eine pH-Elektrode (Glaselektrode) eigentlich?',
+   c:'eine elektrische Spannung, die von der Oxonium-Ionen-Konzentration abhängt. Das pH-Meter rechnet sie in einen pH-Wert um.',
+   d:[{html:'direkt die Konzentration der Säure', why:'Gemessen wird eine Spannung, die von c(H<sub>3</sub>O<sup>+</sup>) abhängt, nicht von c(Säure).'},
+      {html:'die elektrische Leitfähigkeit der Lösung', why:'Die Leitfähigkeit misst man mit einer Leitfähigkeitselektrode.'},
+      {html:'die Farbe der Lösung', why:'Das wäre eine photometrische Messung. Die Glaselektrode misst elektrisch.'}],
+   sol:'Glaselektrode: Spannung ~ pH (ca. 59 mV pro pH-Stufe bei 25 °C)'},
+  {item:30, q:'Warum wird ein pH-Meter vor der Messung kalibriert?',
+   c:'Mit Pufferlösungen bekannten pH-Werts wird der Zusammenhang zwischen gemessener Spannung und pH-Wert eingestellt.',
+   d:[{html:'Damit die Elektrode sauber wird.', why:'Reinigen spült man mit destilliertem Wasser. Kalibrieren stellt die Messkennlinie ein.'},
+      {html:'Damit die Natronlauge die richtige Konzentration hat.', why:'Kalibriert wird das Messgerät, nicht die Maßlösung.'},
+      {html:'Weil das pH-Meter sonst nur pH 7 anzeigt.', why:'Ohne Kalibrierung zeigt es Werte an, die aber ungenau sind.'}],
+   sol:'Kalibrierung mit Puffern, z. B. pH 4 und pH 7'},
+  {item:'30a', q:'Wie stellt man die Messwerte einer pH-metrischen Titration richtig dar?',
+   c:'x-Achse: Volumen der zugegebenen Maßlösung V in mL, y-Achse: pH-Wert',
+   d:[{html:'x-Achse: pH-Wert, y-Achse: Volumen in mL', why:'Die unabhängige Größe (zugegebenes Volumen) gehört auf die x-Achse.'},
+      {html:'x-Achse: Zeit, y-Achse: pH-Wert', why:'Entscheidend ist das zugegebene Volumen, nicht die Zeit.'},
+      {html:'als Säulendiagramm für jede Zugabe', why:'Der pH-Wert ändert sich stetig mit dem Volumen. Man zeichnet Messpunkte und eine Ausgleichskurve.'}],
+   sol:'Punktdiagramm pH gegen V(Maßlösung), Achsen mit Größe und Einheit beschriften, Ausgleichskurve'},
+  {item:'30a', q:'Warum misst man in der Nähe des Äquivalenzpunkts in kleineren Volumenschritten?',
+   c:'Dort ändert sich der pH-Wert sprunghaft. Nur mit kleinen Schritten lässt sich der Sprung genau erfassen.',
+   d:[{html:'Weil die Natronlauge dort teurer ist.', why:'Es geht um die Genauigkeit der Kurve im steilen Bereich.'},
+      {html:'Damit die Elektrode Zeit zum Abkühlen hat.', why:'Die Temperatur ändert sich kaum. Wichtig ist die Auflösung im pH-Sprung.'},
+      {html:'Weil der pH-Wert dort konstant bleibt.', why:'Im Gegenteil: Dort ändert er sich am stärksten.'}],
+   sol:'Steiler Bereich → kleine Schritte, flacher Bereich → größere Schritte'},
+  {item:31, q:'Wie beschreibt man die Titrationskurve von Salzsäure mit Natronlauge fachsprachlich?',
+   c:'Der pH-Wert steigt zunächst nur langsam an, dann sprunghaft im Bereich des Äquivalenzpunkts. Danach flacht die Kurve im basischen Bereich wieder ab.',
+   d:[{html:'Der pH-Wert steigt gleichmäßig (linear) an.', why:'Die Kurve ist S-förmig mit einem steilen Sprung um den Äquivalenzpunkt.'},
+      {html:'Der pH-Wert sinkt mit zunehmender Zugabe von Natronlauge.', why:'Durch Zugabe einer Base steigt der pH-Wert.'},
+      {html:'Der pH-Wert steigt am Anfang stark an und bleibt danach konstant.', why:'Der steile Anstieg liegt am Äquivalenzpunkt, nicht am Anfang.'}],
+   sol:'flacher Anfang → steiler pH-Sprung am Äquivalenzpunkt → flacher Verlauf im Basischen'},
+  {item:31, q:'Wie bestimmt man den Äquivalenzpunkt grafisch aus der Titrationskurve?',
+   c:'als Wendepunkt in der Mitte des steilsten Bereichs, z. B. mit der Tangentenmethode',
+   d:[{html:'als den Punkt mit pH = 7', why:'Das gilt nur für starke Säuren. Bei schwachen Säuren liegt der Äquivalenzpunkt im Basischen.'},
+      {html:'als den höchsten Punkt der Kurve', why:'Der höchste Punkt ist einfach das Ende der Messung.'},
+      {html:'als den Punkt, an dem die Kurve beginnt', why:'Das ist der Anfangs-pH der Probelösung.'}],
+   sol:'Tangentenmethode: zwei parallele Tangenten an die flachen Bereiche, Mittelparallele schneidet die Kurve im Äquivalenzpunkt'}
+];
+function genPrinzipPh(){
+  if (Math.random() < 0.35){
+    const i = Math.floor(Math.random()*PH_LABELS.length);
+    const others = shuffle(PH_LABELS.map((n,k)=>({n,k})).filter(o=>o.k!==i)).slice(0,3);
+    return { stem:`<span class="figwrap">${phFig()}</span>Welches Bauteil ist mit Nummer <b>${i+1}</b> gekennzeichnet?`,
+      options: shuffle([{html:PH_LABELS[i], correct:true}, ...others.map(o=>({html:o.n, why:`Das ist Nummer ${o.k+1}.`}))]),
+      sol: PH_LABELS.map((n,k)=>`${k+1} ${n}`).join('<br>'), item:29 };
+  }
+  const q = rnd(PRINZIP_PH); return {stem:q.q, options:pick({html:q.c}, q.d), sol:q.sol, item:q.item};
+}
+
+const CAT_PHMETRISCH = {
+  title:'pH-metrische Titration',
+  order:['28','29','30','30a','31','32','33','34','35','36','37','38','39','40'],
+  items:{
+    28:'…das Prinzip einer pH-metrischen Titration erklären.',
+    29:'…einen beschrifteten Versuchsaufbau einer pH-metrischen Titration darstellen.',
+    30:'…die Funktion einer pH-Elektrode bzw. eines pH-Meters beschreiben.',
+    '30a':'…Messwerte einer Titration in einem geeigneten Koordinatensystem darstellen.',
+    31:'…eine Titrationskurve zeichnen und fachsprachlich beschreiben.',
+    32:'…aus einer Titrationskurve den Äquivalenzpunkt bestimmen.',
+    33:'…den Halbäquivalenzpunkt in einer Titrationskurve einer schwachen Säure bestimmen und daraus den pKₛ-Wert sowie den pH-Wert der schwachen Säure ableiten.',
+    34:'…den Anfangs-pH-Wert einer Titrationskurve bestimmen bzw. zuordnen.',
+    35:'…erklären, warum die Titrationskurve einer schwachen Säure mit einer starken Base (z. B. NaOH) anders verläuft als die einer starken Säure.',
+    36:'…den Verlauf der Titrationskurve auf Teilchenebene erklären.',
+    37:'…erklären, warum der Äquivalenzpunkt bei der Titration einer schwachen Säure mit einer starken Base (z. B. NaOH) im basischen Bereich liegt.',
+    38:'…Titrationskurven einer starken und einer schwachen Säure unterscheiden.',
+    39:'…aus den charakteristischen Punkten einer Titrationskurve Informationen über die untersuchte Säure gewinnen.',
+    40:'…den Verlauf der Titrationskurve einer mehrprotonigen Säure erläutern.'
+  },
+  ex:{
+    prinzip:{nr:'28–31', title:'Prinzip und Messung', gen:genPrinzipPh,
+      hint:'pH-Meter misst nach jeder Zugabe den pH-Wert.<div class="formula">Diagramm: x = V(Maßlösung) in mL, y = pH</div>'},
+    lesen:{nr:'32–34, 39', title:'Kurven auswerten', gen:genCurve,
+      hint:'Äquivalenzpunkt: Mitte des Sprungs. Halbäquivalenzpunkt: halbes Volumen, dort pH = pKₛ.<div class="formula">c(Säure) = c(NaOH) · V(ÄP) / V(Probe)</div>'},
+    vergleich:{nr:'35, 38', title:'Stark, schwach, mehrprotonig', gen:genCompare,
+      hint:'Achte auf Anfangs-pH, Pufferbereich, Höhe des Sprungs, Lage des Äquivalenzpunkts und Zahl der Sprünge.'},
+    teilchen:{nr:'33, 36, 37', title:'Teilchenebene', gen:genTeilchen,
+      hint:'Während der Titration: HA(aq) + OH<sup>−</sup>(aq) → A<sup>−</sup>(aq) + H<sub>2</sub>O(l)<div class="formula">Halbäquivalenzpunkt: c(HA) = c(A<sup>−</sup>) → pH = pKₛ</div>'},
+    mehr:{item:40, nr:'40', title:'Mehrprotonige Säuren', gen:genPoly,
+      hint:'Jede Protolysestufe hat einen eigenen Äquivalenzpunkt.<div class="formula">V(ÄP₂) = 2 · V(ÄP₁) · am 2. Halbäquivalenzpunkt: pH = pKₛ₂</div>'}
+  },
+  first:'lesen',
+  where:'AB pH-metrische Titration von Salzsäure, AB Salzsäure im Sanitärreiniger, AB pH-metrische Titration einer schwachen Säure, AB Phosphorsäure in Cola, AB pH-metrische Titration einer mehrprotonigen Säure, Lernübersichten in Teams'
+};
+CAT_PHMETRISCH.info = `
+    <p><b>Prinzip:</b> Die Maßlösung wird schrittweise zugegeben, nach jeder Zugabe misst ein pH-Meter den pH-Wert. Man trägt den pH-Wert gegen das zugegebene Volumen auf und erhält die Titrationskurve.</p>
+    ${chartBox(plot({vmax:30, lines:[{pks:[-6], ca:0.1, label:'Salzsäure'}, {pks:[4.75], ca:0.1, alt:true, label:'Essigsäure'}]}), 'Je 20 mL, c = 0,1 mol/L, titriert mit Natronlauge (0,1 mol/L)')}
+    <ul class="rules">
+      <li><b>Anfangs-pH:</b> hängt von Säurestärke und Konzentration ab. Schwache Säuren starten höher.</li>
+      <li><b>Halbäquivalenzpunkt</b> (schwache Säure): c(HA) = c(A<sup>−</sup>), daher pH = pKₛ. Um ihn herum liegt der flache Pufferbereich.</li>
+      <li><b>Äquivalenzpunkt:</b> Wendepunkt im steilen pH-Sprung, n(NaOH) = n(Säure). Bei starken Säuren pH = 7, bei schwachen im Basischen, weil A<sup>−</sup> als Base reagiert.</li>
+      <li><b>Mehrprotonige Säuren</b> zeigen mehrere Sprünge. H<sub>3</sub>PO<sub>4</sub> hat zwei sichtbare, V(ÄP₂) = 2 · V(ÄP₁).</li>
+    </ul>
+    <div class="formula">c(Säure) = c(NaOH) · V(ÄP) / V(Probe)</div>`;
+
+/* ========== Kategorien ========== */
+const CAT = {
+  phmetrisch: CAT_PHMETRISCH,
+  titration: CAT_TITRATION,
+  staerke: CAT_STAERKE,
+  konzepte:{
+    title:'Säure-Base-Konzepte',
+    items:{
+      1:'…zentrale Eigenschaften von Säuren und Basen beschreiben.',
+      2:'…erklären, was nach Arrhenius eine Säure und was eine Base ist.',
+      3:'…die Grenzen des Säure-Base-Konzepts nach Arrhenius darstellen.',
+      4:'…erklären, was nach Brönsted eine Säure und was eine Base ist.',
+      5:'…erklären, dass eine Säure ein Protonendonator und eine Base ein Protonenakzeptor ist.',
+      6:'…Protolysegleichungen für (mehrprotonige) Säuren und Basen mit Wasser aufstellen.',
+      7:'…zu einer Protolyse die korrespondierenden Säure-Base-Paare angeben.',
+      8:'…erklären, warum Säure-Base-Reaktionen als Donator-Akzeptor-Reaktionen beschrieben werden.',
+      9:'…erläutern, warum Wasser sowohl als Säure als auch als Base reagieren kann (Ampholyte).'
+    },
+    ex:{
+      zuordnen:{nr:'2–4', title:'Arrhenius oder Brönsted?', gen:genStatement,
+        hint:'Arrhenius: Säuren bilden in Wasser H<sup>+</sup>, Basen bilden OH<sup>−</sup>. Betrachtet werden Stoffe in wässriger Lösung.<div class="formula">Brönsted: Säure = Protonendonator, Base = Protonenakzeptor</div>'},
+      teilchen:{nr:'5, 9', title:'Säure, Base oder Ampholyt?', gen:genParticle,
+        hint:'Prüfe beide Richtungen: Kann das Teilchen ein Proton abgeben? Kann es eins aufnehmen?<div class="formula">beides möglich → Ampholyt</div>'},
+      gleichung:{item:6, nr:'6', title:'Protolysegleichungen', gen:genEquation,
+        hint:'Säure(aq) + H<sub>2</sub>O(l) ⇌ H<sub>3</sub>O<sup>+</sup>(aq) + korrespondierende Base(aq)<div class="formula">Base(aq) + H<sub>2</sub>O(l) ⇌ korrespondierende Säure(aq) + OH<sup>−</sup>(aq)</div>'},
+      paare:{nr:'7', title:'Säure-Base-Paare', gen:genPair,
+        hint:'Ein korrespondierendes Paar unterscheidet sich um genau ein Proton.<div class="formula">S1 + B2 ⇌ S2 + B1 → Paare: S1/B1 und S2/B2</div>'},
+      konzepte:{nr:'1, 3, 5, 8, 9', title:'Konzepte und Grenzen', gen:genKonzept,
+        hint:'Säure-Base-Reaktionen sind Protonenübertragungen: Ein Donator gibt ab, ein Akzeptor nimmt auf.<div class="formula">Arrhenius gilt nur für wässrige Lösungen und OH<sup>−</sup>-haltige Basen.</div>'}
+    },
+    first:'zuordnen',
+    where:'Säuren und Basen Wiederholung (Stationen), AB Herstellung von Salzsäure, AB Der Ammoniak-Springbrunnen, Übungen zur Säure-Base-Reaktion, Lernübersichten in Teams',
+    info:`
+      <p><b>Arrhenius:</b> Säuren sind Stoffe, die in wässriger Lösung H<sup>+</sup>-Ionen bilden. Basen bilden OH<sup>−</sup>-Ionen.</p>
+      <p><b>Grenzen:</b> Das Konzept gilt nur für wässrige Lösungen und erklärt keine Basen ohne OH-Gruppe, z. B. NH<sub>3</sub> beim Ammoniak-Springbrunnen.</p>
+      <p><b>Brönsted:</b> Säuren sind Protonendonatoren, Basen sind Protonenakzeptoren. Die Einordnung betrifft Teilchen und hängt von der Reaktion ab.</p>
+      <div class="formula">HCl(g) + H<sub>2</sub>O(l) → H<sub>3</sub>O<sup>+</sup>(aq) + Cl<sup>−</sup>(aq)</div>
+      <ul class="rules">
+        <li><b>Donator-Akzeptor:</b> Protonenabgabe und -aufnahme laufen immer gekoppelt ab.</li>
+        <li><b>Korrespondierende Paare</b> unterscheiden sich um genau ein Proton: HCl / Cl<sup>−</sup> und H<sub>3</sub>O<sup>+</sup> / H<sub>2</sub>O.</li>
+        <li><b>Ampholyte</b> wie H<sub>2</sub>O oder HCO<sub>3</sub><sup>−</sup> reagieren je nach Partner als Säure oder als Base.</li>
+        <li><b>Mehrprotonige Säuren</b> wie H<sub>3</sub>PO<sub>4</sub> geben ihre Protonen stufenweise ab, in jeder Stufe eines.</li>
+      </ul>`
+  },
+  ph:{
+    title:'pH-Wert und Oxonium-Ionen',
+    items:ITEMS,
+    ex:EX,
+    first:'c2ph',
+    where:'AB Verdünnungsreihe von Salzsäure, AB Der pH-Wert, AB Berechnung von pH-Werten, Lernübersichten in Teams',
+    info:`
+      <p>Der pH-Wert ist der negative dekadische Logarithmus des Zahlenwerts der Oxonium-Ionen-Konzentration (in mol/L).</p>
+      <div class="formula">pH = −lg ${H3O} &nbsp;⇔&nbsp; ${H3O} = 10<sup>−pH</sup> mol/L</div>
+      <p><b>Starke Säuren</b> protolysieren vollständig. Für einprotonige Säuren gilt ${H3O} = c₀.</p>
+      <div class="formula">pH = −lg c₀</div>
+      <p><b>Schwache Säuren</b> protolysieren nur teilweise, es liegt ein Gleichgewicht vor. Mit den Näherungen ${H3O} = c(A<sup>−</sup>) und c(HA) ≈ c₀ folgt aus dem Massenwirkungsgesetz ${H3O} = √(Kₛ · c₀):</p>
+      <div class="formula">pH = ½ · (pKₛ − lg c₀)</div>
+      <ul class="rules">
+        <li>Faktor 10 in ${H3O} entspricht genau einer pH-Stufe.</li>
+        <li>Verdünnen 1 : 10 erhöht den pH-Wert einer starken Säure um 1, den einer schwachen Säure um 0,5.</li>
+        <li>Neutral bei 25 °C: pH = 7, denn K<sub>W</sub> = 10<sup>−14</sup> mol²/L².</li>
+      </ul>`
+  }
+};
+Object.values(EX).forEach(e => { e.nr = String(e.item); });
+
+/* ---------- Ansicht ---------- */
+let cur = { cat:null, ex:null, q:null, done:false, streak:0 };
+
+function renderHome(){
+  $('#back').hidden = true; $('#h1').textContent = 'Säuren und Basen';
+  $('#view').innerHTML = `<div class="cats">${CATS.map(c=>{ const ready = !!CAT[c.id]; return `
+    <button class="cat ${ready?'ready':''}" data-cat="${c.id}" ${ready?'':'disabled'}>
+      <h2>${c.title}</h2><p>${c.sub}</p>
+      <div class="meta"><span>Ich kann Nr. ${c.items}</span><span class="pill ${ready?'go':''}">${ready?'Üben':'folgt'}</span></div>
+    </button>`; }).join('')}</div>
+    <p class="home-note">Dein Fortschritt und deine Selbsteinschätzung werden in diesem Browser gespeichert. Auf einem anderen Gerät startest du neu.</p>`;
+  document.querySelectorAll('.cat.ready').forEach(b => b.onclick = () => { location.hash = b.dataset.cat; });
+}
+
+function renderCat(id){
+  const C = CAT[id];
+  if (cur.cat !== id){ cur.cat = id; cur.ex = C.first; cur.streak = 0; }
+  $('#back').hidden = false; $('#h1').textContent = C.title;
+  $('#view').innerHTML = `<div class="layout">
+    <main>
+      <details class="info" id="info" open>
+        <summary>Das Wichtigste in Kürze</summary>
+        <div class="body">${C.info}</div>
+      </details>
+      <div class="tabs" role="tablist">${Object.entries(C.ex).map(([k,e])=>`
+        <button class="tab" role="tab" data-ex="${k}" aria-selected="${k===cur.ex}"><span class="n">Nr. ${e.nr}</span><span class="t">${e.title}</span></button>`).join('')}</div>
+      <section class="card" id="card" aria-live="polite"></section>
+    </main>
+    <aside><div class="panel" id="panel"></div></aside>
+  </div>`;
+  const key = STORE+'-info-'+id;
+  try { if (localStorage.getItem(key)==='closed') $('#info').open = false; } catch(e) {}
+  $('#info').addEventListener('toggle', e => { try { localStorage.setItem(key, e.target.open?'open':'closed'); } catch(err) {} });
+  document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
+    cur.ex = b.dataset.ex; cur.streak = 0;
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t===b));
+    newQ();
+  });
+  renderPanel(); newQ();
+}
+
+const curEx = () => CAT[cur.cat].ex[cur.ex];
+function newQ(){ cur.q = curEx().gen(); cur.done = false; drawQ(); }
+
+function drawQ(){
+  const e = curEx(), q = cur.q;
+  $('#card').innerHTML = `
+    <div class="card-head"><h3>${e.title}</h3><span class="streak">Serie: ${cur.streak} richtig in Folge</span></div>
+    <p class="stem">${q.stem}</p>
+    <div class="opts${q.grid?' grid2':''}">${q.options.map((o,i)=>`<button class="opt" data-i="${i}"><span class="key">${'ABCD'[i]}</span><span class="val">${o.html}</span></button>`).join('')}</div>
+    <div id="fb" hidden></div>
+    <div class="hint" id="hintbox" hidden>${e.hint}</div>
+    <div class="qbar"><button class="btn" id="hintbtn">Hilfe zeigen</button><button class="btn primary" id="next">Neue Aufgabe</button></div>`;
+  document.querySelectorAll('.opt').forEach(b => b.onclick = () => answer(+b.dataset.i));
+  $('#hintbtn').onclick = () => { const h = $('#hintbox'); h.hidden = !h.hidden; $('#hintbtn').textContent = h.hidden ? 'Hilfe zeigen' : 'Hilfe ausblenden'; };
+  $('#next').onclick = newQ;
+}
+
+function scale(ph){
+  const p = Math.max(0, Math.min(14, ph)); const x = (p/14*100).toFixed(1);
+  return `<div class="mini" aria-hidden="true"><span class="lb" style="left:${x}%">pH ${num(ph)}</span><span class="mk" style="left:${x}%"></span></div>`;
+}
+
+function answer(i){
+  if (cur.done) return; cur.done = true;
+  const q = cur.q, chosen = q.options[i], ok = !!chosen.correct;
+  document.querySelectorAll('.opt').forEach((b,j) => {
+    b.disabled = true;
+    if (q.options[j].correct) b.classList.add('correct');
+    else if (j===i) b.classList.add('wrong');
+    else b.classList.add('dim');
+  });
+  const item = q.item || curEx().item;
+  const s = state.stats[item] || {r:0,t:0}; s.t++; if (ok) s.r++; state.stats[item] = s; save();
+  cur.streak = ok ? cur.streak+1 : 0;
+  document.querySelector('.streak').textContent = `Serie: ${cur.streak} richtig in Folge`;
+  const fb = $('#fb'); fb.hidden = false; fb.className = 'fb'+(ok?'':' bad');
+  fb.innerHTML = `<strong class="v">${ok?'Richtig.':'Nicht ganz.'}</strong>
+    ${ok?'':`<p>${chosen.why||''}</p>`}
+    <div class="sol">${q.sol}</div>
+    ${typeof q.ph==='number'?scale(q.ph):''}`;
+  $('#next').focus();
+  renderPanel();
+}
+
+function renderPanel(){
+  const C = CAT[cur.cat];
+  const lv = [['up','kann ich','s-up'],['mid','teilweise','s-mid'],['down','noch nicht','s-down']];
+  $('#panel').innerHTML = `<h3>Ich kann …</h3>${(C.order||Object.keys(C.items)).map(n=>{ const t = C.items[n];
+    const s = state.stats[n] || {r:0,t:0}; const pct = s.t ? Math.round(s.r/s.t*100) : 0;
+    return `<div class="item"><div class="txt"><b>${/^\d+$/.test(n)?n:'–'}</b>${t}</div>
+      <div class="prog"><span class="track"><span class="fill" style="width:${pct}%;display:block"></span></span><span>${s.r}/${s.t} richtig</span></div>
+      <div class="self">${lv.map(([k,l,c])=>`<button class="${c}" data-n="${n}" data-k="${k}" aria-pressed="${state.self[n]===k}">${l}</button>`).join('')}</div></div>`;
+  }).join('')}
+  <p class="where">Zum Nachlesen: ${C.where}</p>
+  <button class="reset" id="reset">Fortschritt dieser Kategorie zurücksetzen</button>`;
+  document.querySelectorAll('.self button').forEach(b => b.onclick = () => {
+    state.self[b.dataset.n] = state.self[b.dataset.n]===b.dataset.k ? null : b.dataset.k; save(); renderPanel();
+  });
+  const r = $('#reset');
+  r.onclick = () => {
+    if (r.dataset.arm){ Object.keys(C.items).forEach(n => { delete state.stats[n]; delete state.self[n]; }); save(); renderPanel(); }
+    else { r.dataset.arm = '1'; r.textContent = 'Wirklich löschen? Nochmal klicken'; setTimeout(()=>{ if (r.isConnected){ delete r.dataset.arm; r.textContent = 'Fortschritt dieser Kategorie zurücksetzen'; } }, 4000); }
+  };
+}
+
+document.addEventListener('keydown', e => {
+  if (!$('#card') || e.target.closest('input,textarea')) return;
+  const idx = 'ABCD'.indexOf(e.key.toUpperCase());
+  if (idx>=0 && !cur.done && cur.q && idx<cur.q.options.length) answer(idx);
+});
+$('#back').onclick = () => { location.hash = ''; };
+function route(){ const id = location.hash.slice(1); CAT[id] ? renderCat(id) : renderHome(); }
+window.addEventListener('hashchange', route);
+route();
+</script>
+
+</body></html>
