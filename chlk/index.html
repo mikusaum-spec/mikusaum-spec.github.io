@@ -1,4 +1,5 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+
 <title>Säure-Base-Training Q1 LK</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -210,6 +211,115 @@ details.wr summary{cursor:pointer;font-weight:700}
 .wrbody p{margin:0}
 .reset{background:none;border:0;padding:0;color:var(--muted);font-size:.82rem;text-decoration:underline;justify-self:start}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Virtuelle Titration – eigene Tokens, gemeinsame Farben aus der Lernumgebung */
+#lab{--surface-2:#F5F8F8;--grid:#E6EDEC;--grid-major:#CBD7D6;--curve:var(--accent);--mark:var(--oxy);--buffer:rgba(29,102,112,.10);
+  --glass:#8FA6AD;--glass-fill:rgba(160,190,200,.16);--metal:#8A989C;--titrant:rgba(140,185,215,.45);
+  --device:#26363C;--lcd-bg:#CFE3D2;--lcd-ink:#112A18;--warn:#8F5400;--warn-soft:#FBEFD9;--accent-ink:var(--surface);
+  --display:var(--f-display);--body:var(--f-body);--mono:var(--f-mono);display:flex;flex-direction:column;gap:16px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #lab{--surface-2:#1C2B2E;--grid:#203033;--grid-major:#30454A;--buffer:rgba(108,192,200,.12);
+  --glass:#5F777E;--glass-fill:rgba(140,175,190,.10);--metal:#62747A;--titrant:rgba(120,170,205,.35);--device:#0A1012;--lcd-bg:#1B3626;--lcd-ink:#A3E6B4;--warn:#F0B45A;--warn-soft:#352812}}
+:root[data-theme="dark"] #lab{--surface-2:#1C2B2E;--grid:#203033;--grid-major:#30454A;--buffer:rgba(108,192,200,.12);
+  --glass:#5F777E;--glass-fill:rgba(140,175,190,.10);--metal:#62747A;--titrant:rgba(120,170,205,.35);--device:#0A1012;--lcd-bg:#1B3626;--lcd-ink:#A3E6B4;--warn:#F0B45A;--warn-soft:#352812}
+#lab .labtop{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+#lab .labtop p{margin:0;color:var(--muted);max-width:70ch}
+#lab .labfoot{font-size:.82rem;color:var(--muted);margin:0}
+#lab h2{font-size:1.25rem;font-weight:600}
+#lab button,#lab select,#lab input{font:inherit;color:inherit}
+#lab button{cursor:pointer}
+#lab :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#lab .lbtn{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-weight:700;min-height:44px}
+#lab .lbtn:hover:not(:disabled){border-color:var(--accent)}
+#lab .lbtn:disabled{opacity:.45;cursor:not-allowed}
+#lab .lbtn.lprimary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+#lab .lbtn.lsmall{min-height:36px;padding:5px 11px;font-size:.88rem}
+#lab .modes{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:flex-end}
+#lab .mgroup{display:flex;flex-direction:column;gap:4px}
+#lab .mlabel{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+#lab .lseg{display:flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
+#lab .lseg button{border:0;background:none;padding:9px 15px;min-height:44px;font-weight:700;color:var(--muted)}
+#lab .lseg button+button{border-left:1px solid var(--line)}
+#lab .lseg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+#lab .lcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+#lab .setup{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px 14px;align-items:end}
+#lab .lfield{display:flex;flex-direction:column;gap:4px;min-width:0}
+#lab .lfield label{font-size:.8rem;color:var(--muted);font-weight:700}
+#lab .lfield select,#lab .lfield input{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:44px;width:100%}
+#lab .lfield select:disabled{opacity:.7}
+#lab .lfield.lkey select{border-color:var(--accent);border-width:2px}
+#lab .lnote{border-radius:10px;padding:11px 14px;border:1px solid var(--line);background:var(--surface)}
+#lab .lnote.ok{background:var(--ok-soft);border-color:var(--ok);}
+#lab .lnote.warn{background:var(--warn-soft);border-color:var(--warn)}
+#lab .help{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 20px}
+#lab .help ol{margin:8px 0 0;padding-left:20px;display:grid;gap:4px;max-width:80ch}
+#lab .bench{display:grid;grid-template-columns:minmax(320px,440px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){#lab .bench{grid-template-columns:minmax(0,1fr)}}
+#lab .right{display:flex;flex-direction:column;gap:16px;min-width:0}
+#lab .rig{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:10px;align-items:start}
+#lab #lab-app{width:100%;max-height:540px}
+#lab .lupe{display:flex;flex-direction:column;gap:6px;align-items:stretch;position:sticky;top:8px}
+#lab .cap{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center}
+#lab #lab-lupe{width:100%;border:2px solid var(--glass);border-radius:14px;background:var(--surface-2)}
+#lab .digi{font-family:var(--mono);font-size:.9rem;text-align:center;background:var(--device);color:var(--lcd-ink);border-radius:6px;padding:5px 4px;font-variant-numeric:tabular-nums}
+#lab .digi span{display:block;background:var(--lcd-bg);border-radius:3px;padding:2px 0}
+#lab .dose{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+#lab .dose .lbtn{font-family:var(--mono);font-weight:500;padding:8px 4px}
+#lab .lrow{display:flex;flex-wrap:wrap;gap:8px}
+#lab .msg{margin:0;min-height:1.5em;color:var(--muted);font-size:.92rem}
+#lab .msg.warn{color:var(--warn);font-weight:700}
+#lab .metal{fill:var(--metal)}
+#lab .glass{stroke:var(--glass);stroke-width:1.6;fill:none}
+#lab .glassfill{fill:var(--glass-fill)}
+#lab .titrant{fill:var(--titrant)}
+#lab .tick{stroke:var(--ink);stroke-width:.8}
+#lab .tlbl{fill:var(--ink);font:9px var(--mono)}
+#lab .blbl{fill:var(--muted);font:8px var(--mono)}
+#lab .cock{fill:var(--accent)}
+#lab .plate{fill:var(--device)}
+#lab .knob{fill:var(--metal)}
+#lab .stir{fill:var(--surface);stroke:var(--muted);stroke-width:1}
+#lab .electrode{fill:var(--surface-2);stroke:var(--metal);stroke-width:1.4}
+#lab .cable{fill:none;stroke:var(--metal);stroke-width:2}
+#lab .device{fill:var(--device)}
+#lab .screen{fill:var(--lcd-bg)}
+#lab .lcd{fill:var(--lcd-ink);font:600 17px var(--mono);font-variant-numeric:tabular-nums}
+#lab .lcdsm{fill:var(--lcd-ink);font:9px var(--mono)}
+#lab .devlbl{fill:#d9e3e6;font:8px var(--mono);letter-spacing:.08em}
+#lab #lab-stir{transform-box:fill-box;transform-origin:center;animation:labspin .5s linear infinite}
+@keyframes labspin{0%{transform:scaleX(1)}50%{transform:scaleX(.15)}100%{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){#lab #lab-stir{animation:none}}
+#lab .chartbox{overflow-x:auto}
+#lab #lab-chart{width:100%;min-width:420px;display:block;background:var(--surface)}
+#lab .g-minor{stroke:var(--grid);stroke-width:1}
+#lab .g-major{stroke:var(--grid-major);stroke-width:1}
+#lab .axis{stroke:var(--ink);stroke-width:1.2}
+#lab .alab{fill:var(--muted);font:11px var(--mono)}
+#lab .atitle{fill:var(--ink);font:600 12px var(--body)}
+#lab .curve{fill:none;stroke:var(--curve);stroke-width:2;stroke-linejoin:round}
+#lab .pt{fill:var(--curve)}
+#lab .ph7{stroke:var(--muted);stroke-width:1.3;stroke-dasharray:6 4}
+#lab .mark{fill:var(--mark)}
+#lab .markline{stroke:var(--mark);stroke-width:1.2;stroke-dasharray:4 3}
+#lab .ann{fill:var(--ink);font:600 11.5px var(--body);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+#lab .bufband{fill:var(--buffer)}
+#lab .lchips{display:flex;flex-wrap:wrap;gap:8px}
+#lab .lchip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:.88rem;background:var(--surface-2);cursor:pointer;min-height:36px}
+#lab .lchip input{accent-color:var(--accent);width:16px;height:16px;margin:0}
+#lab .lchip.off{opacity:.45;cursor:not-allowed}
+#lab .headrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+#lab .tablebox{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+#lab table{border-collapse:collapse;width:100%;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.9rem}
+#lab th,#lab td{padding:5px 12px;text-align:right;border-bottom:1px solid var(--line)}
+#lab th{position:sticky;top:0;background:var(--surface-2);font-family:var(--body);font-size:.8rem;color:var(--muted)}
+#lab td:first-child,#lab th:first-child{text-align:left;color:var(--muted);width:3.5em}
+#lab .lsmall{font-size:.86rem;color:var(--muted);margin:0}
+#lab .steps{margin:0;padding-left:20px;display:grid;gap:4px}
+#lab .lformula{font-family:var(--mono);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;overflow-x:auto}
+#lab .proto{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+#lab .mean{font-family:var(--mono);font-weight:500}
+#lab .checkrow{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+#lab .checkrow .lfield{flex:1 1 160px}
+#lab footer{font-size:.82rem;color:var(--muted);max-width:90ch}
 </style>
 
 <div class="wrap">
@@ -269,6 +379,7 @@ const CATS = [
   {id:'ph', title:'pH-Wert und Oxonium-Ionen', sub:'pH ↔ c(H₃O⁺), pH-Werte schwacher Säuren, Verdünnen', items:'16–20', ready:true},
   {id:'titration', title:'Titration mit Indikator', sub:'Äquivalenzpunkt, Indikatorwahl, Konzentration bestimmen', items:'21–27'},
   {id:'phmetrisch', title:'pH-metrische Titration', sub:'Titrationskurven lesen und deuten', items:'28–40'},
+  {id:'labor', title:'Virtuelle Titration', sub:'Simulation: mit Indikator oder pH-metrisch titrieren, Kurven deuten, unbekannte Proben bestimmen', items:'21–40'},
   {id:'mix', title:'Klausurtraining', sub:'Gemischte Aufgaben mit Auswertung nach Ich-kann-Punkten', items:'alle'}
 ];
 const ITEMS = {
@@ -1742,12 +1853,517 @@ const CAT = {
 };
 Object.values(EX).forEach(e => { e.nr = String(e.item); });
 
+
+/* ---------- Virtuelle Titration ---------- */
+const LAB_HTML = `<div id="lab">
+  <div class="labtop"><p>Titriere im Erlenmeyerkolben: Probe vorlegen, passende Maßlösung wählen, Verbrauch an der Lupe ablesen.</p>
+    <button class="lbtn" id="lab-helpBtn" aria-expanded="false" aria-controls="lab-help">? Bedienhilfe</button></div>
+
+  <section id="lab-help" class="help" hidden>
+    <h2>So funktioniert die Simulation</h2>
+    <ol>
+      <li>Oben Kurs, Messverfahren und Aufgabe wählen.</li>
+      <li>Probelösung einstellen und eine <b>passende Maßlösung</b> für die Bürette auswählen.</li>
+      <li>Im Indikator-Modus einen Indikator wählen. Er färbt die Lösung im Erlenmeyerkolben.</li>
+      <li>Mit den Knöpfen Maßlösung zugeben: 1 mL, 0,5 mL, 0,1 mL oder einen Tropfen (0,05 mL). „Hahn öffnen“ lässt die Maßlösung laufen, bis du ihn schließt.</li>
+      <li>Das Volumen liest du an der <b>Lupe</b> ab: unterster Punkt des Meniskus, auf 0,05 mL genau.</li>
+      <li>pH-metrisch: Messwerte landen in der Tabelle, daraus wächst die Titrationskurve. Hilfen kannst du unter dem Diagramm zuschalten.</li>
+      <li>„Kolben neu befüllen“ legt dieselbe Probe frisch vor und füllt die Bürette auf, z. B. für eine Feintitration.</li>
+    </ol>
+  </section>
+
+  <section class="modes" aria-label="Versuchsmodus">
+    <div class="mgroup"><span class="mlabel">Kurs</span>
+      <div class="lseg" data-key="level"><button data-v="GK">GK</button><button data-v="LK">LK</button></div></div>
+    <div class="mgroup"><span class="mlabel">Messverfahren</span>
+      <div class="lseg" data-key="mode"><button data-v="ind">Indikator</button><button data-v="ph">pH-metrisch</button><button data-v="cmp">Vergleich</button></div></div>
+    <div class="mgroup"><span class="mlabel">Aufgabe</span>
+      <div class="lseg" data-key="task"><button data-v="frei">Freies Experimentieren</button><button data-v="unk">Unbekannte Probe</button></div></div>
+  </section>
+
+  <section class="lcard setup" aria-label="Lösungen">
+    <div class="lfield"><label for="lab-sample">Probelösung (Vorlage)</label><select id="lab-sample"></select></div>
+    <div class="lfield"><label for="lab-c0">c(Probelösung)</label><select id="lab-c0"></select></div>
+    <div class="lfield"><label for="lab-V0">V(Probelösung)</label><select id="lab-V0"><option value="10">10 mL</option><option value="20">20 mL</option><option value="25">25 mL</option></select></div>
+    <div class="lfield"><label for="lab-water">Wasser zugeben</label><select id="lab-water"><option value="0">kein Wasser</option><option value="20">20 mL</option><option value="50">50 mL</option><option value="80">80 mL</option></select></div>
+    <div class="lfield lkey"><label for="lab-titrant">Maßlösung (Bürette)</label><select id="lab-titrant"></select></div>
+    <div class="lfield"><label for="lab-ct">c(Maßlösung)</label><select id="lab-ct"><option value="0.1">0,1 mol/L</option><option value="1">1 mol/L</option></select></div>
+    <div class="lfield" data-modes="ind cmp"><label for="lab-ind">Indikator</label><select id="lab-ind"></select></div>
+    <div class="lfield"><button class="lbtn" id="lab-hintBtn">Passt meine Maßlösung?</button></div>
+  </section>
+  <div id="lab-hint" class="lnote" role="status" hidden></div>
+
+  <main class="bench">
+    <section class="lcard">
+      <h2>Versuchsaufbau</h2>
+      <div class="rig">
+        <svg id="lab-app" viewBox="0 0 360 525" role="img" aria-label="Bürette über einem Erlenmeyerkolben auf einem Magnetrührer">
+          <rect class="metal" x="20" y="512" width="80" height="10" rx="2"/>
+          <rect class="metal" x="46" y="4" width="7" height="508"/>
+          <rect class="metal" x="50" y="12" width="88" height="6"/>
+          <rect class="metal" x="133" y="7" width="34" height="16" rx="3"/>
+          <rect class="glassfill" x="140" y="6" width="20" height="332" rx="3"/>
+          <rect id="lab-bLiq" class="titrant" x="142" y="30" width="16" height="306"/>
+          <rect class="glass" x="140" y="6" width="20" height="332" rx="3"/>
+          <g id="lab-bScale"></g>
+          <rect class="glassfill" x="144" y="336" width="12" height="20"/>
+          <rect class="glass" x="144" y="336" width="12" height="20"/>
+          <g id="lab-cock"><rect class="cock" id="lab-cockH" x="128" y="342" width="44" height="8" rx="4"/></g>
+          <path class="glassfill" d="M146 356 L154 356 L151.5 394 L148.5 394 Z"/>
+          <path class="glass" d="M146 356 L148.5 394 L151.5 394 L154 356"/>
+          <circle id="lab-drop" class="titrant" cx="150" cy="397" r="3" opacity="0"/>
+          <rect class="plate" x="70" y="490" width="160" height="22" rx="5"/>
+          <circle class="knob" cx="216" cy="501" r="5"/>
+          <defs><clipPath id="lab-flaskIn"><path d="M82 487 L136 410 L136 386 L164 386 L164 410 L218 487 Z"/></clipPath></defs>
+          <path class="glassfill" d="M82 487 L136 410 L136 386 L164 386 L164 410 L218 487 Z"/>
+          <rect id="lab-beakLiq" clip-path="url(#lab-flaskIn)" x="80" y="470" width="140" height="18" fill="rgba(175,205,222,.32)"/>
+          <g id="lab-beakMarks"></g>
+          <rect id="lab-stir" class="stir" x="135" y="481" width="30" height="5" rx="2.5"/>
+          <path class="glass" d="M130 383 L135 386 L135 410 L80 484 Q78 488 84 488 L216 488 Q222 488 220 484 L165 410 L165 386 L170 383"/>
+          <g id="lab-probe">
+            <path class="cable" d="M161 362 C161 326 240 330 262 300"/>
+            <rect class="electrode" x="157" y="362" width="8" height="112" rx="3.5"/>
+            <circle class="electrode" cx="161" cy="477" r="5.5"/>
+            <rect class="device" x="262" y="258" width="94" height="66" rx="7"/>
+            <rect class="screen" x="269" y="272" width="80" height="32" rx="3"/>
+            <text class="devlbl" x="309" y="268" text-anchor="middle">pH-METER</text>
+            <text class="lcdsm" x="273" y="283">pH</text>
+            <text id="lab-phText" class="lcd" x="345" y="299" text-anchor="end">7.00</text>
+            <text class="devlbl" x="309" y="317" text-anchor="middle">25 °C</text>
+          </g>
+        </svg>
+        <div class="lupe">
+          <span class="cap">Lupe Bürette</span>
+          <svg id="lab-lupe" viewBox="0 0 120 220" role="img" aria-label="Vergrößerte Bürettenskala am Meniskus"></svg>
+          <div class="digi" data-modes="ph cmp" aria-label="Zugegebenes Volumen"><span id="lab-digi">0,00 mL</span></div>
+        </div>
+      </div>
+      <div class="dose" aria-label="Maßlösung zugeben">
+        <button class="lbtn" data-dv="1">+1 mL</button>
+        <button class="lbtn" data-dv="0.5">+0,5 mL</button>
+        <button class="lbtn" data-dv="0.1">+0,1 mL</button>
+        <button class="lbtn" data-dv="0.05">+1 Tropfen</button>
+      </div>
+      <div class="lrow">
+        <button class="lbtn lprimary" id="lab-hahn">Hahn öffnen</button>
+        <button class="lbtn" id="lab-refill" hidden>Bürette nachfüllen</button>
+        <button class="lbtn" id="lab-reset">Kolben neu befüllen</button>
+        <button class="lbtn" id="lab-newSample" data-task="unk">Neue Probe</button>
+      </div>
+      <p id="lab-msg" class="msg" aria-live="polite"></p>
+    </section>
+
+    <div class="right">
+      <section class="lcard" data-modes="ph cmp">
+        <div class="headrow"><h2>Titrationskurve</h2><span class="lsmall" id="lab-chartSub"></span></div>
+        <div class="chartbox"><svg id="lab-chart" viewBox="0 0 600 360" role="img" aria-label="Titrationskurve: pH-Wert gegen Volumen der Maßlösung"></svg></div>
+        <div class="lchips" aria-label="Hilfen">
+          <label class="lchip" id="lab-c_ph7"><input type="checkbox" id="lab-h_ph7"> pH-7-Linie</label>
+          <label class="lchip" id="lab-c_aep"><input type="checkbox" id="lab-h_aep"> Äquivalenzpunkt</label>
+          <label class="lchip" id="lab-c_haep" data-lk><input type="checkbox" id="lab-h_haep"> Halbäquivalenzpunkt (pKs)</label>
+          <label class="lchip" id="lab-c_puf" data-lk><input type="checkbox" id="lab-h_puf"> Pufferbereich</label>
+        </div>
+        <p class="lsmall" id="lab-helpNote"></p>
+      </section>
+
+      <section class="lcard" data-modes="ph cmp">
+        <div class="headrow">
+          <h2>Messwerte</h2>
+          <div class="lrow">
+            <label class="lchip"><input type="checkbox" id="lab-auto" checked> automatisch übernehmen</label>
+            <button class="lbtn lsmall" id="lab-take" disabled>Messwert übernehmen</button>
+            <button class="lbtn lsmall" id="lab-copy">Tabelle kopieren</button>
+          </div>
+        </div>
+        <div class="tablebox"><table><thead><tr><th>Nr.</th><th>V(Maßlösung) in mL</th><th>pH</th></tr></thead><tbody id="lab-tbody"></tbody></table></div>
+        <textarea id="lab-copyFallback" hidden readonly rows="4" style="width:100%;font-family:var(--mono)"></textarea>
+        <p class="lsmall">Die Tabelle wird tabulatorgetrennt mit Dezimalkomma kopiert und lässt sich direkt in Excel oder GeoGebra einfügen.</p>
+      </section>
+
+      <section class="lcard" data-modes="ind">
+        <h2>Auswertung</h2>
+        <ol class="steps">
+          <li>Indikator wählen und begründen.</li>
+          <li>Maßlösung zugeben, bis die Farbe <b>bleibend</b> umschlägt. Erst grob, dann nach „Kolben neu befüllen“ fein titrieren.</li>
+          <li>Verbrauchsvolumen an der Lupe ablesen und notieren.</li>
+          <li>Konzentration der Probelösung berechnen.</li>
+        </ol>
+        <div class="lformula">n(Maßlösung) = c(Maßlösung) · V(Maßlösung)<br>n(Probe) aus dem Stoffmengenverhältnis der Reaktionsgleichung<br>c(Probe) = n(Probe) / V(Probe)</div>
+        <div class="proto">
+          <div class="lfield"><label for="lab-p1">Titration 1 in mL</label><input id="lab-p1" inputmode="decimal" placeholder="z. B. 19,95"></div>
+          <div class="lfield"><label for="lab-p2">Titration 2 in mL</label><input id="lab-p2" inputmode="decimal"></div>
+          <div class="lfield"><label for="lab-p3">Titration 3 in mL</label><input id="lab-p3" inputmode="decimal"></div>
+        </div>
+        <p class="lsmall">Mittelwert: <span class="mean" id="lab-pMean">–</span></p>
+        <p class="lsmall" id="lab-fillInfo"></p>
+      </section>
+
+      <section class="lcard" data-task="unk">
+        <h2>Ergebnis prüfen</h2>
+        <p class="lsmall">Gesucht ist die Konzentration der Probelösung, bevor Wasser zugegeben wurde. Toleranz: ±3 %.</p>
+        <div class="checkrow">
+          <div class="lfield"><label for="lab-answer">c(Probelösung) in mol/L</label><input id="lab-answer" inputmode="decimal" placeholder="z. B. 0,087"></div>
+          <button class="lbtn lprimary" id="lab-check">Prüfen</button>
+          <button class="lbtn" id="lab-reveal" hidden>Lösung zeigen</button>
+        </div>
+        <div id="lab-result" class="lnote" hidden></div>
+      </section>
+    </div>
+  </main>
+
+  <p class="labfoot">Modell: exakte pH-Berechnung über die Ladungsbilanz bei 25 °C. Annahmen: ideale Lösungen (Konzentrationen statt Aktivitäten), kein CO₂-Eintrag, Messgeräte ohne Messfehler, Tropfenvolumen 0,05 mL. pKs-Werte: Essigsäure 4,75 · Ameisensäure 3,75 · Milchsäure 3,86 · Phosphorsäure 2,16 / 7,21 / 12,32 · Hydrogensulfat 1,92 (1. Protolyse der Schwefelsäure vollständig) · Ammonium 9,25.</p>
+</div>`;
+function renderLab(){
+  $('#back').hidden = false; $('#h1').textContent = 'Virtuelle Titration';
+  $('#view').innerHTML = LAB_HTML;
+  initLab(document.getElementById('lab'));
+}
+function initLab(root){
+
+const Kw=1e-14;
+const SUB={
+  HCl:{name:'Salzsäure (HCl)',short:'Salzsäure',type:'SA',kind:'acid',strong:true,lk:false},
+  NaOH:{name:'Natronlauge (NaOH)',short:'Natronlauge',type:'SB',kind:'base',strong:true,lk:false},
+  CH3COOH:{name:'Essigsäure (CH₃COOH)',short:'Essigsäure',type:'WA',kind:'acid',pKa:4.75,lk:true},
+  HCOOH:{name:'Ameisensäure (HCOOH)',short:'Ameisensäure',type:'WA',kind:'acid',pKa:3.75,lk:true},
+  H2SO4:{name:'Schwefelsäure (H₂SO₄)',short:'Schwefelsäure',type:'SA',kind:'acid',strong:true,lk:false,eq:2,
+    parts:[{type:'SA'},{type:'WA',pKa:1.92}]},
+  H3PO4:{name:'Phosphorsäure (H₃PO₄)',short:'Phosphorsäure',type:'P',kind:'acid',lk:true,
+    parts:[{type:'P',pKas:[2.16,7.21,12.32]}],eps:[1,2],stages:[{f:0,n:'₁',pKa:2.16},{f:1,n:'₂',pKa:7.21}]},
+  C3H6O3:{name:'Milchsäure (CH₃CH(OH)COOH)',short:'Milchsäure',type:'WA',kind:'acid',pKa:3.86,lk:true},
+  NH3:{name:'Ammoniaklösung (NH₃)',short:'Ammoniaklösung',type:'WB',kind:'base',pKa:9.25,lk:true}
+};
+const SAMPLES=['HCl','H2SO4','NaOH','CH3COOH','HCOOH','C3H6O3','H3PO4','NH3'];
+const TITRANTS=['HCl','NaOH','CH3COOH','NH3'];
+const CLEAR=[175,205,222,.32];
+const IND={
+  none:{name:'ohne Indikator'},
+  MO:{name:'Methylorange (3,1–4,4)',lo:3.1,hi:4.4,stops:[[205,45,40,.82],[240,165,35,.8]]},
+  MR:{name:'Methylrot (4,4–6,2)',lo:4.4,hi:6.2,stops:[[210,35,60,.82],[238,205,45,.78]]},
+  BTB:{name:'Bromthymolblau (6,0–7,6)',lo:6.0,hi:7.6,stops:[[228,205,40,.78],[70,160,85,.8],[40,85,200,.82]]},
+  PP:{name:'Phenolphthalein (8,2–10,0)',lo:8.2,hi:10.0,stops:[CLEAR,[214,32,140,.82]]}
+};
+const C0S=[0.01,0.05,0.1,0.2,0.5,1];
+
+const st={level:'LK',mode:'ind',task:'frei',sample:'HCl',c0:0.1,V0:20,water:0,titrant:'',ct:0.1,ind:'none',
+  V:0,pos:0,fill:1,data:[],auto:true,hidden:0.1,hahn:null,revealed:false};
+const $=id=>document.getElementById(id.startsWith('lab-')?id:'lab-'+id);
+const fmt=(x,d)=>x.toFixed(d).replace('.',',');
+const num=s=>parseFloat(String(s).replace(',','.'));
+const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Chemie ---------- */
+function solvePH(comps){
+  const f=p=>{const h=Math.pow(10,-p);let s=h-Kw/h;
+    for(const c of comps){ if(!c.c) continue; const Ka=c.pKa!=null?Math.pow(10,-c.pKa):0;
+      if(c.type==='SA') s-=c.c; else if(c.type==='SB') s+=c.c;
+      else if(c.type==='P'){const K=c.pKas.map(x=>Math.pow(10,-x));
+        const t1=K[0]*h*h,t2=K[0]*K[1]*h,t3=K[0]*K[1]*K[2]; s-=c.c*(t1+2*t2+3*t3)/(h*h*h+t1+t2+t3);}
+      else if(c.type==='WA') s-=c.c*Ka/(Ka+h); else if(c.type==='WB') s+=c.c*h/(Ka+h);}
+    return s;};
+  let lo=-2,hi=16;
+  for(let i=0;i<70;i++){const m=(lo+hi)/2; if(f(m)>0) lo=m; else hi=m;}
+  return (lo+hi)/2;
+}
+const c0eff=()=>st.task==='unk'?st.hidden:st.c0;
+function pHAt(V){
+  const S=SUB[st.sample],T=SUB[st.titrant];
+  const Vt=(st.V0+st.water+V)/1000;
+  const cs=c0eff()*st.V0/1000/Vt;
+  const comps=(S.parts||[{type:S.type,pKa:S.pKa}]).map(p=>({type:p.type,pKa:p.pKa,pKas:p.pKas,c:cs}));
+  if(T) comps.push({type:T.type,pKa:T.pKa,c:st.ct*V/1000/Vt});
+  return solvePH(comps);
+}
+/* sichtbare Äquivalenzpunkte (Volumina); veq() = letzter davon */
+function aeps(){const S=SUB[st.sample],T=SUB[st.titrant];
+  if(!T||S.kind===T.kind) return [];
+  const base=c0eff()*st.V0/st.ct; return (S.eps||[S.eq||1]).map(f=>f*base);}
+function veq(){const a=aeps(); return a.length?a[a.length-1]:null;}
+/* Pufferstufen: Start der Stufe (Vielfaches des 1. ÄP), Index, pKs */
+function stages(){const S=SUB[st.sample],a=aeps(); if(!a.length||S.strong) return [];
+  const base=a[0]; return (S.stages||[{f:0,n:'',pKa:S.pKa}]).map(g=>({V0:g.f*base,w:base,n:g.n,pKa:g.pKa}));}
+function colorAt(pH){
+  const I=IND[st.mode==='ph'?'none':st.ind];
+  if(!I.stops) return CLEAR;
+  const f=Math.min(1,Math.max(0,(pH-I.lo)/(I.hi-I.lo)));
+  const n=I.stops.length-1, k=Math.min(n-1,Math.floor(f*n)), t=f*n-k;
+  const a=I.stops[k],b=I.stops[k+1];
+  return a.map((v,i)=>v+(b[i]-v)*t);
+}
+const rgba=c=>`rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${c[3].toFixed(2)})`;
+
+/* ---------- Aufbau ---------- */
+const BY0=30,BPX=5.8;
+/* Füllhöhe im Erlenmeyerkolben (250 mL bis zum Halsansatz, Kegelform) */
+function levelY(vol){
+  const w=h=>140-108*h/77; const cum=h=>{let a=0,n=60;for(let i=0;i<n;i++){const x=(i+.5)*h/n;a+=w(x)*w(x)*h/n;}return a;};
+  const full=cum(77), neck=32*32;
+  let target=vol/250*full;
+  if(target>full) return Math.max(386,410-(target-full)/neck);
+  let lo=0,hi=77;for(let i=0;i<30;i++){const m=(lo+hi)/2;if(cum(m)<target)lo=m;else hi=m;}
+  return 487-(lo+hi)/2;
+}
+(function scale(){let s='';
+  for(let v=0;v<=50;v++){const y=BY0+v*BPX, maj=v%5===0;
+    s+=`<line class="tick" x1="${maj?150:154}" y1="${y}" x2="160" y2="${y}"/>`;
+    if(maj) s+=`<text class="tlbl" x="164" y="${y+3}">${v}</text>`;}
+  $('lab-bScale').innerHTML=s;
+  let m='';
+  for(const v of [50,100,150,200]){const y=levelY(v),xl=82+(487-y)*54/77;
+    m+=`<line class="tick" x1="${xl+3}" y1="${y}" x2="${xl+11}" y2="${y}"/><text class="blbl" x="${xl+13}" y="${y+3}">${v}</text>`;}
+  $('lab-beakMarks').innerHTML=m;
+})();
+function drawLupe(){
+  const P=60,Y=v=>110+(v-st.pos)*P, ym=110;
+  let s=`<defs><clipPath id="lab-lc"><rect x="0" y="0" width="120" height="220"/></clipPath></defs><g clip-path="url(#lab-lc)">`;
+  s+=`<rect class="glassfill" x="30" y="0" width="54" height="220"/>`;
+  s+=`<path class="titrant" d="M30 ${ym-8} Q57 ${ym+8} 84 ${ym-8} L84 220 L30 220 Z"/>`;
+  s+=`<path fill="none" stroke="var(--curve)" stroke-width="1.4" d="M30 ${ym-8} Q57 ${ym+8} 84 ${ym-8}"/>`;
+  const k0=Math.ceil((st.pos-1.9)*10),k1=Math.floor((st.pos+1.9)*10);
+  for(let k=k0;k<=k1;k++){ if(k<0||k>500) continue; const v=k/10,y=Y(v);
+    const len=k%10===0?24:(k%5===0?16:9);
+    s+=`<line class="tick" x1="30" y1="${y}" x2="${30+len}" y2="${y}" style="stroke-width:${k%10===0?1.3:.9}"/>`;
+    if(k%10===0) s+=`<text class="tlbl" x="90" y="${y+4}" style="font-size:13px">${k/10}</text>`;}
+  s+=`<line class="glass" x1="30" y1="0" x2="30" y2="220"/><line class="glass" x1="84" y1="0" x2="84" y2="220"/></g>`;
+  $('lab-lupe').innerHTML=s;
+}
+function animateDrop(){
+  if(reduced) return;
+  const top=levelY(st.V0+st.water+st.V);
+  $('lab-drop').animate([{opacity:1,transform:'translateY(0)'},{opacity:.9,transform:`translateY(${top-397}px)`}],{duration:320,easing:'ease-in'});
+}
+
+/* ---------- Messwerte ---------- */
+function record(force){
+  if(!SUB[st.titrant]) return;
+  const p=pHAt(st.V), last=st.data[st.data.length-1];
+  if(last&&Math.abs(last.V-st.V)<1e-9) return;
+  if(!force&&last&&Math.abs(st.V-last.V)<0.5&&Math.abs(p-last.pH)<0.2) return;
+  st.data.push({V:st.V,pH:p});
+}
+function add(dv,fromHahn){
+  if(!SUB[st.titrant]){say('Wähle zuerst eine Maßlösung für die Bürette.',true);stopHahn();return;}
+  const rest=50-st.pos;
+  if(rest<1e-9){say('Die Bürette ist leer. Fülle sie nach, um weiter zu titrieren.',true);stopHahn();render();return;}
+  const d=Math.min(dv,rest);
+  st.V=Math.round((st.V+d)*1000)/1000; st.pos=Math.round((st.pos+d)*1000)/1000;
+  if(!fromHahn) animateDrop();
+  if(st.auto) record(!fromHahn);
+  if(st.pos>=50-1e-9){stopHahn();say('Die Bürette ist leer. Fülle sie nach, um weiter zu titrieren.',true);}
+  else say('');
+  render();
+}
+function startHahn(){
+  if(!SUB[st.titrant]){say('Wähle zuerst eine Maßlösung für die Bürette.',true);return;}
+  st.hahn=setInterval(()=>add(0.05,true),100);
+  $('lab-hahn').textContent='Hahn schließen';
+  $('lab-cockH').setAttribute('transform','rotate(90 150 346)');
+}
+function stopHahn(){
+  if(!st.hahn) return;
+  clearInterval(st.hahn); st.hahn=null;
+  if(st.auto) record(true);
+  $('lab-hahn').textContent='Hahn öffnen';
+  $('lab-cockH').removeAttribute('transform');
+  render();
+}
+function resetExp(newHidden){
+  stopHahn();
+  if(newHidden) st.hidden=Math.round((0.05+Math.random()*0.1)*1000)/1000;
+  st.V=0;st.pos=0;st.fill=1;st.data=[];st.revealed=false;
+  if(SUB[st.titrant]) st.data.push({V:0,pH:pHAt(0)});
+  $('lab-result').hidden=true;$('lab-reveal').hidden=true;
+  say('');render();
+}
+function say(t,warn){const m=$('lab-msg');m.textContent=t;m.classList.toggle('warn',!!warn);}
+
+/* ---------- Diagramm ---------- */
+function niceCeil(v){return v<=10?Math.ceil(v):Math.ceil(v/5)*5;}
+/* Hilfen erst nach Überschreiten des Äquivalenzpunkts */
+function unlocked(){const ve=veq(); return !!ve && st.V>ve+1e-9;}
+const on=id=>$(id).checked&&unlocked();
+function drawChart(){
+  const W=600,H=360,L=48,R=18,T=14,B=46,pw=W-L-R,ph=H-T-B;
+  const vmax=Math.max(st.V,...st.data.map(d=>d.V),0);
+  const xmax=Math.max(st.ct>=1?5:25,niceCeil(vmax*1.2+0.5));
+  const X=v=>L+v/xmax*pw, Y=p=>T+(14-p)/14*ph;
+  const steps=[0.5,1,2,5,10,20];const major=steps.find(s=>xmax/s<=8)||20;const minor=major/5;
+  let s='';
+  for(let v=0;v<=xmax+1e-9;v+=minor){const isM=Math.abs(v/major-Math.round(v/major))<1e-6;
+    s+=`<line class="${isM?'g-major':'g-minor'}" x1="${X(v)}" y1="${T}" x2="${X(v)}" y2="${T+ph}"/>`;}
+  for(let p=0;p<=14;p+=0.5){s+=`<line class="${p%1===0?'g-major':'g-minor'}" x1="${L}" y1="${Y(p)}" x2="${L+pw}" y2="${Y(p)}"/>`;}
+  const S=SUB[st.sample],T_=SUB[st.titrant],ve=veq(),weak=!S.strong&&st.level==='LK';
+  if(on('h_puf')&&weak) stages().forEach(g=>{const a=X(Math.min(g.V0+g.w/11,xmax)),b=X(Math.min(g.V0+g.w*10/11,xmax));
+    s+=`<rect class="bufband" x="${a}" y="${T}" width="${b-a}" height="${ph}"/>`;
+    s+=`<text class="ann" x="${(a+b)/2}" y="${T+16}" text-anchor="middle">Pufferbereich${g.n?' '+g.n.replace('₁','1').replace('₂','2'):''} (pH = pKs${g.n} ± 1)</text>`;});
+  if(st.mode==='cmp'&&st.ind!=='none'){const I=IND[st.ind];const mid=colorAt((I.lo+I.hi)/2);
+    s+=`<rect x="${L}" y="${Y(I.hi)}" width="${pw}" height="${Y(I.lo)-Y(I.hi)}" fill="rgba(${Math.round(mid[0])},${Math.round(mid[1])},${Math.round(mid[2])},.28)"/>`;
+    s+=`<text class="ann" x="${L+pw-6}" y="${Y(I.hi)-5}" text-anchor="end">Umschlagsbereich ${I.name.split(' (')[0]}</text>`;}
+  if(on('h_ph7')){s+=`<line class="ph7" x1="${L}" y1="${Y(7)}" x2="${L+pw}" y2="${Y(7)}"/><text class="ann" x="${L+6}" y="${Y(7)-5}">pH = 7</text>`;}
+  const d=st.data.slice().sort((a,b)=>a.V-b.V);
+  if(d.length>1) s+=`<polyline class="curve" points="${d.map(p=>X(p.V)+','+Y(p.pH)).join(' ')}"/>`;
+  for(const p of d) s+=`<circle class="pt" cx="${X(p.V)}" cy="${Y(p.pH)}" r="2.6"/>`;
+  if(!weak&&ve&&(on('h_puf')||on('h_haep'))){
+    const lines=[];
+    if(on('h_puf')) lines.push(`${S.short} ist ${S.kind==='acid'?'eine starke Säure':'eine starke Base'}: kein Pufferbereich.`);
+    if(on('h_haep')) lines.push('Am Halbäquivalenzpunkt gilt hier nicht pH = pKs.');
+    lines.forEach((t,i)=>{s+=`<text class="ann" x="${L+pw/2}" y="${T+18+i*16}" text-anchor="middle">${t}</text>`;});
+    if(on('h_haep')&&ve/2<=xmax){const p=pHAt(ve/2),x=X(ve/2),y=Y(p);
+      s+=`<line class="markline" x1="${x}" y1="${y}" x2="${x}" y2="${T+ph}"/><circle class="mark" cx="${x}" cy="${y}" r="5"/>`;
+      s+=`<text class="ann" x="${x+8}" y="${y+(S.kind==='acid'?-8:18)}">HÄP: pH = ${fmt(p,2)}</text>`;}
+  }
+  if(on('h_haep')&&weak) stages().forEach(g=>{const vh=g.V0+g.w/2; if(vh>xmax) return; const p=pHAt(vh),x=X(vh),y=Y(p);
+    s+=`<line class="markline" x1="${x}" y1="${y}" x2="${x}" y2="${T+ph}"/><line class="markline" x1="${L}" y1="${y}" x2="${x}" y2="${y}"/>`;
+    s+=`<circle class="mark" cx="${x}" cy="${y}" r="5"/>`;
+    let t;
+    if(g.n) t=`HÄP${g.n}: pH ≈ ${fmt(p,2)} (pKs${g.n} = ${fmt(g.pKa,2)})`;
+    else t=`HÄP: pH = ${S.kind==='acid'?'pKs':'pKs(NH₄⁺)'} ≈ ${fmt(p,2)}`;
+    s+=`<text class="ann" x="${x+8}" y="${y+(S.kind==='acid'?-8:18)}">${t}</text>`;});
+  if(on('h_aep')&&st.task!=='unk'){const A=aeps(); A.forEach((v,i)=>{if(v>xmax) return; const p=pHAt(v),x=X(v),y=Y(p);const right=x>L+pw*0.6;
+    const nm=A.length>1?'ÄP'+['₁','₂','₃'][i]:'ÄP';
+    s+=`<line class="markline" x1="${x}" y1="${y}" x2="${x}" y2="${T+ph}"/>`;
+    s+=`<circle class="mark" cx="${x}" cy="${y}" r="5"/>`;
+    s+=`<text class="ann" x="${x+(right?-9:9)}" y="${y+4}" text-anchor="${right?'end':'start'}">${nm}: V = ${fmt(v,2)} mL · pH = ${fmt(p,2)}</text>`;});}
+  s+=`<line class="axis" x1="${L}" y1="${T+ph}" x2="${L+pw}" y2="${T+ph}"/><line class="axis" x1="${L}" y1="${T}" x2="${L}" y2="${T+ph}"/>`;
+  for(let v=0;v<=xmax+1e-9;v+=major) s+=`<text class="alab" x="${X(v)}" y="${T+ph+16}" text-anchor="middle">${fmt(v,major<1?1:0)}</text>`;
+  for(let p=0;p<=14;p+=2) s+=`<text class="alab" x="${L-8}" y="${Y(p)+4}" text-anchor="end">${p}</text>`;
+  s+=`<text class="atitle" x="${L+pw/2}" y="${H-6}" text-anchor="middle">V(Maßlösung) in mL</text>`;
+  s+=`<text class="atitle" transform="translate(14 ${T+ph/2}) rotate(-90)" text-anchor="middle">pH</text>`;
+  if(!T_) s+=`<text class="ann" x="${L+pw/2}" y="${T+ph/2}" text-anchor="middle">Wähle eine Maßlösung, um zu starten.</text>`;
+  $('lab-chart').innerHTML=s;
+  $('lab-chartSub').textContent=T_?`${S.short} mit ${T_.short}`:'';
+}
+
+/* ---------- Oberfläche ---------- */
+function fillSelect(sel,items,val){
+  sel.innerHTML=items.map(([v,t])=>`<option value="${v}">${t}</option>`).join('');
+  sel.value=val;
+}
+function buildSelects(){
+  const lk=st.level==='LK';
+  const samples=SAMPLES.filter(k=>lk||!SUB[k].lk);
+  if(!samples.includes(st.sample)) st.sample='HCl';
+  fillSelect($('lab-sample'),samples.map(k=>[k,SUB[k].name]),st.sample);
+  const tit=TITRANTS.filter(k=>lk||!SUB[k].lk);
+  if(st.titrant&&!tit.includes(st.titrant)) st.titrant='';
+  fillSelect($('lab-titrant'),[['','– bitte wählen –'],...tit.map(k=>[k,SUB[k].name])],st.titrant);
+  if(st.task==='unk') fillSelect($('lab-c0'),[['u','unbekannt']],'u');
+  else fillSelect($('lab-c0'),C0S.map(c=>[c,fmt(c,c<0.1?2:1)+' mol/L']),st.c0);
+  $('lab-c0').disabled=st.task==='unk';
+  if(!lk) st.ct=0.1;
+  $('lab-ct').value=String(st.ct); $('lab-ct').disabled=!lk;
+  fillSelect($('lab-ind'),Object.keys(IND).map(k=>[k,IND[k].name]),st.ind);
+  $('lab-V0').value=String(st.V0);$('lab-water').value=String(st.water);
+}
+function applyVisibility(){
+  root.querySelectorAll('[data-modes]').forEach(el=>el.hidden=!el.dataset.modes.split(' ').includes(st.mode));
+  root.querySelectorAll('[data-task]').forEach(el=>el.hidden=st.task!==el.dataset.task);
+  root.querySelectorAll('[data-lk]').forEach(el=>el.hidden=st.level!=='LK');
+  root.querySelectorAll('.lseg').forEach(g=>g.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(st[g.dataset.key]===b.dataset.v))));
+  $('lab-probe').style.display=st.mode==='ind'?'none':'';
+  root.querySelectorAll('[data-key="mode"] button').forEach(b=>b.hidden=st.level==='GK'&&b.dataset.v!=='ind');
+}
+function render(){
+  const yTop=BY0+st.pos*BPX;
+  $('lab-bLiq').setAttribute('y',yTop);$('lab-bLiq').setAttribute('height',Math.max(0,336-yTop));
+  drawLupe();
+  $('lab-digi').textContent=fmt(st.V,2)+' mL';
+  const top=levelY(st.V0+st.water+st.V);
+  const p=pHAt(st.V);
+  const bl=$('lab-beakLiq');bl.setAttribute('y',top);bl.setAttribute('height',488-top);bl.setAttribute('fill',rgba(colorAt(p)));
+  $('lab-phText').textContent=p.toFixed(2);
+  $('lab-refill').hidden=st.pos<50-1e-9;
+  const noT=!SUB[st.titrant];
+  root.querySelectorAll('[data-dv]').forEach(b=>b.disabled=noT||st.pos>=50-1e-9);
+  $('lab-hahn').disabled=noT||(st.pos>=50-1e-9&&!st.hahn);
+  $('lab-take').disabled=st.auto||noT;
+  const S=SUB[st.sample],ve=veq(),weak=!S.strong;
+  const U=unlocked();
+  [['h_ph7','c_ph7'],['h_aep','c_aep'],['h_haep','c_haep'],['h_puf','c_puf']].forEach(([h,c])=>{
+    const off=!U||(h==='h_aep'&&st.task==='unk'); $(h).disabled=off; $(c).classList.toggle('off',off);});
+  const notes=[];
+  if(SUB[st.titrant]&&ve&&!U) notes.push('Die Hilfen werden freigeschaltet, sobald der Äquivalenzpunkt überschritten ist.');
+  if(st.task==='unk') notes.push('Bei einer unbekannten Probe ist die Markierung des Äquivalenzpunkts gesperrt.');
+  if(SUB[st.titrant]&&!ve) notes.push('Probe und Maßlösung reagieren nicht miteinander, deshalb gibt es keinen Äquivalenzpunkt.');
+  $('lab-helpNote').textContent=notes.join(' ');
+  $('lab-fillInfo').textContent=st.fill>1?`Bürettenfüllung ${st.fill}: Aus den vorherigen Füllungen wurden bereits ${fmt((st.fill-1)*50,2)} mL zugegeben.`:'';
+  if(st.mode==='ind'&&st.ind==='none'&&!st.V) say('Wähle einen Indikator, damit du den Endpunkt erkennen kannst.');
+  drawTable();
+  if(st.mode!=='ind') drawChart();
+}
+function drawTable(){
+  const tb=$('lab-tbody');
+  tb.innerHTML=st.data.map((d,i)=>`<tr><td>${i+1}</td><td>${fmt(d.V,2)}</td><td>${fmt(d.pH,2)}</td></tr>`).join('');
+  const box=tb.closest('.tablebox'); if(box) box.scrollTop=box.scrollHeight;
+}
+function hint(){
+  const S=SUB[st.sample],T=SUB[st.titrant],h=$('lab-hint');
+  let t,cls;
+  if(!T){t='Wähle zuerst eine Maßlösung aus.';cls='warn';}
+  else if(S.kind===T.kind){const a=S.kind==='acid';
+    t=`Probe und Maßlösung sind beide ${a?'Säuren':'Basen'}. Zwischen ihnen findet keine Neutralisation statt. Für eine ${a?'saure':'basische'} Probe brauchst du eine ${a?'basische':'saure'} Maßlösung.`;cls='warn';}
+  else if(!T.strong){t=`${T.short} ist eine schwache ${T.kind==='acid'?'Säure':'Base'}. Sie reagiert zwar mit der Probe, aber der pH-Sprung am Äquivalenzpunkt fällt klein aus. Mit einer starken ${T.kind==='acid'?'Säure':'Base'} als Maßlösung wird der Sprung deutlich.`;cls='warn';}
+  else{t=`${T.short} passt: Als starke ${T.kind==='acid'?'Säure':'Base'} reagiert sie vollständig mit der ${S.kind==='acid'?'Säure':'Base'} in der Probe.`;cls='ok';}
+  h.textContent=t;h.className='lnote '+cls;h.hidden=false;
+}
+
+/* ---------- Ereignisse ---------- */
+root.querySelectorAll('.lseg').forEach(g=>g.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;const k=g.dataset.key,v=b.dataset.v;if(st[k]===v)return;
+  st[k]=v;
+  if(k==='level'&&v==='GK') st.mode='ind';
+  if(k==='level'||k==='task'){buildSelects();$('lab-hint').hidden=true;resetExp(k==='task'&&v==='unk');}
+  if(k==='mode'&&v==='cmp'&&st.ind==='none'){st.ind='PP';$('lab-ind').value='PP';}
+  applyVisibility();render();
+}));
+$('lab-sample').addEventListener('change',e=>{st.sample=e.target.value;$('lab-hint').hidden=true;resetExp(true);});
+$('lab-c0').addEventListener('change',e=>{st.c0=num(e.target.value);resetExp(false);});
+$('lab-V0').addEventListener('change',e=>{st.V0=num(e.target.value);resetExp(false);});
+$('lab-water').addEventListener('change',e=>{st.water=num(e.target.value);resetExp(false);});
+$('lab-titrant').addEventListener('change',e=>{st.titrant=e.target.value;$('lab-hint').hidden=true;resetExp(false);});
+$('lab-ct').addEventListener('change',e=>{st.ct=num(e.target.value);resetExp(false);});
+$('lab-ind').addEventListener('change',e=>{st.ind=e.target.value;say('');render();});
+$('lab-hintBtn').addEventListener('click',hint);
+root.querySelectorAll('[data-dv]').forEach(b=>b.addEventListener('click',()=>add(num(b.dataset.dv),false)));
+$('lab-hahn').addEventListener('click',()=>st.hahn?stopHahn():startHahn());
+$('lab-refill').addEventListener('click',()=>{st.pos=0;st.fill++;say(`Bürette nachgefüllt (Füllung ${st.fill}). Die Skala beginnt wieder bei 0.`);render();});
+$('lab-reset').addEventListener('click',()=>resetExp(false));
+$('lab-newSample').addEventListener('click',()=>{resetExp(true);say('Neue Probe mit unbekannter Konzentration vorgelegt.');});
+['h_ph7','h_aep','h_haep','h_puf'].forEach(id=>$(id).addEventListener('change',render));
+$('lab-auto').addEventListener('change',e=>{st.auto=e.target.checked;render();});
+$('lab-take').addEventListener('click',()=>{record(true);render();});
+$('lab-copy').addEventListener('click',()=>{
+  const txt='V(Maßlösung) in mL\tpH\n'+st.data.map(d=>fmt(d.V,2)+'\t'+fmt(d.pH,2)).join('\n');
+  const fb=()=>{const t=$('lab-copyFallback');t.value=txt;t.hidden=false;t.select();say('Kopieren ist hier nicht erlaubt. Der markierte Text lässt sich mit Strg+C kopieren.');};
+  try{navigator.clipboard.writeText(txt).then(()=>say(`${st.data.length} Messwerte kopiert.`),fb);}catch(e){fb();}
+});
+['p1','p2','p3'].forEach(id=>$(id).addEventListener('input',()=>{
+  const v=['p1','p2','p3'].map(i=>num($(i).value)).filter(x=>!isNaN(x));
+  $('lab-pMean').textContent=v.length?fmt(v.reduce((a,b)=>a+b,0)/v.length,2)+' mL':'–';
+}));
+$('lab-check').addEventListener('click',()=>{
+  const x=num($('lab-answer').value),r=$('lab-result');r.hidden=false;
+  if(isNaN(x)||x<=0){r.className='lnote warn';r.textContent='Gib eine Konzentration in mol/L ein, z. B. 0,087.';return;}
+  const dev=(x-st.hidden)/st.hidden*100;
+  if(Math.abs(dev)<=3){r.className='lnote ok';r.textContent=`Richtig! Deine Abweichung beträgt ${fmt(dev,1)} %.`;}
+  else{r.className='lnote warn';r.textContent=`Noch nicht. Deine Abweichung beträgt ${fmt(dev,1)} %. Prüfe das abgelesene Volumen und den Rechenweg. Achte auf das Stoffmengenverhältnis in der Reaktionsgleichung. Wasser, das du zugegeben hast, ändert die Stoffmenge nicht.`;}
+  $('lab-reveal').hidden=false;
+});
+$('lab-reveal').addEventListener('click',()=>{const r=$('lab-result');r.hidden=false;r.className='lnote';
+  r.textContent=`Lösung: c(Probelösung) = ${fmt(st.hidden,3)} mol/L. ${aeps().length>1?'Die Äquivalenzpunkte liegen bei '+aeps().map(v=>fmt(v,2)+' mL').join(' und ')+'.':'Am Äquivalenzpunkt werden '+(veq()?fmt(veq(),2)+' mL':'– mL')+' Maßlösung verbraucht.'}`;});
+$('lab-helpBtn').addEventListener('click',()=>{const h=$('lab-help');h.hidden=!h.hidden;$('lab-helpBtn').setAttribute('aria-expanded',String(!h.hidden));});
+
+buildSelects();applyVisibility();resetExp(false);
+
+window.labStop=()=>stopHahn();
+}
+
 /* ---------- Ansicht ---------- */
 let cur = { cat:null, ex:null, q:null, done:false, streak:0 };
 
 function renderHome(){
   $('#back').hidden = true; $('#h1').textContent = 'Säuren und Basen';
-  $('#view').innerHTML = `<div class="cats">${CATS.map(c=>{ const ready = !!CAT[c.id] || c.id==='mix'; return `
+  $('#view').innerHTML = `<div class="cats">${CATS.map(c=>{ const ready = !!CAT[c.id] || c.id==='mix' || c.id==='labor'; return `
     <button class="cat ${ready?'ready':''}" data-cat="${c.id}" ${ready?'':'disabled'}>
       <h2>${c.title}</h2><p>${c.sub}</p>
       <div class="meta"><span>Ich kann Nr. ${c.items}</span><span class="pill ${ready?'go':''}">${ready?'Üben':'folgt'}</span></div>
@@ -2029,7 +2645,9 @@ document.addEventListener('keydown', e => {
 });
 $('#back').onclick = () => { location.hash = ''; };
 function route(){
+  if (window.labStop){ window.labStop(); window.labStop = null; }
   const id = location.hash.slice(1);
+  if (id === 'labor'){ stopTimer(); renderLab(); return; }
   if (id === 'mix'){ if (mix.phase==='run' && !mix.timer) mix.timer = setInterval(tick, 1000); renderMix(); return; }
   stopTimer(); CAT[id] ? renderCat(id) : renderHome();
 }
@@ -2041,5 +2659,6 @@ document.addEventListener('keydown', e => {
 window.addEventListener('hashchange', route);
 route();
 </script>
+
 
 </body></html>
