@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulationen · Claßen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,600&display=swap" rel="stylesheet">
+
+<script>
+/* =====================================================================
+   HIER NEUE SIMULATIONEN EINTRAGEN
+   ---------------------------------------------------------------------
+   Für jede Simulation einen Block { ... }, kopieren und anpassen.
+   Wichtig: Jeder Block endet mit einem Komma.
+
+   fach         → "Chemie" oder "Physik" (genau so geschrieben)
+   stufe        → z. B. "5", "7", "9", "EF", "Q1", "Q2"
+   thema        → Inhaltsfeld / Stichwort, z. B. "Optik"
+   titel        → Name der Simulation
+   beschreibung → ein Satz, worum es geht
+   link         → Dateiname im Repo (z. B. "optik/spiegel.html")
+                  oder eine vollständige Adresse (https://...)
+   ===================================================================== */
+const SIMULATIONEN = [
+
+  {
+    fach: "Physik",
+    stufe: "7",
+    thema: "Optik",
+    titel: "Zauberer-Labor",
+    beschreibung: "Rätsel rund um Reflexion: Laser-Spiegel, Periskop und Spiegel-Gitter.",
+    link: "zauberer-labor.html"
+  },
+
+  {
+    fach: "Physik",
+    stufe: "Q1",
+    thema: "Radioaktivität",
+    titel: "Beispiel: Zerfallsgesetz",
+    beschreibung: "Platzhalter – ersetzen oder löschen.",
+    link: "zerfall.html"
+  },
+
+  {
+    fach: "Chemie",
+    stufe: "Q1",
+    thema: "Chemisches Gleichgewicht",
+    titel: "Beispiel: Gleichgewichtseinstellung",
+    beschreibung: "Platzhalter – ersetzen oder löschen.",
+    link: "gleichgewicht.html"
+  },
+
+];
+/* ===================== Ab hier nichts ändern ======================== */
+</script>
+
+<style>
+:root{
+  --bg:#f6f5f1; --card:#ffffff; --text:#1d2329; --muted:#5d6670; --line:#e2dfd7;
+  --chemie:#1f7a5a; --chemie-soft:#e3f2ec;
+  --physik:#2a5ca8; --physik-soft:#e4ecf8;
+  --accent:#1d2329;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#15181b; --card:#1e2226; --text:#eceae4; --muted:#9aa3ac; --line:#2e3338;
+    --chemie:#5cc79c; --chemie-soft:#1d3029;
+    --physik:#7fa8ec; --physik-soft:#1d2738;
+    --accent:#eceae4;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Source Sans 3",system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header{padding:48px 0 24px;border-bottom:1px solid var(--line)}
+.kicker{font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:"Source Serif 4",Georgia,serif;font-size:clamp(2rem,5vw,2.8rem);margin:.2em 0 .2em;line-height:1.1}
+.sub{color:var(--muted);margin:0;max-width:60ch}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:20px 0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 16px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.tab .n{opacity:.6;font-weight:400;margin-left:4px}
+select,input[type=search]{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--text)}
+input[type=search]{flex:1;min-width:180px}
+
+section.fach{margin:12px 0 40px}
+.fach-head{display:flex;align-items:baseline;gap:12px;border-bottom:3px solid var(--c);padding-bottom:6px;margin-bottom:8px}
+.fach-head h2{font-family:"Source Serif 4",Georgia,serif;margin:0;font-size:1.7rem;color:var(--c)}
+.fach-head span{color:var(--muted)}
+h3{font-size:.95rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:22px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+a.card{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:10px;padding:16px;transition:transform .12s,box-shadow .12s}
+a.card:hover,a.card:focus-visible{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.08);outline:none}
+.tag{align-self:flex-start;font-size:.78rem;font-weight:600;background:var(--soft);color:var(--c);padding:2px 10px;border-radius:999px}
+.card strong{font-size:1.1rem}
+.card p{margin:0;color:var(--muted);font-size:.95rem}
+.go{margin-top:auto;padding-top:6px;font-weight:600;color:var(--c);font-size:.9rem}
+.leer{color:var(--muted);padding:40px 0;text-align:center}
+footer{border-top:1px solid var(--line);padding:20px 0 40px;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Amplonius-Gymnasium Rheinberg · Claßen</div>
+    <h1>Simulationen für Chemie &amp; Physik</h1>
+    <p class="sub">Interaktive Simulationen und Lernspiele für den Unterricht – nach Fach und Jahrgangsstufe sortiert.</p>
+  </header>
+
+  <div class="controls">
+    <div class="tabs" id="tabs"></div>
+    <select id="stufe" aria-label="Jahrgangsstufe"><option value="">Alle Stufen</option></select>
+    <input type="search" id="suche" placeholder="Suchen (Titel, Thema …)">
+  </div>
+
+  <main id="liste"></main>
+
+  <footer>Stand: <span id="anzahl"></span> · Mike Claßen</footer>
+</div>
+
+<script>
+const FAECHER = {
+  "Chemie": {c:"var(--chemie)", soft:"var(--chemie-soft)"},
+  "Physik": {c:"var(--physik)", soft:"var(--physik-soft)"}
+};
+const STUFEN = ["5","6","7","8","9","10","EF","Q1","Q2"];
+const stufenRang = s => { const i = STUFEN.indexOf(String(s)); return i<0 ? 99 : i; };
+const stufenName = s => /^\d+$/.test(s) ? "Klasse " + s : s;
+const esc = t => String(t ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let aktivFach = "Alle";
+const tabs = document.getElementById("tabs");
+const stufeSel = document.getElementById("stufe");
+const suche = document.getElementById("suche");
+
+function baueTabs(){
+  const namen = ["Alle", ...Object.keys(FAECHER)];
+  tabs.innerHTML = namen.map(n => {
+    const anz = n==="Alle" ? SIMULATIONEN.length : SIMULATIONEN.filter(s=>s.fach===n).length;
+    return `<button class="tab" data-f="${n}" aria-pressed="${n===aktivFach}">${n}<span class="n">${anz}</span></button>`;
+  }).join("");
+  tabs.querySelectorAll(".tab").forEach(b => b.onclick = () => { aktivFach = b.dataset.f; baueTabs(); zeige(); });
+}
+
+function baueStufen(){
+  const vorhanden = [...new Set(SIMULATIONEN.map(s=>String(s.stufe)))].sort((a,b)=>stufenRang(a)-stufenRang(b));
+  stufeSel.innerHTML += vorhanden.map(s=>`<option value="${esc(s)}">${esc(stufenName(s))}</option>`).join("");
+}
+
+function zeige(){
+  const q = suche.value.trim().toLowerCase();
+  const st = stufeSel.value;
+  const treffer = SIMULATIONEN.filter(s =>
+    (aktivFach==="Alle" || s.fach===aktivFach) &&
+    (!st || String(s.stufe)===st) &&
+    (!q || [s.titel,s.thema,s.beschreibung,s.stufe].join(" ").toLowerCase().includes(q))
+  );
+  const liste = document.getElementById("liste");
+  if(!treffer.length){ liste.innerHTML = `<p class="leer">Keine Simulation gefunden.</p>`; return; }
+
+  liste.innerHTML = Object.keys(FAECHER).map(fach => {
+    const eigene = treffer.filter(s=>s.fach===fach);
+    if(!eigene.length) return "";
+    const f = FAECHER[fach];
+    const stufen = [...new Set(eigene.map(s=>String(s.stufe)))].sort((a,b)=>stufenRang(a)-stufenRang(b));
+    return `<section class="fach" style="--c:${f.c};--soft:${f.soft}">
+      <div class="fach-head"><h2>${fach}</h2><span>${eigene.length} Simulation${eigene.length>1?"en":""}</span></div>
+      ${stufen.map(stf => `
+        <h3>${esc(stufenName(stf))}</h3>
+        <div class="grid">
+          ${eigene.filter(s=>String(s.stufe)===stf).sort((a,b)=>a.titel.localeCompare(b.titel,"de")).map(s=>`
+            <a class="card" href="${esc(s.link)}">
+              ${s.thema?`<span class="tag">${esc(s.thema)}</span>`:""}
+              <strong>${esc(s.titel)}</strong>
+              ${s.beschreibung?`<p>${esc(s.beschreibung)}</p>`:""}
+              <span class="go">Öffnen →</span>
+            </a>`).join("")}
+        </div>`).join("")}
+    </section>`;
+  }).join("");
+}
+
+document.getElementById("anzahl").textContent = SIMULATIONEN.length + " Simulationen";
+baueTabs(); baueStufen();
+stufeSel.onchange = zeige; suche.oninput = zeige;
+zeige();
+</script>
+</body>
+</html>
