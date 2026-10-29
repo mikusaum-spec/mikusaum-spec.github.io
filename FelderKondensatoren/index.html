@@ -1,0 +1,933 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Feld und Kondensator Q1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: Laborheft auf Millimeterpapier – Kopfzeile + Reiter oben, darunter je Station Theorie, Simulation, Aufgaben */
+:root{
+  --bg:#f2f5f4; --paper:#ffffff; --ink:#1a2427; --muted:#5a6a6e; --line:#d3dcdb;
+  --accent:#0e6a72; --accent-soft:#dcebea; --pos:#c2410c; --neg:#1f4fd1;
+  --ok:#15803d; --ok-soft:#e3f3e8; --bad:#b42318; --bad-soft:#fbe9e7; --grid:rgba(14,106,114,.07);
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10171a; --paper:#172126; --ink:#e3ecec; --muted:#93a5a9; --line:#2a383d;
+  --accent:#55b8be; --accent-soft:#1c3439; --pos:#fb8f5c; --neg:#80a6ff;
+  --ok:#4ade80; --ok-soft:#163323; --bad:#f87171; --bad-soft:#3a1a1a; --grid:rgba(85,184,190,.06); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10171a; --paper:#172126; --ink:#e3ecec; --muted:#93a5a9; --line:#2a383d;
+  --accent:#55b8be; --accent-soft:#1c3439; --pos:#fb8f5c; --neg:#80a6ff;
+  --ok:#4ade80; --ok-soft:#163323; --bad:#f87171; --bad-soft:#3a1a1a; --grid:rgba(85,184,190,.06); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:20px 20px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+.kopf{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--f-mono);font-size:12.5px;color:var(--muted);
+  padding-block:8px;border-bottom:1px dashed var(--line)}
+.kopf b{color:var(--ink);font-weight:500}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;padding-block:6px;scrollbar-width:thin}
+nav.tabs button{flex:0 0 auto;font:500 14px var(--f-body);color:var(--muted);background:none;border:1px solid transparent;border-radius:6px;
+  padding:6px 10px;cursor:pointer;display:flex;align-items:center;gap:6px}
+nav.tabs button:hover{color:var(--ink);background:var(--accent-soft)}
+nav.tabs button[aria-selected="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.chip{font-family:var(--f-mono);font-size:11px;padding:1px 6px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+.chip.done{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+main{padding-block:28px 64px}
+section.station{display:flex;flex-direction:column;gap:22px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(30px,5vw,46px);font-weight:700}
+h2{font-size:clamp(24px,3.6vw,32px);font-weight:700}
+h3{font-size:19px;font-weight:700}
+p{margin:0}
+.lead{max-width:66ch;color:var(--muted);font-size:17px}
+.intro{display:flex;flex-direction:column;gap:8px}
+
+.theory{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card p{font-size:15px}
+.f{font-family:var(--f-mono);font-size:15px;background:var(--accent-soft);color:var(--ink);padding:6px 10px;border-radius:6px;align-self:flex-start;white-space:nowrap;overflow-x:auto;max-width:100%}
+.note{font-size:13.5px;color:var(--muted)}
+i.v{font-family:var(--f-body);font-style:italic}
+
+.sim{background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.sim-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.sim-head .tag{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.sim canvas{display:block;width:100%;background:var(--paper);touch-action:manipulation}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 20px;padding:14px 16px;border-top:1px solid var(--line)}
+.ctl{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ctl label{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+.ctl output{font-family:var(--f-mono);color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.readout{display:flex;flex-wrap:wrap;gap:8px 24px;padding:12px 16px;background:var(--accent-soft);font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.readout span{color:var(--muted)} .readout b{color:var(--ink);font-weight:500}
+.seg{display:flex;flex-wrap:wrap;gap:6px;padding:12px 16px;border-top:1px solid var(--line)}
+.btn{font:500 14px var(--f-body);border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.btn.primary{background:var(--accent);color:var(--paper);border-color:var(--accent)}
+.check{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.tablewrap{overflow-x:auto;padding:0 16px 14px}
+table{border-collapse:collapse;width:100%;font-family:var(--f-mono);font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:500}
+th:first-child,td:first-child{text-align:left}
+
+.tasks{display:flex;flex-direction:column;gap:12px}
+.task{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.task.solved{border-left-color:var(--ok)}
+.tq{font-size:15.5px;max-width:72ch}
+.tn{font-family:var(--f-mono);font-size:12px;color:var(--accent);display:block;margin-bottom:2px;letter-spacing:.04em}
+.ans{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ans input{font:15px var(--f-mono);padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:180px;max-width:100%}
+.unit{font-family:var(--f-mono);color:var(--muted);font-size:14px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts button{text-align:left;font:15px var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 12px;cursor:pointer}
+.opts button:hover{border-color:var(--accent)}
+.opts button.right{background:var(--ok-soft);border-color:var(--ok)}
+.opts button.wrong{background:var(--bad-soft);border-color:var(--bad);text-decoration:line-through;text-decoration-color:var(--bad)}
+.fb{font-size:14px;min-height:1px}
+.opts.num{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.opts.num button{font-family:var(--f-mono);text-align:center}
+.expl{font-size:14.5px;padding:10px 12px;background:var(--ok-soft);border-radius:6px;overflow-x:auto}
+.fb.ok{color:var(--ok)} .fb.no{color:var(--bad)}
+details{font-size:14.5px;color:var(--muted)}
+summary{cursor:pointer;color:var(--accent);font-weight:500;width:max-content;max-width:100%}
+details .sol{margin-top:6px;padding:10px 12px;background:var(--bg);border-radius:6px;color:var(--ink);overflow-x:auto}
+
+.formeln{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:12px}
+.formeln td,.formeln th{text-align:left;font-family:var(--f-body);font-size:14.5px}
+.formeln td.fm{font-family:var(--f-mono)}
+ol.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:15px;max-width:66ch}
+.score{font-family:var(--f-display);font-size:40px;font-weight:700;color:var(--accent);line-height:1}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.reset{align-self:flex-start}
+.game{background:var(--paper);border:2px solid var(--accent);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.game-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px 20px}
+.hud{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-mono);font-size:13.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.hud b{color:var(--ink);font-weight:500}
+.bar{height:10px;background:var(--bg);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--accent)}
+.bar i.low{background:var(--bad)}
+.gstart{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding-block:8px}
+.gq{font-family:var(--f-display);font-size:clamp(22px,4vw,30px);font-weight:700;line-height:1.2;margin-bottom:12px}
+.gopts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.gopts button{display:flex;align-items:center;gap:10px;text-align:left;font:500 18px var(--f-mono);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer;min-width:0}
+.gopts button:hover{border-color:var(--accent)}
+.gopts button .k{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;flex:0 0 auto}
+.gopts button.right{background:var(--ok-soft);border-color:var(--ok)}
+.gopts button.wrong{background:var(--bad-soft);border-color:var(--bad)}
+#gFb{margin-top:10px;min-height:1.5em}
+.btn.big{font-size:16px;padding:10px 18px}
+@media (max-width:460px){.gopts{grid-template-columns:1fr}}
+.vec{position:relative;display:inline-block;padding-top:.28em;line-height:1}
+.vec::before{content:"";position:absolute;left:0;right:-.08em;top:0;height:.3em;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 6'%3E%3Cpath d='M0.5 3H18' stroke='black' stroke-width='1.3'/%3E%3Cpath d='M14 0.4L19.6 3L14 5.6Z' fill='black'/%3E%3C/svg%3E") no-repeat center/100% 100%;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 6'%3E%3Cpath d='M0.5 3H18' stroke='black' stroke-width='1.3'/%3E%3Cpath d='M14 0.4L19.6 3L14 5.6Z' fill='black'/%3E%3C/svg%3E") no-repeat center/100% 100%}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto}}
+</style>
+
+<style>
+.ctl select{font:14px var(--f-body);padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.ctl.off{opacity:.45}
+.sim canvas.drag{touch-action:none;cursor:crosshair}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;padding:10px 16px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.src{font-size:13px;color:var(--muted)}
+.skizze{display:block;max-width:100%;height:auto;margin-top:8px}
+.opts.locked button{cursor:not-allowed;opacity:.55}
+.opts.locked button.wrong{opacity:1}
+.countdown{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted);margin:0}
+.countdown i{display:block;height:6px;border-radius:99px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.countdown b{display:block;height:100%;background:var(--bad)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.15;margin:0 .1em}
+.frac>span:first-child{border-bottom:1px solid currentColor;padding:0 .2em}
+.frac>span:last-child{padding:0 .2em}
+.f:has(.frac),td.fm:has(.frac){white-space:nowrap}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="kopf"><span><b>Amplonius-Gymnasium Rheinberg</b> · Physik · Q1 · Claßen</span><span>Felder · Kap. 4.1–4.4</span></div>
+    <nav class="tabs" role="tablist" aria-label="Stationen" id="tabs"></nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- START -->
+<section class="station" id="start" data-name="Überblick">
+  <div class="intro">
+    <div class="eyebrow">Wiederholen &amp; Festigen</div>
+    <h1>Feld und Kondensator</h1>
+    <p class="lead">Hier wiederholst du alles, was wir bisher zu elektrischen Feldern erarbeitet haben: von der Ladungsmessung über Feldstärke, Coulomb-Gesetz und Potential bis zur Kapazität von Kondensatoren. Jede Station hat eine kurze Erklärung, eine Simulation und Aufgaben mit sofortiger Rückmeldung.</p>
+  </div>
+  <div class="two">
+    <div class="card">
+      <h3>So arbeitest du</h3>
+      <ol class="steps">
+        <li>Bearbeite die Stationen in der Reihenfolge der Reiter. Sie folgen den Kapiteln 4.1 bis 4.4.</li>
+        <li>Lies die Erklärungen und probiere die Simulation aus. Formuliere dabei eine Je-desto-Aussage.</li>
+        <li>Beantworte zuerst die Verständnisfragen. Rechenaufgaben löst du auf Papier und wählst dann dein Ergebnis aus vier Antworten.</li>
+        <li>Die Hilfe zeigt nur den Ansatz. Die vollständige Lösung erscheint, sobald du richtig liegst.</li>
+        <li>Zum Schluss: Abschlusstest mit Aufgaben auf Abiturniveau. Dein Fortschritt steht an den Reitern.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Konstanten</h3>
+      <p class="f">e = 1,602 · 10⁻¹⁹ C</p>
+      <p class="f">ε₀ = 8,854 · 10⁻¹² C²/(N·m²)</p>
+      <p class="f">k = <span class="frac"><span>1</span><span>4πε₀</span></span> ≈ 8,99 · 10⁹ N·m²/C²</p>
+      <p class="f">mₑ = 9,109 · 10⁻³¹ kg · mₚ = 1,673 · 10⁻²⁷ kg</p>
+      <p class="f">g = 9,81 m/s²</p>
+    </div>
+  </div>
+  <div class="formeln">
+    <table>
+      <thead><tr><th>Größe</th><th>Gleichung</th><th>Einheit</th><th>Station</th></tr></thead>
+      <tbody>
+        <tr><td>Stromstärke</td><td class="fm">I = ΔQ / Δt ;  I(t) = Q̇(t)</td><td>1 A = 1 C/s</td><td>Ladung &amp; Strom</td></tr>
+        <tr><td>Ladung aus I(t)</td><td class="fm">ΔQ = Fläche unter dem I(t)-Graphen</td><td>1 C = 1 A·s</td><td>Ladung &amp; Strom</td></tr>
+        <tr><td>Feldstärke</td><td class="fm"><span class="vec">E</span> = <span class="vec">F</span> / q ;  <span class="vec">F</span> = q · <span class="vec">E</span></td><td>1 N/C = 1 V/m</td><td>Feldstärke</td></tr>
+        <tr><td>Coulomb-Kraft</td><td class="fm">F = <span class="frac"><span>1</span><span>4πε₀</span></span> · <span class="frac"><span>q · Q</span><span>r²</span></span></td><td>N</td><td>Coulomb</td></tr>
+        <tr><td>Radialfeld</td><td class="fm">E = <span class="frac"><span>1</span><span>4πε₀</span></span> · <span class="frac"><span>Q</span><span>r²</span></span></td><td>N/C</td><td>Coulomb</td></tr>
+        <tr><td>Superposition</td><td class="fm"><span class="vec">E</span> = <span class="vec">E</span>₁ + <span class="vec">E</span>₂ + …  (vektoriell)</td><td>N/C</td><td>Coulomb</td></tr>
+        <tr><td>Spannung</td><td class="fm">U = W / q</td><td>1 V = 1 J/C</td><td>Spannung &amp; Potential</td></tr>
+        <tr><td>Homogenes Feld</td><td class="fm">E = U / d</td><td>V/m</td><td>Spannung &amp; Potential</td></tr>
+        <tr><td>Potential</td><td class="fm">U = φ(P₁) − φ(P₂)</td><td>V</td><td>Spannung &amp; Potential</td></tr>
+        <tr><td>Energie im Feld</td><td class="fm">W = q · U ;  ½ m v² = q · U</td><td>J ;  1 eV = 1,602 · 10⁻¹⁹ J</td><td>Spannung &amp; Potential</td></tr>
+        <tr><td>Flächenladungsdichte</td><td class="fm">σ = Q / A = ε₀ · εᵣ · E</td><td>C/m²</td><td>Kapazität</td></tr>
+        <tr><td>Kapazität</td><td class="fm">C = Q / U</td><td>1 F = 1 C/V</td><td>Kapazität</td></tr>
+        <tr><td>Plattenkondensator</td><td class="fm">C = ε₀ · εᵣ · A / d</td><td>F</td><td>Kapazität</td></tr>
+        <tr><td>Parallelschaltung</td><td class="fm">C = C₁ + C₂ + …</td><td>F</td><td>Schaltungen</td></tr>
+        <tr><td>Reihenschaltung</td><td class="fm">1/C = 1/C₁ + 1/C₂ + …</td><td>F</td><td>Schaltungen</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <button class="btn reset" id="resetAll">Fortschritt zurücksetzen</button>
+</section>
+
+<!-- 1 LADUNG & STROM -->
+<section class="station" id="strom" data-name="Ladung &amp; Strom" hidden>
+  <div class="intro">
+    <div class="eyebrow">4.1 · Ladungsmessung</div>
+    <h2>Ladung, Stromstärke und I(t)-Diagramm</h2>
+    <p class="lead">Ladungen kann man nachweisen (Elektroskop) und messen. Am genauesten misst man nicht die Ladung selbst, sondern die Stromstärke, und berechnet daraus die transportierte Ladung.</p>
+  </div>
+  <div class="theory">
+    <div class="card"><h3>Ladungen</h3><p>Es gibt positive und negative Ladungen. Gleichnamige stoßen sich ab, ungleichnamige ziehen sich an. Im Metall sind die Elektronen beweglich (Leitungselektronen), die positiven Atomrümpfe sitzen fest.</p><p class="note">Elektroskop: Stab und Zeiger laden sich gleichnamig auf und stoßen sich ab. Der Ausschlag zeigt die Ladung an.</p></div>
+    <div class="card"><h3>Stromstärke</h3><p>Ladung, die pro Zeit durch einen Leiterquerschnitt fließt.</p><p class="f">I = ΔQ / Δt</p><p>Bei zeitlich veränderlicher Stromstärke ist I die Änderungsrate der Ladung:</p><p class="f">I(t) = Q̇(t) = dQ/dt</p></div>
+    <div class="card"><h3>Ladung aus dem I(t)-Diagramm</h3><p>Die geflossene Ladung entspricht der <b>Fläche unter dem I(t)-Graphen</b>. Bei konstantem I ist das ein Rechteck: ΔQ = I · Δt. Sonst nähert man die Fläche durch schmale Rechtecke an.</p><p class="f">1 C = 1 A · 1 s</p></div>
+    <div class="card"><h3>Ladungstransport im Kondensator</h3><p>Ein leitendes Kügelchen pendelt zwischen geladenen Platten. An jeder Platte gibt es seine Ladung ab und nimmt die entgegengesetzte auf: Pro Berührung ändert sich seine Ladung von −q auf +q, es transportiert also 2q.</p><p class="note">Ein Messverstärker zeigt den mittleren Strom an, schon ab etwa 1 pA = 10⁻¹² A.</p></div>
+  </div>
+  <div class="sim">
+    <div class="sim-head"><h3>Ladung als Fläche unter I(t)</h3><span class="tag">Rechtecke: Wert in der Intervallmitte</span></div>
+    <div class="seg" id="itModes" style="border-top:0;border-bottom:1px solid var(--line)">
+      <button class="btn" data-mode="konst" aria-pressed="true">konstante Stromstärke</button>
+      <button class="btn" data-mode="exp" aria-pressed="false">Entladestrom (nicht konstant)</button>
+    </div>
+    <canvas id="cvIt" style="height:290px" aria-label="I(t)-Diagramm mit Rechtecknäherung der Fläche"></canvas>
+    <div class="controls">
+      <div class="ctl"><label for="iI0">Anfangsstromstärke I₀ <output id="iI0o"></output></label><input type="range" id="iI0" min="0.2" max="2" step="0.1" value="2"></div>
+      <div class="ctl" id="iTbox"><label for="iT">Dauer T <output id="iTo"></output></label><input type="range" id="iT" min="0.5" max="4" step="0.5" value="3"></div>
+      <div class="ctl off" id="iTaubox"><label for="iTau">Abklingzeit τ <output id="iTauo"></output></label><input type="range" id="iTau" min="0.5" max="3" step="0.1" value="1" disabled></div>
+      <div class="ctl"><label for="iDt">Intervallbreite Δt <output id="iDto"></output></label><input type="range" id="iDt" min="0" max="3" step="1" value="0"></div>
+    </div>
+    <div class="readout" id="iOut"></div>
+  </div>
+  <p class="note">Tipp: Wähle den Entladestrom und verkleinere Δt schrittweise. Wie verändert sich die Abweichung zwischen Rechtecksumme und Fläche?</p>
+  <div class="tasks" data-sec="strom"></div>
+</section>
+
+<!-- 2 FELD & INFLUENZ -->
+<section class="station" id="feld" data-name="Feld &amp; Influenz" hidden>
+  <div class="intro">
+    <div class="eyebrow">4.1 · Feldbegriff</div>
+    <h2>Elektrische Felder, Feldlinien und Influenz</h2>
+    <p class="lead">Mit unseren Sinnen merken wir nicht, ob sich im Raum um eine Ladung etwas befindet. Probeladungen zeigen es: Sie erfahren dort Kräfte. Einen solchen Raumbereich nennt man elektrisches Feld.</p>
+  </div>
+  <div class="theory">
+    <div class="card"><h3>Feldlinien</h3><p>Feldlinien zeigen die Richtung der Kraft auf eine <b>positive</b> Probeladung. Sie beginnen an positiven und enden an negativen Ladungen und schneiden sich nie. Je dichter sie liegen, desto größer ist die Kraft.</p><p class="note">Sichtbar machen: Watteflocken (V1) oder Grießkörner in Rizinusöl (V2). Die Körner werden zu Dipolen und richten sich entlang der Feldlinien aus.</p></div>
+    <div class="card"><h3>Homogen und inhomogen</h3><p><b>Homogen:</b> parallele, gleich dichte Feldlinien. Betrag und Richtung der Kraft hängen nicht vom Ort ab (Inneres eines Plattenkondensators).</p><p><b>Inhomogen:</b> Dichte oder Richtung ändern sich, z. B. im Radialfeld einer Kugel oder am Rand des Kondensators.</p></div>
+    <div class="card"><h3>Influenz</h3><p>Im Feld werden die freien Elektronen eines Leiters verschoben, bis keine Kraft parallel zur Oberfläche mehr wirkt. Dann stehen alle Feldlinien <b>senkrecht</b> auf der Leiteroberfläche. Auf beiden Seiten des Leiters entstehen entgegengesetzte Influenzladungen.</p></div>
+    <div class="card"><h3>Abschirmung</h3><p>Im Innern eines Leiters ist das Feld null, solange kein Strom fließt. Ein geschlossener Metallkäfig (Faraday-Käfig) schirmt deshalb äußere Felder ab: Auto und Flugzeug schützen bei Gewitter.</p></div>
+  </div>
+  <div class="sim">
+    <div class="sim-head"><h3>Feldlinienbilder</h3><span class="tag">Tippe ins Feld: Kraftpfeil auf +q</span></div>
+    <div class="seg" id="fModes" style="border-top:0;border-bottom:1px solid var(--line)">
+      <button class="btn" data-mode="homogen" aria-pressed="true">Plattenkondensator</button>
+      <button class="btn" data-mode="radialP" aria-pressed="false">radial (+Q)</button>
+      <button class="btn" data-mode="dipol" aria-pressed="false">+Q / −Q</button>
+      <button class="btn" data-mode="gleich" aria-pressed="false">+Q / +Q</button>
+      <button class="btn" data-mode="leiter" aria-pressed="false">Metallzylinder im Feld</button>
+    </div>
+    <canvas id="cvField" style="height:340px" aria-label="Feldlinienbild"></canvas>
+    <div class="readout" id="fOut"><span>Tippe auf einen Punkt im Feld.</span></div>
+  </div>
+  <div class="tasks" data-sec="feld"></div>
+</section>
+
+<!-- 3 FELDSTÄRKE -->
+<section class="station" id="estark" data-name="Feldstärke" hidden>
+  <div class="intro">
+    <div class="eyebrow">4.1 · Quantitative Beschreibung</div>
+    <h2>Elektrische Feldstärke E = F / q</h2>
+    <p class="lead">Mit einem Kraftsensor misst man die Kraft auf eine kleine geladene Kugel im Feld. Bei fester Position gilt: Doppelte Ladung, doppelte Kraft. Der Quotient F/q hängt also nur vom Feld am Ort ab.</p>
+  </div>
+  <div class="theory">
+    <div class="card"><h3>Definition</h3><p class="f"><span class="vec">E</span> = <span class="vec">F</span> / q</p><p>Die Feldstärke ist ein Vektor. Sie zeigt in Richtung der Kraft auf eine positive Probeladung und liegt tangential zur Feldlinie.</p><p class="note">Einheit: [E] = 1 N/C = 1 V/m</p></div>
+    <div class="card"><h3>F-q-Diagramm</h3><p>Trägt man F über q auf, entsteht eine Ursprungsgerade. Ihre Steigung ist die Feldstärke am Messort. An einem Ort mit stärkerem Feld ist die Gerade steiler.</p></div>
+    <div class="card"><h3>Kraft auf eine Ladung</h3><p class="f"><span class="vec">F</span> = q · <span class="vec">E</span></p><p>Positive Ladungen erfahren die Kraft in Feldrichtung, negative entgegen der Feldrichtung.</p></div>
+    <div class="card"><h3>Mechanisches Messverfahren</h3><p>Ein geladenes Kügelchen hängt an einem langen Faden im Feld und wird um s ausgelenkt. Aus dem Kraftdreieck folgt für kleine Winkel:</p><p class="f">F<sub>el</sub> / F<sub>G</sub> = s / l</p></div>
+  </div>
+  <div class="sim">
+    <div class="sim-head"><h3>Messreihe mit dem Kraftsensor</h3><span class="tag">Messwerte mit kleiner Messunsicherheit</span></div>
+    <div class="seg" id="eOrt" style="border-top:0;border-bottom:1px solid var(--line)">
+      <button class="btn" data-ort="A" aria-pressed="true">Ort A (nahe an der Platte)</button>
+      <button class="btn" data-ort="B" aria-pressed="false">Ort B (weiter entfernt)</button>
+    </div>
+    <canvas id="cvFq" style="height:300px" aria-label="F-q-Diagramm mit Messpunkten"></canvas>
+    <div class="controls">
+      <div class="ctl"><label for="eq">Ladung q der Kugel <output id="eqo"></output></label><input type="range" id="eq" min="5" max="40" step="5" value="10"></div>
+    </div>
+    <div class="readout" id="eOut"></div>
+    <div class="seg"><button class="btn primary" id="eAdd">Messwert aufnehmen</button><button class="btn" id="eClear">Messreihe löschen</button></div>
+    <div class="legend"><span><i style="background:var(--accent)"></i>Ort A</span><span><i style="background:var(--pos)"></i>Ort B</span></div>
+  </div>
+  <p class="note">Tipp: Nimm an beiden Orten mindestens drei Messwerte auf. Was gibt die Steigung der Geraden an?</p>
+  <div class="tasks" data-sec="estark"></div>
+</section>
+
+<!-- 4 COULOMB -->
+<section class="station" id="coulomb" data-name="Coulomb" hidden>
+  <div class="intro">
+    <div class="eyebrow">4.2 · Radialfeld</div>
+    <h2>Das Coulomb’sche Gesetz und Superposition</h2>
+    <p class="lead">Das Feld einer geladenen Kugel ist radialsymmetrisch. Messungen mit Kraftsensor und zwei Kugeln zeigen, wie die Kraft von den Ladungen und vom Abstand der Kugelmittelpunkte abhängt.</p>
+  </div>
+  <div class="theory">
+    <div class="card"><h3>Coulomb’sches Gesetz</h3><p class="f">F = <span class="frac"><span>1</span><span>4πε₀</span></span> · <span class="frac"><span>q · Q</span><span>r²</span></span></p><p>F ~ q, F ~ Q und F ~ 1/r². Der Abstand r wird zwischen den Mittelpunkten gemessen.</p><p class="note">ε₀ = 8,854 · 10⁻¹² C²/(N·m²) heißt elektrische Feldkonstante.</p></div>
+    <div class="card"><h3>Feldstärke im Radialfeld</h3><p class="f">E = <span class="frac"><span>1</span><span>4πε₀</span></span> · <span class="frac"><span>Q</span><span>r²</span></span></p><p>Folgt aus E = F/q. Für Q &gt; 0 zeigt <span class="vec">E</span> radial nach außen, für Q &lt; 0 zum Mittelpunkt.</p></div>
+    <div class="card"><h3>Superpositionsprinzip</h3><p>Wirken mehrere Ladungen, addiert man die Einzelkräfte bzw. Einzelfeldstärken <b>vektoriell</b>:</p><p class="f"><span class="vec">F</span> = <span class="vec">F</span>₁ + <span class="vec">F</span>₂ + …</p></div>
+    <div class="card"><h3>Vergleich mit Gravitation</h3><p>Beide Kräfte sind proportional zu 1/r² und zum Produkt der „Quellen“ (Ladungen bzw. Massen). Gravitation wirkt aber nur anziehend, die Coulomb-Kraft anziehend oder abstoßend.</p></div>
+  </div>
+  <div class="sim">
+    <div class="sim-head"><h3>Kräfte auf eine Probeladung</h3><span class="tag">Ziehe die Probeladung +q · Abstand Q₁–Q₂ = 10 cm</span></div>
+    <canvas id="cvSup" class="drag" style="height:330px" aria-label="Zwei Ladungen und eine verschiebbare Probeladung mit Kraftpfeilen"></canvas>
+    <div class="controls">
+      <div class="ctl"><label for="sQ1">Ladung Q₁ <output id="sQ1o"></output></label><input type="range" id="sQ1" min="-10" max="10" step="1" value="5"></div>
+      <div class="ctl"><label for="sQ2">Ladung Q₂ <output id="sQ2o"></output></label><input type="range" id="sQ2" min="-10" max="10" step="1" value="-5"></div>
+    </div>
+    <div class="readout" id="sOut"></div>
+    <div class="legend"><span><i style="background:var(--pos)"></i>Kraft durch Q₁</span><span><i style="background:var(--neg)"></i>Kraft durch Q₂</span><span><i style="background:var(--accent)"></i>resultierende Kraft</span></div>
+  </div>
+  <div class="tasks" data-sec="coulomb"></div>
+</section>
+
+<!-- 5 SPANNUNG & POTENTIAL -->
+<section class="station" id="pot" data-name="Spannung &amp; Potential" hidden>
+  <div class="intro">
+    <div class="eyebrow">4.3 · Energie im Feld</div>
+    <h2>Spannung, Potential und Äquipotentiallinien</h2>
+    <p class="lead">Wird eine Ladung q gegen die Feldkraft verschoben, steckt man Energie hinein, wie beim Anheben eines Körpers im Schwerefeld. Die Spannung gibt an, wie viel Energie pro Ladung umgesetzt wird.</p>
+  </div>
+  <div class="theory">
+    <div class="card"><h3>Spannung</h3><p class="f">U = W / q</p><p>Im homogenen Feld gilt W = F · d = q · E · d und damit</p><p class="f">U = E · d   bzw.   E = U / d</p><p class="note">1 V = 1 J/C</p></div>
+    <div class="card"><h3>Potential</h3><p>Das Potential φ(P) ist die Energie pro Ladung, die man braucht, um q vom Bezugspunkt nach P zu bringen. Den Bezugspunkt (φ = 0, oft „Erde“) wählt man frei.</p><p class="f">U = φ(P₁) − φ(P₂)</p></div>
+    <div class="card"><h3>Äquipotentialflächen</h3><p>Punkte gleichen Potentials bilden Äquipotentiallinien bzw. -flächen. Sie stehen senkrecht auf den Feldlinien. Entlang einer Äquipotentiallinie braucht man keine Energie.</p><p class="note">Analogie: Höhenlinien auf der Landkarte.</p></div>
+    <div class="card"><h3>Elektronenvolt</h3><p>Durchläuft eine Ladung q die Spannung U, gewinnt sie die Energie W = q·U, unabhängig vom Weg.</p><p class="f">1 eV = 1,602 · 10⁻¹⁹ C · 1 V = 1,602 · 10⁻¹⁹ J</p><p class="f">½ m v² = q · U</p></div>
+  </div>
+  <div class="sim">
+    <div class="sim-head"><h3>Potentiale im Plattenkondensator</h3><span class="tag">untere Platte geerdet: φ = 0 V</span></div>
+    <div class="seg" id="pPick" style="border-top:0;border-bottom:1px solid var(--line)">
+      <span class="note" style="align-self:center">Tippe ins Feld, um zu setzen:</span>
+      <button class="btn" data-p="0" aria-pressed="true">Punkt P₁</button>
+      <button class="btn" data-p="1" aria-pressed="false">Punkt P₂</button>
+    </div>
+    <canvas id="cvPot" style="height:320px" aria-label="Plattenkondensator mit Feldlinien, Äquipotentiallinien und zwei Punkten"></canvas>
+    <div class="controls">
+      <div class="ctl"><label for="vU">Spannung U <output id="vUo"></output></label><input type="range" id="vU" min="0" max="1000" step="50" value="500"></div>
+      <div class="ctl"><label for="vd">Plattenabstand d <output id="vdo"></output></label><input type="range" id="vd" min="1" max="10" step="0.5" value="5"></div>
+    </div>
+    <div class="readout" id="vOut"></div>
+  </div>
+  <div class="tasks" data-sec="pot"></div>
+</section>
+
+<!-- 6 KAPAZITÄT -->
+<section class="station" id="kap" data-name="Kapazität" hidden>
+  <div class="intro">
+    <div class="eyebrow">4.3 / 4.4 · Kondensator</div>
+    <h2>Flächenladungsdichte und Kapazität</h2>
+    <p class="lead">Ein Kondensator speichert Ladung. Wie viel, hängt von der Spannung und von seinem Aufbau ab: Plattenfläche, Plattenabstand und Material zwischen den Platten.</p>
+  </div>
+  <div class="theory">
+    <div class="card"><h3>Flächenladungsdichte</h3><p class="f">σ = Q / A</p><p>Im homogenen Feld ist σ überall gleich groß und proportional zur Feldstärke:</p><p class="f">σ = ε₀ · E   (Luft)</p><p class="note">[σ] = 1 C/m²</p></div>
+    <div class="card"><h3>Kapazität</h3><p>Die Ladung auf den Platten ist proportional zur Spannung. Der Quotient heißt Kapazität:</p><p class="f">C = Q / U</p><p class="note">[C] = 1 C/V = 1 F (Farad). Übliche Werte: pF bis mF.</p></div>
+    <div class="card"><h3>Plattenkondensator</h3><p class="f">C = ε₀ · εᵣ · A / d</p><p>Große Fläche, kleiner Abstand und ein Dielektrikum mit großem εᵣ ergeben eine große Kapazität.</p></div>
+    <div class="card"><h3>Dielektrikum</h3><p>Ein Isolator zwischen den Platten wird im Feld polarisiert. Sein Gegenfeld schwächt das Feld. Bei gleicher Spannung fließt deshalb mehr Ladung auf die Platten: C steigt um den Faktor εᵣ (relative Permittivität).</p><p class="note">Luft ≈ 1 · Paraffin 2 · Öl 2–2,5 · Glas 5–16 · Wasser 81</p></div>
+  </div>
+  <div class="sim">
+    <div class="sim-head"><h3>Kondensator-Baukasten</h3><span class="tag">Trenne die Quelle und verändere dann d oder εᵣ</span></div>
+    <div class="seg" id="kSrc" style="border-top:0;border-bottom:1px solid var(--line)">
+      <button class="btn" data-src="on" aria-pressed="true">Quelle angeschlossen (U fest)</button>
+      <button class="btn" data-src="off" aria-pressed="false">Quelle getrennt (Q fest)</button>
+    </div>
+    <canvas id="cvKap" style="height:300px" aria-label="Plattenkondensator mit Ladungen, Feldlinien und Dielektrikum"></canvas>
+    <div class="controls">
+      <div class="ctl"><label for="kA">Plattenfläche A <output id="kAo"></output></label><input type="range" id="kA" min="50" max="500" step="25" value="200"></div>
+      <div class="ctl"><label for="kd">Plattenabstand d <output id="kdo"></output></label><input type="range" id="kd" min="1" max="10" step="0.5" value="2"></div>
+      <div class="ctl"><label for="kE">Dielektrikum</label><select id="kE"><option value="1">Luft (εᵣ = 1)</option><option value="2">Paraffin (εᵣ = 2)</option><option value="2.2">Öl (εᵣ = 2,2)</option><option value="7">Glas (εᵣ = 7)</option></select></div>
+      <div class="ctl" id="kUbox"><label for="kU">Spannung U <output id="kUo"></output></label><input type="range" id="kU" min="0" max="500" step="10" value="200"></div>
+    </div>
+    <div class="readout" id="kOut"></div>
+  </div>
+  <div class="tasks" data-sec="kap"></div>
+</section>
+
+<!-- 7 SCHALTUNGEN -->
+<section class="station" id="schalt" data-name="Schaltungen" hidden>
+  <div class="intro">
+    <div class="eyebrow">4.4 · Kombinieren</div>
+    <h2>Parallel- und Reihenschaltung von Kondensatoren</h2>
+    <p class="lead">Mehrere Kondensatoren lassen sich durch einen einzigen mit der Ersatzkapazität C ersetzen, ohne dass sich an der Schaltung etwas ändert.</p>
+  </div>
+  <div class="theory">
+    <div class="card"><h3>Parallelschaltung</h3><p>Alle Kondensatoren liegen an derselben Spannung U. Die Ladungen addieren sich: Q = Q₁ + Q₂ + Q₃.</p><p class="f">C = C₁ + C₂ + C₃</p><p class="note">C ist größer als die größte Einzelkapazität.</p></div>
+    <div class="card"><h3>Reihenschaltung</h3><p>Die Quelle lädt nur die beiden äußeren Platten. Durch Influenz tragen alle Kondensatoren dieselbe Ladung Q. Die Teilspannungen addieren sich: U = U₁ + U₂ + U₃.</p><p class="f">1/C = 1/C₁ + 1/C₂ + 1/C₃</p><p class="note">C ist kleiner als die kleinste Einzelkapazität.</p></div>
+    <div class="card"><h3>Vergleich mit Widerständen</h3><p>Die Formeln sind „vertauscht“: Kondensatoren parallel addieren sich wie Widerstände in Reihe (R = R₁ + R₂), Kondensatoren in Reihe wie Widerstände parallel.</p><p class="note">Zwei gleiche Kondensatoren: parallel 2C, in Reihe C/2.</p></div>
+  </div>
+  <div class="sim">
+    <div class="sim-head"><h3>Drei Kondensatoren kombinieren</h3><span class="tag">Werte in µF, µC und V</span></div>
+    <div class="seg" id="rMode" style="border-top:0;border-bottom:1px solid var(--line)">
+      <button class="btn" data-m="par" aria-pressed="true">parallel</button>
+      <button class="btn" data-m="rei" aria-pressed="false">in Reihe</button>
+    </div>
+    <canvas id="cvSch" style="height:270px" aria-label="Schaltplan mit drei Kondensatoren und Werten"></canvas>
+    <div class="controls">
+      <div class="ctl"><label for="rC1">C₁ <output id="rC1o"></output></label><input type="range" id="rC1" min="1" max="50" step="1" value="5"></div>
+      <div class="ctl"><label for="rC2">C₂ <output id="rC2o"></output></label><input type="range" id="rC2" min="1" max="50" step="1" value="10"></div>
+      <div class="ctl"><label for="rC3">C₃ <output id="rC3o"></output></label><input type="range" id="rC3" min="1" max="50" step="1" value="20"></div>
+      <div class="ctl"><label for="rU">Spannung U <output id="rUo"></output></label><input type="range" id="rU" min="0" max="100" step="5" value="100"></div>
+    </div>
+    <div class="readout" id="rOut"></div>
+  </div>
+  <div class="tasks" data-sec="schalt"></div>
+</section>
+
+<!-- ABSCHLUSS -->
+<section class="station" id="test" data-name="Abschlusstest" hidden>
+  <div class="intro">
+    <div class="eyebrow">Selbstcheck</div>
+    <h2>Abschlusstest</h2>
+    <p class="lead">Gemischte Aufgaben aus allen Stationen, einige mit mehreren Schritten wie im Abitur. Rechne auf Papier mit.</p>
+  </div>
+  <div class="card" style="flex-direction:row;align-items:center;gap:18px;flex-wrap:wrap">
+    <div class="score" id="totalScore">0 / 0</div>
+    <p id="totalText" class="note" style="max-width:50ch">Gelöste Aufgaben in der gesamten Lernumgebung.</p>
+  </div>
+  <div class="tasks" data-sec="test"></div>
+</section>
+
+</main>
+<script>
+(function(){
+const TASKS={
+strom:[
+ {id:'s1',q:'Ein negativ geladener Stab berührt den Teller eines ungeladenen Elektroskops. Warum schlägt der Zeiger aus?',opts:['Stab und Zeiger tragen nun gleichnamige Ladung und stoßen sich ab.','Zeiger und Stab tragen ungleichnamige Ladung und ziehen sich an.','Durch die Berührung werden im Elektroskop neue Elektronen erzeugt.','Der Zeiger wird magnetisch und richtet sich aus.'],c:0,hint:'Welche Ladung verteilt sich nach der Berührung über den gesamten Metallteil des Elektroskops?',sol:'Elektronen fließen vom Stab auf das Elektroskop und verteilen sich auf feststehenden Stab und Zeiger. Gleichnamige Ladungen stoßen sich ab, der Zeiger schlägt aus.'},
+ {id:'s2',q:'Was entspricht im I(t)-Diagramm der in einem Zeitraum geflossenen Ladung?',opts:['die Steigung des Graphen','die Fläche zwischen Graph und Zeitachse','der größte Wert der Stromstärke','der Kehrwert der Stromstärke'],c:1,hint:'Bei konstanter Stromstärke gilt ΔQ = I · Δt. Welche geometrische Figur hat die Seitenlängen I und Δt?',sol:'Bei konstantem I ist I · Δt die Fläche eines Rechtecks. Bei veränderlichem I nähert man die Fläche durch viele schmale Rechtecke an.'},
+ {id:'s3',q:'Die Stromstärke ist zeitlich nicht konstant. Was gibt I(t) dann an?',opts:['die Gesamtladung geteilt durch die Gesamtzeit','die momentane Änderungsrate der Ladung, I(t) = Q̇(t)','die Ladung, die bis zum Zeitpunkt t geflossen ist','die Anzahl der Elektronen im Leiter'],c:1,hint:'Denk an die Geschwindigkeit: v = Δs/Δt wird bei veränderlicher Bewegung zu v(t) = ṡ(t).',sol:'I(t) ist die zeitliche Ableitung der Ladung. Der Quotient ΔQ/Δt liefert nur die mittlere Stromstärke im Intervall.'},
+ {id:'s4',q:'Das Kügelchen im Kondensator (Versuch V1) hat vor der Berührung der rechten Platte die Ladung −q, danach +q. Welche Ladung hat es bei dieser Berührung mit der Platte ausgetauscht?',opts:['q','2q','q/2','keine, die Ladungen gleichen sich aus'],c:1,hint:'Berechne die Ladungsänderung des Kügelchens: Endladung minus Anfangsladung.',sol:'ΔQ = +q − (−q) = 2q. Die Platte entzieht dem Kügelchen die Ladung −q und gibt zusätzlich +q ab.'},
+ {id:'s5',calc:1,q:'Ein Akku liefert 4,0 min lang einen konstanten Strom von 350 mA. Welche Ladung fließt dabei?',opts:['84 C','1,4 C','1400 C','1,5 · 10⁻³ C'],c:0,why:{1:'Rechne die Zeit in Sekunden um.',2:'Rechne mA in A und min in s um.',3:'Du hast geteilt. Aus I = ΔQ/Δt folgt ΔQ = I · Δt.'},hint:'Stelle I = ΔQ/Δt nach ΔQ um. Rechne vorher in A und s um.',sol:'ΔQ = 0,350 A · 240 s = 84 C'},
+ {id:'s7',calc:1,q:'Ein Stromverlauf besteht aus vier Abschnitten von je 5 ms: 6 mA (0–5 ms), 2 mA (5–10 ms), 8 mA (10–15 ms) und 4 mA (15–20 ms). Welche Ladung fließt im Zeitraum 7,5 ms bis 17,5 ms?',opts:['55 µC','100 µC','55 mC','70 µC'],c:0,why:{1:'Das ist die Ladung von 0 bis 20 ms.',2:'Rechne ms in s um: mA · ms ergibt µC.',3:'Die Abschnitte 5–10 ms und 15–20 ms gehören nur zur Hälfte zum Zeitraum.'},hint:'Zerlege den Zeitraum in Teilstücke mit konstanter Stromstärke. Achte darauf, dass der erste und der letzte Abschnitt nur teilweise im Zeitraum liegen.',sol:'ΔQ = 2 mA · 2,5 ms + 8 mA · 5 ms + 4 mA · 2,5 ms = (5 + 40 + 10) µC = 55 µC'},
+ {id:'s8',calc:1,q:'Das pendelnde Kügelchen berührt die rechte Platte 5-mal pro Sekunde. Der Messverstärker zeigt eine mittlere Stromstärke von 15 nA. Welche Ladung q trägt das Kügelchen?',opts:['1,5 nC','3,0 nC','7,5 nC','75 nC'],c:0,why:{1:'Pro Berührung wird die Ladung 2q ausgetauscht, nicht q.',2:'Du hast nur durch 2 geteilt. Die Ladung verteilt sich auf 5 Berührungen pro Sekunde.',3:'Du hast multipliziert statt geteilt.'},hint:'Bestimme die Ladung, die in 1 s fließt. Pro Berührung wird 2q transportiert.',sol:'In 1 s fließen 15 nC. 5 · 2q = 15 nC ⇒ q = 1,5 nC'},
+],
+feld:[
+ {id:'f1',q:'Welche Aussage über Feldlinien ist <b>falsch</b>?',opts:['Sie beginnen an positiven und enden an negativen Ladungen.','Zwei Feldlinien können sich kreuzen, wenn sich zwei Felder überlagern.','Ihre Dichte ist ein Maß für die Stärke der Kraft.','Sie treffen senkrecht auf Leiteroberflächen.'],c:1,hint:'Wie viele Kraftrichtungen kann eine Probeladung an einem einzigen Punkt haben?',sol:'An jedem Punkt hat die Kraft genau eine Richtung. Überlagern sich Felder, entsteht ein gemeinsames Feld mit neuen Feldlinien.'},
+ {id:'f2',q:'In welche Richtung wirkt die Kraft auf eine negative Probeladung −q?',opts:['in Richtung der Feldlinien','entgegen der Richtung der Feldlinien','senkrecht zu den Feldlinien','Negative Ladungen erfahren im Feld keine Kraft.'],c:1,hint:'Für welche Ladung ist die Feldlinienrichtung festgelegt?',sol:'Feldlinien zeigen die Kraftrichtung auf positive Probeladungen. Negative Ladungen erfahren die Kraft in Gegenrichtung.'},
+ {id:'f3',q:'Woran erkennst du im Feldlinienbild ein homogenes Feld?',opts:['Die Feldlinien verlaufen strahlenförmig von einem Punkt aus.','Die Feldlinien sind parallel und haben überall den gleichen Abstand.','Die Feldlinien sind gekrümmt.','Es gibt keine Feldlinien.'],c:1,hint:'Homogen heißt: Betrag und Richtung der Kraft sind überall gleich.',sol:'Parallele Linien bedeuten gleiche Richtung, gleicher Abstand bedeutet gleicher Betrag. Das ist im Inneren eines Plattenkondensators der Fall, nicht aber am Rand.'},
+ {id:'f4',q:'Warum stehen Feldlinien immer senkrecht auf der Oberfläche eines Leiters?',opts:['Weil Leiter nur senkrechte Felder erzeugen können.','Weil eine Kraftkomponente parallel zur Oberfläche die freien Elektronen so lange verschiebt, bis sie verschwindet.','Weil die Feldlinien im Leiter weiterlaufen und nicht abknicken dürfen.','Das gilt nur für kugelförmige Leiter.'],c:1,hint:'Zerlege die Kraft auf ein Elektron an der Oberfläche in eine senkrechte und eine tangentiale Komponente. Was bewirkt die tangentiale Komponente?',sol:'Die tangentiale Komponente verschiebt die beweglichen Elektronen entlang der Oberfläche (Influenz). Diese Verschiebung endet erst, wenn die tangentiale Komponente null ist.'},
+ {id:'f5',q:'Ein ungeladener Metallzylinder wird zwischen die Platten eines Kondensators gebracht. Was gilt? (Teste mit der Simulation.)',opts:['Auf der Seite zur Plusplatte sammeln sich Elektronen, die Gegenseite wird positiv. Insgesamt bleibt der Zylinder neutral.','Der Zylinder lädt sich insgesamt negativ auf.','Die Protonen im Metall wandern zur Minusplatte.','Es passiert nichts, da der Zylinder ungeladen ist.'],c:0,hint:'Welche Ladungsträger sind im Metall beweglich, und in welche Richtung zieht sie das Feld?',sol:'Die Leitungselektronen wandern gegen die Feldrichtung zur Plusplatte. Dort entsteht die Influenzladung −Q, auf der Gegenseite bleibt +Q zurück. Die Gesamtladung bleibt null.'},
+ {id:'f6',q:'Warum ist man bei einem Gewitter in einem Auto mit Metallkarosserie geschützt?',opts:['Die Gummireifen isolieren das Auto vom Boden.','Das Innere eines geschlossenen Leiters ist feldfrei (Faraday-Käfig).','Das Auto zieht keine Blitze an.','Die Fenster leiten den Strom ab.'],c:1,hint:'Wo befinden sich die Influenzladungen eines Leiters, und wie groß ist das Feld in seinem Innern?',sol:'Die Ladungen verschieben sich auf die Außenhaut, bis das Feld im Innern null ist. Auch der Blitzstrom fließt über die Karosserie.'},
+ {id:'f7',q:'Grießkörner in Rizinusöl ordnen sich im Feld zu Ketten entlang der Feldlinien an. Warum?',opts:['Die Körner sind von Natur aus elektrisch geladen.','Im Feld werden Ladungen in jedem Korn verschoben. Die Körner werden zu Dipolen, die sich ausrichten.','Das Öl strömt entlang der Feldlinien und nimmt die Körner mit.','Die Körner sind magnetisch.'],c:1,hint:'Die Körner sind insgesamt neutral. Was passiert trotzdem mit ihren Ladungen im Feld?',sol:'Im Feld überwiegen auf einer Seite jedes Korns positive, auf der anderen negative Ladungen. Die so entstandenen Dipole drehen sich in Feldrichtung und reihen sich aneinander.'},
+ {id:'f8',q:'Wie unterscheiden sich die Kräfte auf eine Probeladung an zwei verschiedenen Orten im Inneren eines Plattenkondensators?',opts:['Gar nicht. Betrag und Richtung sind gleich.','In der Mitte ist die Kraft am kleinsten.','Nahe der Plusplatte ist die Kraft größer.','Die Richtung ist gleich, der Betrag hängt vom Ort ab.'],c:0,hint:'Wie sieht das Feldlinienbild im Inneren des Kondensators aus?',sol:'Im Inneren ist das Feld homogen. Nur am Rand ist es inhomogen.'}
+],
+estark:[
+ {id:'e1',q:'Die Probeladung an einem festen Ort im Feld wird verdoppelt. Was gilt?',opts:['E verdoppelt sich.','E halbiert sich.','F verdoppelt sich, E bleibt gleich.','F und E bleiben gleich.'],c:2,hint:'F ist proportional zu q. Was passiert dann mit dem Quotienten F/q?',sol:'F ~ q, deshalb bleibt F/q = E konstant. E beschreibt das Feld am Ort, nicht die Probeladung.'},
+ {id:'e2',q:'Was gibt im F-q-Diagramm die Steigung der Ursprungsgeraden an?',opts:['die Probeladung','die Feldstärke am Messort','die Spannung zwischen den Platten','den Abstand zur Platte'],c:1,hint:'Die Steigung ist der Quotient aus der y-Größe und der x-Größe.',sol:'Steigung = F/q = E. Eine steilere Gerade bedeutet ein stärkeres Feld.'},
+ {id:'e3',q:'Wie ist der Feldstärkevektor in einem Punkt P gerichtet?',opts:['senkrecht zur Feldlinie durch P','tangential zur Feldlinie in P, in Richtung der Kraft auf eine positive Probeladung','immer zur nächsten negativen Ladung hin','immer waagerecht'],c:1,hint:'<span class="vec">E</span> = <span class="vec">F</span>/q mit positivem q: Welche Richtung hat dann <span class="vec">E</span> im Vergleich zu <span class="vec">F</span>?',sol:'Für positives q zeigen <span class="vec">E</span> und <span class="vec">F</span> in dieselbe Richtung, also tangential zur Feldlinie in Feldlinienrichtung.'},
+ {id:'e4',calc:1,q:'Im F-q-Diagramm für Ort A verläuft die Ursprungsgerade durch den Punkt (20 nC | 6,0 mN). Bestimme die Feldstärke an Ort A.',opts:['3,0 · 10⁵ N/C','0,30 N/C','1,2 · 10⁻¹⁰ N/C','3,0 · 10² N/C'],c:0,why:{1:'Rechne die Vorsätze in Zehnerpotenzen um, bevor du teilst.',2:'Du hast multipliziert. E ist der Quotient F/q.',3:'Nano bedeutet 10⁻⁹, nicht 10⁻⁶.'},hint:'Die Feldstärke ist die Steigung der Geraden. Rechne mN und nC in N und C um.',sol:'E = 6,0 · 10⁻³ N / 20 · 10⁻⁹ C = 3,0 · 10⁵ N/C'},
+ {id:'e5',calc:1,q:'Berechne die Kraft auf eine Ladung von 10 nC in einem Feld der Stärke 10 kN/C.',opts:['1,0 · 10⁻⁴ N','1,0 · 10⁻⁷ N','0,10 N','1,0 · 10⁻¹² N'],c:0,why:{1:'Kilo bedeutet 10³: 10 kN/C = 10⁴ N/C.',2:'Nano bedeutet 10⁻⁹, nicht 10⁻⁶.',3:'Du hast geteilt. Aus E = F/q folgt F = q · E.'},hint:'Stelle E = F/q nach F um und rechne die Vorsätze in Zehnerpotenzen um.',sol:'F = 10 · 10⁻⁹ C · 10 · 10³ N/C = 1,0 · 10⁻⁴ N = 0,10 mN'},
+ {id:'e6',calc:1,q:'Auf eine Ladung von 10 nC wirkt in einem anderen Feld die Kraft 10 µN. Berechne die Feldstärke.',opts:['1,0 · 10³ N/C','1,0 · 10⁻¹³ N/C','1,0 N/C','1,0 · 10⁶ N/C'],c:0,why:{1:'Du hast multipliziert. E = F/q.',2:'Nano (10⁻⁹) und Mikro (10⁻⁶) sind verschieden.',3:'Mikro bedeutet 10⁻⁶, nicht 10⁻³.'},hint:'Nutze die Definition der Feldstärke. Rechne µN und nC in N und C um.',sol:'E = 10 · 10⁻⁶ N / 10 · 10⁻⁹ C = 1,0 · 10³ N/C'},
+ {id:'e7',calc:1,q:'Eine geladene Kugel (m = 0,25 g) hängt an einem 1,1 m langen Faden in einem waagerechten Feld. Sie wird um s = 3,5 cm ausgelenkt. Berechne die elektrische Kraft (Näherung für kleine Winkel).',opts:['78 µN','2,5 mN','78 mN','7,8 µN'],c:0,why:{1:'Das ist die Gewichtskraft. Gesucht ist ihr Anteil s/l.',2:'Rechne die Masse in kg um: 0,25 g = 2,5 · 10⁻⁴ kg.',3:'Rechne s richtig in Meter um: 3,5 cm = 0,035 m.'},hint:'Im Kraftdreieck gilt für kleine Winkel F<sub>el</sub> / F<sub>G</sub> = s / l. Bestimme zuerst F<sub>G</sub> in SI-Einheiten.',sol:'F<sub>el</sub> = m · g · s/l = 2,5 · 10⁻⁴ kg · 9,81 m/s² · 0,035 m / 1,1 m ≈ 7,8 · 10⁻⁵ N = 78 µN'}
+],
+coulomb:[
+ {id:'k1',q:'Der Abstand zweier Ladungen wird verdreifacht. Wie ändert sich die Coulomb-Kraft?',opts:['Sie wird dreimal so groß.','Sie sinkt auf ein Drittel.','Sie sinkt auf ein Neuntel.','Sie bleibt gleich.'],c:2,hint:'Im Gesetz steht r im Nenner. Mit welchem Exponenten?',sol:'F ~ 1/r²: (1/3)² = 1/9'},
+ {id:'k2',q:'Beide Ladungen werden verdoppelt und gleichzeitig wird ihr Abstand verdoppelt. Was passiert mit der Kraft?',opts:['Sie bleibt gleich.','Sie verdoppelt sich.','Sie vervierfacht sich.','Sie halbiert sich.'],c:0,hint:'Betrachte die Faktoren einzeln: Was bewirkt die Verdopplung von q, von Q und von r?',sol:'Faktor 2 · 2 durch die Ladungen, Faktor 1/4 durch den Abstand: insgesamt 4 · 1/4 = 1.'},
+ {id:'k3',q:'Auf eine Probeladung wirken die Kräfte <span class="vec">F</span>₁ = 3 mN (nach rechts) und <span class="vec">F</span>₂ = 4 mN (nach oben). Wie groß ist die resultierende Kraft?<br><svg class="skizze" viewBox="0 0 230 170" width="230" height="170" role="img" aria-label="Skizze: F1 = 3 mN nach rechts, F2 = 4 mN nach oben, beide greifen an der Probeladung an"><g style="stroke:var(--line);stroke-width:1"><line x1="40" y1="30" x2="40" y2="140"/><line x1="65" y1="30" x2="65" y2="140"/><line x1="90" y1="30" x2="90" y2="140"/><line x1="115" y1="30" x2="115" y2="140"/><line x1="140" y1="30" x2="140" y2="140"/><line x1="40" y1="140" x2="140" y2="140"/><line x1="40" y1="115" x2="140" y2="115"/><line x1="40" y1="90" x2="140" y2="90"/><line x1="40" y1="65" x2="140" y2="65"/><line x1="40" y1="40" x2="140" y2="40"/></g><line x1="40" y1="140" x2="106" y2="140" style="stroke:var(--pos);stroke-width:3"/><polygon points="115,140 104,134 104,146" style="fill:var(--pos)"/><line x1="40" y1="140" x2="40" y2="49" style="stroke:var(--neg);stroke-width:3"/><polygon points="40,40 34,51 46,51" style="fill:var(--neg)"/><circle cx="40" cy="140" r="7" style="fill:var(--paper);stroke:var(--ink);stroke-width:1.5"/><text x="40" y="160" text-anchor="middle" style="fill:var(--ink);font:12px var(--f-mono)">+q</text><text x="78" y="130" text-anchor="middle" style="fill:var(--pos);font:italic 13px var(--f-body)">F₁ = 3 mN</text><text x="48" y="36" style="fill:var(--neg);font:italic 13px var(--f-body)">F₂ = 4 mN</text><line x1="160" y1="140" x2="185" y2="140" style="stroke:var(--muted);stroke-width:1.5"/><line x1="160" y1="136" x2="160" y2="144" style="stroke:var(--muted)"/><line x1="185" y1="136" x2="185" y2="144" style="stroke:var(--muted)"/><text x="172" y="156" text-anchor="middle" style="fill:var(--muted);font:11px var(--f-mono)">1 mN</text></svg>',opts:['7 mN','5 mN','1 mN','12 mN'],c:1,hint:'Superposition heißt: vektoriell addieren. Die beiden Kräfte stehen senkrecht aufeinander.',sol:'Nach Pythagoras: F = √(3² + 4²) mN = 5 mN. Die Beträge darf man nur addieren, wenn die Kräfte in dieselbe Richtung zeigen.'},
+ {id:'k4',q:'Welche Aussage zum Vergleich von Coulomb-Gesetz und Gravitationsgesetz stimmt?',opts:['Beide Kräfte sind ~ 1/r², aber nur die Coulomb-Kraft kann auch abstoßend wirken.','Die Gravitationskraft ist ~ 1/r, die Coulomb-Kraft ~ 1/r².','Beide Kräfte können anziehend und abstoßend wirken.','Die Coulomb-Kraft hängt von den Massen ab.'],c:0,hint:'Vergleiche den Aufbau der beiden Gleichungen und überlege, welche Vorzeichen Ladungen und Massen haben können.',sol:'Struktur: Konstante · Produkt der Quellen / r². Massen sind immer positiv, Ladungen können beide Vorzeichen haben.'},
+ {id:'k5',q:'Zwei gleich große positive Ladungen. Wie groß ist die Kraft auf eine Probeladung genau in der Mitte zwischen ihnen? (Teste mit der Simulation.)',opts:['null','doppelt so groß wie die Kraft einer einzelnen Ladung','genauso groß wie die Kraft einer einzelnen Ladung','unendlich groß'],c:0,hint:'Zeichne die beiden Einzelkräfte ein. Wie sind sie gerichtet?',sol:'Die beiden Kräfte sind gleich groß und entgegengesetzt gerichtet. Ihre Vektorsumme ist null.'},
+ {id:'k6',calc:1,q:'Messwerte zwischen zwei Kugeln mit q₁ = 10 nC und q₂ = 200 nC: Bei r = 8,0 cm beträgt die Kraft F = 2,81 mN. Bestimme daraus die Konstante k im Coulomb-Gesetz.',opts:['9,0 · 10⁹ N·m²/C²','9,0 · 10¹³ N·m²/C²','1,1 · 10¹¹ N·m²/C²','9,0 · 10¹² N·m²/C²'],c:0,why:{1:'Rechne r in Meter um: 8,0 cm = 0,080 m.',2:'Der Abstand muss quadriert werden.',3:'Rechne die Kraft in Newton um: 2,81 mN = 2,81 · 10⁻³ N.'},hint:'Stelle F = k · q₁·q₂ / r² nach k um. Rechne alle Größen in SI-Einheiten um.',sol:'k = F · r² / (q₁·q₂) = 2,81 · 10⁻³ N · 6,4 · 10⁻³ m² / (2,0 · 10⁻¹⁵ C²) ≈ 9,0 · 10⁹ N·m²/C²'},
+ {id:'k7',calc:1,q:'Zwei gleiche Kügelchen (je 0,5 g) hängen an 1,0 m langen Fäden am selben Punkt. Sie tragen die gleiche Ladung und stoßen sich ab. Ihre Mittelpunkte haben 20 cm Abstand. Berechne die Ladung eines Kügelchens.',opts:['47 nC','23 nC','2,2 · 10⁻¹⁵ C','1,5 µC'],c:0,why:{1:'Im Coulomb-Gesetz steht der Abstand der beiden Kugeln (20 cm), nicht der halbe Abstand.',2:'Du hast q² berechnet. Es fehlt die Wurzel.',3:'Rechne die Masse in kg um.'},hint:'1. Bestimme den Auslenkwinkel aus Fadenlänge und halbem Abstand.<br>2. Kraftdreieck: tan α = F<sub>el</sub> / F<sub>G</sub>.<br>3. Setze F<sub>el</sub> in das Coulomb-Gesetz mit q₁ = q₂ = q ein und stelle nach q um.',sol:'sin α = 0,10 m / 1,0 m ⇒ tan α ≈ 0,1005. F<sub>el</sub> = m g tan α ≈ 4,93 · 10⁻⁴ N. q = r · √(F<sub>el</sub>/k) = 0,20 m · √(4,93 · 10⁻⁴ / 8,99 · 10⁹) C ≈ 4,7 · 10⁻⁸ C = 47 nC'},
+ {id:'k8',calc:1,q:'Zwei Ladungen +2,0 nC und −2,0 nC sind 10 cm voneinander entfernt. Berechne die Feldstärke genau in der Mitte zwischen ihnen.',opts:['1,4 · 10⁴ N/C','0 N/C','7,2 · 10³ N/C','3,6 · 10³ N/C'],c:0,why:{1:'Zwischen ungleichnamigen Ladungen zeigen beide Feldanteile in dieselbe Richtung (von + nach −).',2:'Das ist nur der Anteil einer Ladung. Superposition!',3:'Der Abstand zur Mitte beträgt 5 cm, nicht 10 cm.'},hint:'Berechne die Feldstärke jeder Ladung im Abstand zur Mitte. Überlege, ob die beiden Vektoren in dieselbe oder in entgegengesetzte Richtung zeigen.',sol:'E₁ = E₂ = 8,99 · 10⁹ · 2,0 · 10⁻⁹ / (0,050)² N/C ≈ 7,2 · 10³ N/C. Beide zeigen zur negativen Ladung: E = 2 · 7,2 · 10³ N/C ≈ 1,4 · 10⁴ N/C'}
+],
+pot:[
+ {id:'u1',q:'Welche Aussage über Äquipotentiallinien ist richtig?',opts:['Sie verlaufen parallel zu den Feldlinien.','Sie stehen senkrecht auf den Feldlinien. Entlang einer Äquipotentiallinie braucht man keine Energie, um eine Ladung zu verschieben.','Auf einer Äquipotentiallinie ist die Feldstärke null.','Es gibt sie nur im homogenen Feld.'],c:1,hint:'Wann verrichtet man Arbeit gegen die Feldkraft, wenn man eine Ladung verschiebt?',sol:'Verschiebt man eine Ladung senkrecht zur Feldkraft, verrichtet man keine Arbeit. Alle so erreichbaren Punkte haben dasselbe Potential.'},
+ {id:'u2',q:'Was unterscheidet das Potential φ von der Spannung U?',opts:['Es gibt keinen Unterschied.','φ gehört zu einem Punkt und hängt vom gewählten Bezugspunkt ab. U ist die Differenz zweier Potentiale und hängt davon nicht ab.','Spannung gibt es nur in Stromkreisen, Potential nur im Kondensator.','Das Potential ist eine Kraft, die Spannung eine Energie.'],c:1,hint:'Was passiert mit φ(P₁), φ(P₂) und mit U, wenn du einen anderen Bezugspunkt wählst?',sol:'Wählt man einen anderen Nullpunkt, verschieben sich alle Potentiale um denselben Betrag. Ihre Differenz U bleibt gleich.'},
+ {id:'u3',q:'Ein Kondensator wird aufgeladen und von der Quelle getrennt. Dann werden die Platten auseinandergezogen. Beim Entladen leuchtet die Glimmlampe jetzt heller. Warum?',opts:['Die Ladung bleibt gleich, also auch E. Mit größerem d wird U = E · d größer.','Beim Auseinanderziehen fließt zusätzliche Ladung auf die Platten.','Die Feldstärke wird größer, weil d größer wird.','Die Kapazität wird größer, deshalb ist mehr Ladung gespeichert.'],c:0,hint:'Was kann sich ändern, wenn keine Quelle angeschlossen ist, und was nicht? Wovon hängt die Feldstärke im Kondensator ab?',sol:'Ohne Quelle bleibt Q erhalten. Damit bleiben σ = Q/A und E = σ/ε₀ gleich. Wegen U = E · d steigt die Spannung, wenn d steigt. Die Energie dafür stammt aus der Arbeit beim Auseinanderziehen.'},
+ {id:'u4',q:'Eine Probeladung wird im Kondensator auf zwei verschiedenen Wegen von P₁ nach P₂ gebracht. Was gilt für die umgesetzte Energie?',opts:['Sie ist auf dem kürzeren Weg kleiner.','Sie hängt nur von φ(P₁) − φ(P₂) ab und ist auf beiden Wegen gleich.','Sie ist null, weil das Feld homogen ist.','Sie hängt von der Form des Weges ab.'],c:1,hint:'Wie beim Heben im Schwerefeld: Kommt es auf den Weg oder auf die Höhendifferenz an?',sol:'W = q · (φ(P₁) − φ(P₂)). Bewegungen entlang von Äquipotentiallinien tragen nichts bei. Deshalb ist der Weg egal.'},
+ {id:'u5',calc:1,q:'Zwischen zwei Kondensatorplatten im Abstand 2,0 cm liegt die Spannung 1,8 kV. Berechne die Feldstärke.',opts:['9,0 · 10⁴ V/m','900 V/m','36 V/m','90 V/m'],c:0,why:{1:'Rechne d in Meter um: 2,0 cm = 0,020 m.',2:'Du hast multipliziert. Es gilt E = U/d.',3:'Kilo bedeutet 10³: 1,8 kV = 1800 V.'},hint:'Nutze E = U/d mit SI-Einheiten.',sol:'E = 1800 V / 0,020 m = 9,0 · 10⁴ V/m'},
+ {id:'u6',calc:1,q:'Welche Energie übertragen die Feldkräfte, wenn eine Ladung von 10 nC im Kondensator aus der vorigen Aufgabe von einer Platte zur anderen gelangt?',opts:['1,8 · 10⁻⁵ J','1,8 · 10⁻⁸ J','9,0 · 10⁻⁴ J','1,8 · 10⁻³ J'],c:0,why:{1:'Kilo bedeutet 10³: 1,8 kV = 1800 V.',2:'Das ist die Kraft F = q · E in Newton, keine Energie.',3:'Rechne d in Meter um, wenn du über W = F · d gehst.'},hint:'Nutze W = q · U oder W = F · d.',sol:'W = q · U = 10 · 10⁻⁹ C · 1800 V = 1,8 · 10⁻⁵ J'},
+ {id:'u7',calc:1,q:'Ein Elektron startet aus der Ruhe und durchläuft die Spannung 250 V. Welche Geschwindigkeit erreicht es?',opts:['9,4 · 10⁶ m/s','6,6 · 10⁶ m/s','8,8 · 10¹³ m/s','2,2 · 10⁵ m/s'],c:0,why:{1:'Beim Umstellen von ½ m v² wandert der Faktor 2 in den Zähler.',2:'Die Wurzel fehlt: Das ist v².',3:'Du hast die Protonenmasse verwendet.'},hint:'Die gewonnene Energie wird vollständig zu kinetischer Energie. Setze ½ m v² = e · U an und stelle nach v um.',sol:'v = √(2 · 1,602 · 10⁻¹⁹ C · 250 V / 9,109 · 10⁻³¹ kg) ≈ 9,4 · 10⁶ m/s'},
+ {id:'u8',calc:1,q:'Die untere Platte eines Kondensators ist geerdet (0 V), die obere liegt auf 400 V. Der Abstand beträgt 8,0 cm. Welches Potential hat ein Punkt, der 3,0 cm unter der oberen Platte liegt?',opts:['250 V','150 V','50 V','1200 V'],c:0,why:{1:'Das ist der Potentialunterschied zur oberen Platte, nicht das Potential relativ zur Erde.',2:'50 V pro cm ist die Feldstärke. Das Potential hängt vom Abstand zur geerdeten Platte ab.',3:'Das Potential kann zwischen den Platten nicht größer als 400 V sein.'},hint:'Das Potential fällt zwischen den Platten linear ab. Bestimme, wie viel Volt es pro Zentimeter abnimmt, und wie weit der Punkt von der geerdeten Platte entfernt ist.',sol:'Pro cm: 400 V / 8,0 cm = 50 V/cm. Abstand zur geerdeten Platte: 5,0 cm ⇒ φ = 250 V'},
+ {id:'u9',calc:1,q:'An einem 1,0 m langen homogenen Widerstandsdraht liegt die Spannung 4,0 V. Das linke Ende ist geerdet. Welches Potential hat ein Punkt S, 35 cm vom linken Ende entfernt?',opts:['1,4 V','2,6 V','0,14 V','11 V'],c:0,why:{1:'Das ist die Spannung zwischen S und dem rechten Ende.',2:'Rechne 35 cm in Meter um: 0,35 m.',3:'Du hast geteilt. Das Potential wächst proportional zum Abstand.'},hint:'Im homogenen Draht wächst das Potential linear mit dem Abstand vom geerdeten Ende.',sol:'φ(S) = 4,0 V · 0,35 m / 1,0 m = 1,4 V'}
+],
+kap:[
+ {id:'c1',q:'Die Spannung an einem Kondensator wird verdoppelt. Was gilt?',opts:['Q verdoppelt sich, C bleibt gleich.','C verdoppelt sich, Q bleibt gleich.','Q und C verdoppeln sich.','C halbiert sich.'],c:0,hint:'Wovon hängt die Kapazität eines Plattenkondensators ab?',sol:'Q ~ U, deshalb ist C = Q/U konstant. C hängt nur vom Aufbau ab: A, d und εᵣ.'},
+ {id:'c2',q:'Bei angeschlossener Quelle wird eine Glasplatte (εᵣ = 7) in einen Luftkondensator geschoben. Was passiert?',opts:['U bleibt, Q steigt auf das Siebenfache.','Q bleibt, U sinkt auf ein Siebtel.','U und Q bleiben gleich.','C sinkt auf ein Siebtel.'],c:0,hint:'Was hält die Quelle fest? Wie ändert sich C?',sol:'Die Quelle hält U fest. C steigt um den Faktor εᵣ, also fließt Q = C · U auf das Siebenfache.'},
+ {id:'c3',q:'Ein geladener Kondensator wird von der Quelle getrennt. Dann wird der Plattenabstand verdoppelt. Was gilt?',opts:['Q und E bleiben gleich, C halbiert sich, U verdoppelt sich.','U bleibt gleich, Q halbiert sich.','E halbiert sich, U bleibt gleich.','Alle Größen bleiben gleich.'],c:0,hint:'Ohne Quelle kann keine Ladung zu- oder abfließen. Was folgt dann für σ und E?',sol:'Q bleibt, also auch σ = Q/A und E = σ/ε₀. C = ε₀A/d halbiert sich, U = Q/C = E · d verdoppelt sich.'},
+ {id:'c4',q:'Bei angeschlossener Quelle wird der Plattenabstand verdoppelt. Was gilt für Feldstärke und Flächenladungsdichte?',opts:['Beide halbieren sich.','Beide bleiben gleich.','E halbiert sich, σ bleibt gleich.','Beide verdoppeln sich.'],c:0,hint:'U bleibt fest. Nutze E = U/d und den Zusammenhang zwischen σ und E.',sol:'E = U/d halbiert sich. Wegen σ = ε₀ · E halbiert sich auch σ: Ladung fließt zur Quelle zurück.'},
+ {id:'c5',calc:1,q:'Zwei Kondensatorplatten (Abstand 5,0 cm, Fläche je 450 cm²) liegen an 10 kV. Berechne die Ladung auf einer Platte.',opts:['8,0 · 10⁻⁸ C','8,0 · 10⁻⁴ C','8,0 · 10⁻¹¹ C','8,0 · 10⁻¹⁰ C'],c:0,why:{1:'1 cm² = 10⁻⁴ m²: 450 cm² = 0,045 m².',2:'Kilo bedeutet 10³: 10 kV = 10 000 V.',3:'Rechne d in Meter um: 5,0 cm = 0,050 m.'},hint:'Bestimme E = U/d, dann σ = ε₀ · E und schließlich Q = σ · A. Alternativ: C = ε₀ A/d und Q = C · U.',sol:'E = 2,0 · 10⁵ V/m; σ = ε₀ · E ≈ 1,77 · 10⁻⁶ C/m²; Q = σ · A = 1,77 · 10⁻⁶ C/m² · 0,045 m² ≈ 8,0 · 10⁻⁸ C'},
+ {id:'c6',calc:1,q:'Ein Plattenkondensator hat die Fläche 300 cm² und den Abstand 1,5 mm. Der Raum zwischen den Platten ist mit Glas (εᵣ = 6) gefüllt. Berechne die Kapazität.',opts:['1,1 nF','0,18 nF','11 µF','1,1 pF'],c:0,why:{1:'Das wäre die Kapazität ohne Dielektrikum. εᵣ fehlt.',2:'1 cm² = 10⁻⁴ m²: 300 cm² = 0,030 m².',3:'1 mm = 10⁻³ m: 1,5 mm = 0,0015 m.'},hint:'Nutze C = ε₀ · εᵣ · A/d und rechne A und d in SI-Einheiten um.',sol:'C = 8,854 · 10⁻¹² · 6 · 0,030 m² / 0,0015 m ≈ 1,1 · 10⁻⁹ F = 1,1 nF'},
+ {id:'c7',calc:1,q:'Ein Kondensator (10 µF) wird auf 200 V aufgeladen und zu einem auf 100 V geladenen Kondensator gleicher Kapazität gleichpolig parallel geschaltet. Es geht keine Ladung verloren. Welche Spannung stellt sich ein?',opts:['150 V','300 V','100 V','50 V'],c:0,why:{1:'Spannungen addieren sich nur in Reihe. Teile die Gesamtladung durch die Gesamtkapazität.',2:'Die Ladung des zweiten Kondensators fehlt.',3:'Die Kondensatoren sind gleichpolig verbunden. Die Ladungen addieren sich.'},hint:'1. Bestimme die Ladung jedes Kondensators vorher.<br>2. Die Gesamtladung verteilt sich auf die Ersatzkapazität der Parallelschaltung.',sol:'Q = 10 µF · 200 V + 10 µF · 100 V = 3,0 mC; C = 20 µF ⇒ U = 3,0 mC / 20 µF = 150 V'}
+],
+schalt:[
+ {id:'r1',q:'Drei Kondensatoren sind parallel geschaltet. Welche Aussage stimmt?',opts:['Die Ersatzkapazität ist größer als die größte Einzelkapazität.','Die Ersatzkapazität ist kleiner als die kleinste Einzelkapazität.','Alle Kondensatoren tragen dieselbe Ladung.','An den Kondensatoren liegen unterschiedliche Spannungen.'],c:0,hint:'Parallel geschaltete Kondensatoren wirken wie ein Kondensator mit …?',sol:'Parallelschaltung wirkt wie eine größere Plattenfläche: C = C₁ + C₂ + C₃. Alle liegen an derselben Spannung.'},
+ {id:'r2',q:'Warum tragen in einer Reihenschaltung alle Kondensatoren dieselbe Ladung?',opts:['Weil die Quelle jeden Kondensator einzeln lädt.','Weil die Quelle nur die beiden äußeren Platten lädt und die inneren Platten ihre Ladung durch Influenz erhalten.','Weil alle Kondensatoren dieselbe Kapazität haben müssen.','Das stimmt nur, wenn die Spannung klein ist.'],c:1,hint:'Die mittleren Platten zweier benachbarter Kondensatoren sind leitend verbunden, aber insgesamt ungeladen.',sol:'Die äußeren Platten tragen +Q und −Q. Durch Influenz entstehen auf jedem verbundenen Plattenpaar −Q und +Q. So trägt jeder Kondensator Q.'},
+ {id:'r3',q:'Zwei gleiche Kondensatoren mit der Kapazität C werden in Reihe geschaltet. Wie groß ist die Ersatzkapazität?',opts:['C/2','2C','C','C²'],c:0,hint:'Nutze 1/C<sub>ges</sub> = 1/C₁ + 1/C₂.',sol:'1/C<sub>ges</sub> = 2/C ⇒ C<sub>ges</sub> = C/2. Das entspricht einem verdoppelten Plattenabstand.'},
+ {id:'r4',calc:1,q:'Drei Kondensatoren mit 5 µF, 10 µF und 20 µF liegen in Reihe an 100 V. Bestimme die Ladung jedes Kondensators.',opts:['2,9 · 10⁻⁴ C','3,5 · 10⁻³ C','3,5 · 10⁻⁵ C','2,9 · 10² C'],c:0,why:{1:'Das wäre die Parallelschaltung.',2:'Du hast 1/C als C verwendet. Bilde am Ende den Kehrwert.',3:'Mikro bedeutet 10⁻⁶.'},hint:'Bestimme die Ersatzkapazität der Reihenschaltung. In Reihe trägt jeder Kondensator die Ladung Q = C<sub>ges</sub> · U.',sol:'1/C = 1/5 + 1/10 + 1/20 = 0,35 µF⁻¹ ⇒ C ≈ 2,86 µF; Q = 2,86 µF · 100 V ≈ 2,9 · 10⁻⁴ C'},
+ {id:'r5',calc:1,q:'Aus den Kondensatoren 8 µF, 12 µF, 27 µF und 54 µF darfst du höchstens drei kombinieren. Wie klein kann die Ersatzkapazität werden?',opts:['4,1 µF','4,8 µF','47 µF','0,25 µF'],c:0,why:{1:'Mit einem dritten Kondensator in Reihe wird es noch kleiner.',2:'Das ist eine Parallelschaltung. Sie vergrößert die Kapazität.',3:'Du hast 1/C als C angegeben. Bilde den Kehrwert.'},hint:'Welche Schaltungsart verkleinert die Kapazität? Welche drei Kondensatoren eignen sich dafür am besten?',sol:'Reihe aus 8, 12 und 27 µF: 1/C = 1/8 + 1/12 + 1/27 ≈ 0,245 µF⁻¹ ⇒ C ≈ 4,1 µF'},
+ {id:'r6',calc:1,q:'Welchen Kondensator musst du zu 10 µF in Reihe schalten, damit die Ersatzkapazität 5 µF beträgt?',opts:['10 µF','5 µF','15 µF','3,3 µF'],c:0,why:{1:'Subtrahieren darf man nur bei der Parallelschaltung.',2:'In Reihe wird die Kapazität kleiner. Ein Zusatz kann sie nicht auf 15 µF bringen.',3:'Das ist die Ersatzkapazität von 10 µF und 5 µF in Reihe.'},hint:'Setze in 1/C = 1/C₁ + 1/Cₓ ein und stelle nach Cₓ um.',sol:'1/Cₓ = 1/5 − 1/10 = 1/10 ⇒ Cₓ = 10 µF'},
+ {id:'r7',calc:1,q:'Die beiden Kondensatoren aus der vorigen Aufgabe (10 µF und 10 µF in Reihe) liegen an 10 V. Welche Ladung trägt jeder Kondensator?',opts:['50 µC','100 µC','25 µC','200 µC'],c:0,why:{1:'In Reihe zählt die Ersatzkapazität 5 µF, nicht die Einzelkapazität.',2:'Die Ladung teilt sich nicht auf. Jeder Kondensator trägt Q.',3:'Das wäre die Parallelschaltung (20 µF).'},hint:'Bestimme Q mit der Ersatzkapazität. Was gilt für die Ladungen in einer Reihenschaltung?',sol:'Q = 5 µF · 10 V = 50 µC auf jedem Kondensator; jeder hat die Teilspannung 5 V.'}
+],
+test:[
+ {id:'t1',q:'Welche Einheit gehört zur Kapazität?',opts:['1 F = 1 C/V','1 F = 1 V/C','1 F = 1 C·V','1 F = 1 A/V'],c:0,hint:'C = Q/U',sol:'C = Q/U ⇒ 1 F = 1 C/V'},
+ {id:'t2',q:'Ein geladener Luftkondensator ist von der Quelle getrennt. Ein Dielektrikum wird eingeschoben. Was misst ein Voltmeter?',opts:['Die Spannung sinkt.','Die Spannung steigt.','Die Spannung bleibt gleich.','Die Spannung wird null.'],c:0,hint:'Was bleibt ohne Quelle erhalten, und wie ändert sich C?',sol:'Q bleibt erhalten, C steigt um εᵣ. Also sinkt U = Q/C auf 1/εᵣ.'},
+ {id:'t3',q:'Wie groß ist die Feldstärke im Innern eines Leiters, in dem kein Strom fließt?',opts:['null','genauso groß wie außen','doppelt so groß wie außen','Sie hängt von der Form des Leiters ab.'],c:0,hint:'Was würde ein Feld im Innern mit den freien Elektronen machen?',sol:'Ein Feld im Innern würde Elektronen verschieben, also einen Strom bewirken. Die Elektronen verschieben sich, bis das Innere feldfrei ist.'},
+ {id:'t4',q:'Ein Elektron und ein Proton durchlaufen aus der Ruhe dieselbe Spannung von 100 V. Was gilt für das Proton?',opts:['gleiche Energie, aber kleinere Geschwindigkeit','größere Energie','gleiche Geschwindigkeit','Es gewinnt keine Energie.'],c:0,hint:'Gleicher Ladungsbetrag, gleiche Spannung, aber unterschiedliche Masse.',sol:'Beide gewinnen 100 eV. Das Proton ist etwa 1836-mal schwerer und deshalb langsamer.'},
+ {id:'t5',q:'Ein Kondensator liegt an fester Spannung. Die Feldstärke soll auf ein Viertel sinken. Was musst du tun?',opts:['den Plattenabstand vervierfachen','den Plattenabstand halbieren','die Plattenfläche vervierfachen','ein Dielektrikum einschieben'],c:0,hint:'Von welchen Größen hängt E = U/d ab?',sol:'E = U/d. Bei festem U wird E ein Viertel so groß, wenn d viermal so groß wird.'},
+ {id:'t6',calc:1,q:'Abiturvorbereitung: Ein Kügelchen (m = 0,25 g) hängt an einem 1,1 m langen Faden mittig in einem Plattenkondensator (d = 10 cm, U = 1,8 kV). Es wird um s = 3,5 cm ausgelenkt. Berechne seine Ladung.',opts:['4,3 nC','4,3 µC','1,4 · 10⁻⁷ C','4,3 · 10⁻⁷ C'],c:0,why:{1:'Kilo bedeutet 10³: 1,8 kV = 1800 V.',2:'Du hast die Gewichtskraft statt der elektrischen Kraft verwendet.',3:'Rechne d in Meter um: 10 cm = 0,10 m.'},hint:'1. Bestimme F<sub>el</sub> mit dem Kraftdreieck (s/l).<br>2. Bestimme E = U/d.<br>3. q = F<sub>el</sub> / E.',sol:'F<sub>el</sub> = m g s/l ≈ 7,8 · 10⁻⁵ N; E = 1800 V / 0,10 m = 1,8 · 10⁴ V/m; q = F<sub>el</sub>/E ≈ 4,3 · 10⁻⁹ C = 4,3 nC'},
+ {id:'t7',calc:1,q:'Ein Elektrometer zeigt 3,0 kV an. Ein ungeladener Luftkondensator (A = 100 cm², d = 1,0 mm) wird parallel geschaltet. Die Anzeige sinkt auf 1,0 kV. Bestimme die Kapazität des Elektrometers.',opts:['44 pF','89 pF','133 pF','177 pF'],c:0,why:{1:'Das ist die Kapazität des Plattenkondensators.',2:'Prüfe das Verhältnis: Die Ladung bleibt gleich, also C<sub>E</sub> · U₁ = (C<sub>E</sub> + C<sub>K</sub>) · U₂.',3:'Prüfe das Verhältnis: Die Ladung bleibt gleich, also C<sub>E</sub> · U₁ = (C<sub>E</sub> + C<sub>K</sub>) · U₂.'},hint:'1. Berechne die Kapazität C<sub>K</sub> des Plattenkondensators.<br>2. Die Ladung des Elektrometers verteilt sich auf die Parallelschaltung. Setze die Ladung vorher und nachher gleich.',sol:'C<sub>K</sub> = ε₀ A/d ≈ 88,5 pF. C<sub>E</sub> · U₁ = (C<sub>E</sub> + C<sub>K</sub>) · U₂ ⇒ C<sub>E</sub> = C<sub>K</sub> · U₂/(U₁ − U₂) = 88,5 pF · 1/2 ≈ 44 pF'},
+ {id:'t8',calc:1,q:'Ein Elektron wird mit 3,0 kV beschleunigt. Welche Energie in Joule nimmt es auf?',opts:['4,8 · 10⁻¹⁶ J','4,8 · 10⁻¹⁹ J','1,9 · 10²² J','3000 J'],c:0,why:{1:'Kilo bedeutet 10³: 3,0 kV = 3000 V.',2:'Du hast U durch e geteilt. W = e · U.',3:'3000 ist der Wert in eV, nicht in J.'},hint:'Nutze W = e · U oder rechne 3,0 keV in Joule um.',sol:'W = 1,602 · 10⁻¹⁹ C · 3000 V ≈ 4,8 · 10⁻¹⁶ J = 3,0 keV'}
+]};
+const K=8.9875e9, EL=1.602e-19, ME=9.109e-31, MP=1.673e-27, E0=8.854e-12;
+const root=document.documentElement;
+const css=n=>getComputedStyle(root).getPropertyValue(n).trim();
+const $=id=>document.getElementById(id);
+
+/* ---------- Zahlformat ---------- */
+function de(x,d=3){return Number(Number(x).toPrecision(d)).toLocaleString('de-DE',{maximumSignificantDigits:d})}
+function sci(x,d=3){
+  if(!isFinite(x))return '–'; if(x===0)return '0';
+  let e=Math.floor(Math.log10(Math.abs(x)));
+  if(e>=-2&&e<5)return de(x,d);
+  let m=Number((x/Math.pow(10,e)).toPrecision(d)); if(Math.abs(m)>=10){m/=10;e++;}
+  return m.toLocaleString('de-DE',{maximumSignificantDigits:d})+' · 10<sup>'+e+'</sup>';
+}
+function sciT(x,d=3){return sci(x,d).replace(/<sup>(-?\d+)<\/sup>/,(m,k)=>k.replace(/[-0-9]/g,c=>'⁻⁰¹²³⁴⁵⁶⁷⁸⁹'['-0123456789'.indexOf(c)]));}
+
+/* ---------- Aufgaben-Engine ---------- */
+let solved={};
+try{solved=JSON.parse(localStorage.getItem('q1kond-solved')||'{}')||{}}catch(e){solved={}}
+function save(){try{localStorage.setItem('q1kond-solved',JSON.stringify(solved))}catch(e){}}
+function mix(t){const h=k=>{let x=2166136261;for(const ch of t.id+'#'+k){x^=ch.charCodeAt(0);x=Math.imul(x,16777619);}return x>>>0;};return t.opts.map((o,j)=>j).sort((a,b)=>h(a)-h(b));}
+function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function renderTasks(){
+  document.querySelectorAll('.tasks').forEach(box=>{
+    const sec=box.dataset.sec; box.innerHTML='';
+    const list=[...TASKS[sec].filter(t=>!t.calc),...TASKS[sec].filter(t=>t.calc)];
+    list.forEach((t,i)=>{
+      const done=!!solved[t.id];
+      const el=document.createElement('article'); el.className='task'+(done?' solved':'');
+      el.innerHTML='<div class="tq"><span class="tn">AUFGABE '+(i+1)+(t.calc?' · RECHNUNG':' · VERSTÄNDNIS')+'</span>'+t.q+'</div>'
+        +(t.calc?'<p class="note">Rechne auf Papier und wähle dann dein Ergebnis.</p>':'')
+        +'<div class="opts'+(t.calc?' num':'')+'">'+mix(t).map(j=>'<button type="button" data-j="'+j+'"'+(done&&j===t.c?' class="right"':'')+'>'+t.opts[j]+'</button>').join('')+'</div>'
+        +'<p class="fb'+(done?' ok':'')+'" aria-live="polite">'+(done?'Gelöst.':'')+'</p>'
+        +'<details><summary>'+(t.calc?'Hilfe: Ansatz':'Hilfe')+'</summary><div class="sol">'+t.hint+'</div></details>'
+        +'<div class="expl"'+(done?'':' hidden')+'><b>'+(t.calc?'Lösung':'Erklärung')+':</b> '+t.sol+'</div>';
+      box.appendChild(el);
+      const fb=el.querySelector('.fb'),ex=el.querySelector('.expl');
+      const opts=el.querySelector('.opts');let busy=false;
+      opts.addEventListener('click',e=>{
+        const b=e.target.closest('button');if(!b||busy||el.classList.contains('solved'))return;
+        const j=+b.dataset.j;
+        if(j===t.c){b.className='right';fb.className='fb ok';fb.textContent='Richtig.';ex.hidden=false;solved[t.id]=1;save();el.classList.add('solved');updateProgress();return;}
+        b.className='wrong';fb.className='fb no';
+        const msg=(t.why&&t.why[j])?'Noch nicht. '+t.why[j]:(t.calc?'Noch nicht. Prüfe Formel, Einheiten und Zehnerpotenzen.':'Noch nicht. Überlege, welche Gesetzmäßigkeit hier gilt.');
+        fb.textContent=msg;
+        // 10 s Wartezeit mit Countdown, dann alle Antworten neu mischen (andere Reihenfolge als vorher)
+        busy=true;opts.classList.add('locked');opts.setAttribute('aria-busy','true');
+        const cd=document.createElement('p');cd.className='countdown';cd.setAttribute('aria-live','polite');
+        cd.innerHTML='<span></span><i><b></b></i>';fb.after(cd);
+        const t0=performance.now(),WAIT=10000;
+        const tick=()=>{
+          const left=Math.max(0,WAIT-(performance.now()-t0));
+          cd.firstChild.textContent='Nächster Versuch in '+Math.ceil(left/1000)+' s. Lies in der Zwischenzeit die Hilfe. Danach werden die Antworten neu gemischt.';
+          cd.querySelector('b').style.width=(100*left/WAIT)+'%';
+          if(left>0){requestAnimationFrame(tick);return;}
+          const btns=[...opts.children],old=btns.map(x=>x.dataset.j).join();
+          let order;do{order=shuffleArr(btns.slice());}while(order.map(x=>x.dataset.j).join()===old&&btns.length>1);
+          order.forEach(x=>{x.className='';opts.appendChild(x);});
+          cd.remove();opts.classList.remove('locked');opts.removeAttribute('aria-busy');busy=false;
+          fb.textContent=msg+' Die Antworten wurden neu gemischt. Versuch es noch einmal.';
+        };
+        tick();
+      });
+    });
+  });
+  updateProgress();
+}
+function updateProgress(){
+  let tot=0,done=0;
+  document.querySelectorAll('#tabs button').forEach(b=>{
+    const s=b.dataset.sec,chip=b.querySelector('.chip');if(!TASKS[s]||!chip)return;
+    const n=TASKS[s].length,d=TASKS[s].filter(t=>solved[t.id]).length;tot+=n;done+=d;
+    chip.textContent=d+'/'+n;chip.classList.toggle('done',d===n);
+  });
+  $('totalScore').textContent=done+' / '+tot;
+  $('totalText').textContent=done===tot?'Alles gelöst. Du bist gut vorbereitet.':'Gelöste Aufgaben in der gesamten Lernumgebung. Offene Aufgaben findest du an den Reitern.';
+}
+
+/* ---------- Reiter ---------- */
+const sections=[...document.querySelectorAll('section.station')];
+const tabs=$('tabs');
+sections.forEach(s=>{
+  const b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.dataset.sec=s.id;
+  b.innerHTML=s.dataset.name+(TASKS[s.id]?' <span class="chip"></span>':'');
+  b.addEventListener('click',()=>show(s.id,true));tabs.appendChild(b);
+});
+function show(id,push){
+  sections.forEach(s=>s.hidden=s.id!==id);
+  tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.sec===id));
+  if(push){try{history.replaceState(null,'','#'+id)}catch(e){} window.scrollTo(0,0);}
+  try{localStorage.setItem('q1kond-tab',id)}catch(e){}
+  drawAll();
+}
+$('resetAll').addEventListener('click',function(){
+  if(this.dataset.armed){solved={};save();renderTasks();this.textContent='Fortschritt zurückgesetzt';delete this.dataset.armed;}
+  else{this.dataset.armed=1;this.textContent='Wirklich zurücksetzen? Nochmal tippen';}
+});
+
+/* ---------- Canvas-Helfer ---------- */
+function fit(c){
+  const r=c.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  const w=Math.round(r.width*dpr),h=Math.round(r.height*dpr);
+  if(c.width!==w||c.height!==h){c.width=w;c.height=h;}
+  const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,r.width,r.height);
+  return {ctx,W:r.width,H:r.height};
+}
+function arrow(ctx,x1,y1,x2,y2,col,w=2,head=8){
+  const a=Math.atan2(y2-y1,x2-x1);
+  ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=w;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2-Math.cos(a)*head*0.6,y2-Math.sin(a)*head*0.6);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-head*Math.cos(a-0.4),y2-head*Math.sin(a-0.4));ctx.lineTo(x2-head*Math.cos(a+0.4),y2-head*Math.sin(a+0.4));ctx.closePath();ctx.fill();
+}
+function charge(ctx,x,y,q,r=15){
+  const col=q>0?css('--pos'):q<0?css('--neg'):css('--muted');
+  ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+  ctx.fillStyle=css('--paper');ctx.font='600 '+(r*1.3)+'px '+css('--f-body');ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(q>0?'+':q<0?'−':'0',x,y+1);
+}
+function label(ctx,t,x,y,col,align='center',size=12){ctx.fillStyle=col||css('--muted');ctx.font=size+'px '+css('--f-mono');ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillText(t,x,y);}
+const vis=id=>!$(id).closest('section').hidden;
+function segGroup(id,cb){$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$(id).querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));cb(b);});}
+function pos(e,c){const r=c.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top};}
+
+/* ---------- 1 I(t)-Diagramm ---------- */
+let itMode='konst';
+const DTS=[1,0.5,0.25,0.1];
+function Ift(t){const I0=+$('iI0').value;if(itMode==='konst')return t<+$('iT').value?I0:0;return I0*Math.exp(-t/+$('iTau').value);}
+function drawIt(){
+  const I0=+$('iI0').value,T=+$('iT').value,tau=+$('iTau').value,dt=DTS[+$('iDt').value],tmax=4;
+  $('iI0o').textContent=de(I0,2)+' A';$('iTo').textContent=de(T,2)+' s';$('iTauo').textContent=de(tau,2)+' s';$('iDto').textContent=de(dt,2)+' s';
+  let sum=0;const n=Math.round(tmax/dt);for(let i=0;i<n;i++)sum+=Ift((i+0.5)*dt)*dt;
+  const exact=itMode==='konst'?I0*T:I0*tau*(1-Math.exp(-tmax/tau));
+  const dev=exact?Math.abs(sum-exact)/exact*100:0;
+  $('iOut').innerHTML='<span>Rechtecksumme:</span><b>ΔQ ≈ '+de(sum,3)+' C</b><span>Fläche unter dem Graphen (0–4 s):</span><b>ΔQ = '+de(exact,3)+' C</b><span>Abweichung:</span><b>'+(dev<0.005?'0':de(dev,2))+' %</b>';
+  if(!vis('cvIt'))return;
+  const {ctx,W,H}=fit($('cvIt')),ink=css('--ink'),mu=css('--muted'),acc=css('--accent');
+  const L=52,R=W-18,T0=16,B=H-36,sx=t=>L+(R-L)*t/tmax,sy=I=>B-(B-T0)*I/2.2;
+  // Gitter
+  ctx.strokeStyle=css('--line');ctx.lineWidth=1;
+  for(let t=0;t<=tmax;t+=0.5){ctx.beginPath();ctx.moveTo(sx(t),T0);ctx.lineTo(sx(t),B);ctx.stroke();}
+  for(let I=0;I<=2;I+=0.5){ctx.beginPath();ctx.moveTo(L,sy(I));ctx.lineTo(R,sy(I));ctx.stroke();}
+  // Rechtecke
+  ctx.globalAlpha=0.28;ctx.fillStyle=acc;
+  for(let i=0;i<n;i++){const h=Ift((i+0.5)*dt);ctx.fillRect(sx(i*dt),sy(h),sx(dt)-sx(0),B-sy(h));}
+  ctx.globalAlpha=1;ctx.strokeStyle=acc;ctx.lineWidth=1.2;
+  for(let i=0;i<n;i++){const h=Ift((i+0.5)*dt);if(h>0)ctx.strokeRect(sx(i*dt),sy(h),sx(dt)-sx(0),B-sy(h));}
+  // Graph
+  ctx.strokeStyle=ink;ctx.lineWidth=2.5;ctx.beginPath();
+  if(itMode==='konst'){ctx.moveTo(sx(0),sy(I0));ctx.lineTo(sx(Math.min(T,tmax)),sy(I0));ctx.lineTo(sx(Math.min(T,tmax)),sy(0));ctx.lineTo(sx(tmax),sy(0));}
+  else{for(let i=0;i<=200;i++){const t=tmax*i/200;i?ctx.lineTo(sx(t),sy(Ift(t))):ctx.moveTo(sx(t),sy(Ift(t)));}}
+  ctx.stroke();
+  // Achsen
+  ctx.strokeStyle=mu;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(L,T0-6);ctx.lineTo(L,B);ctx.lineTo(R,B);ctx.stroke();
+  for(let t=0;t<=tmax;t+=1)label(ctx,String(t),sx(t),B+12,mu);
+  for(let I=0;I<=2;I+=0.5)label(ctx,de(I,2),L-8,sy(I),mu,'right');
+  label(ctx,'t in s',R,B+26,mu,'right');label(ctx,'I in A',L+6,T0-2,mu,'left');
+}
+segGroup('itModes',b=>{itMode=b.dataset.mode;const k=itMode==='konst';
+  $('iTbox').classList.toggle('off',!k);$('iT').disabled=!k;$('iTaubox').classList.toggle('off',k);$('iTau').disabled=k;drawIt();});
+['iI0','iT','iTau','iDt'].forEach(id=>$(id).addEventListener('input',drawIt));
+
+/* ---------- 2 Feldlinien ---------- */
+let fMode='homogen',probe=null;
+function fieldCharges(W,H){const d=Math.min(W*0.2,120),cx=W/2,cy=H/2;
+  return {radialP:[{x:cx,y:cy,q:1}],dipol:[{x:cx-d,y:cy,q:1},{x:cx+d,y:cy,q:-1}],gleich:[{x:cx-d,y:cy,q:1},{x:cx+d,y:cy,q:1}]}[fMode]||[];}
+function Eat(ch,x,y){let ex=0,ey=0;for(const c of ch){const dx=x-c.x,dy=y-c.y,r2=dx*dx+dy*dy,r=Math.sqrt(r2);if(r<1)continue;ex+=c.q*dx/(r2*r);ey+=c.q*dy/(r2*r);}return [ex,ey];}
+function plates(W,H){const xl=W*0.12,xr=W*0.88,ph=H*0.8,yt=(H-ph)/2;return {xl,xr,ph,yt};}
+// Metallzylinder (Radius Rc) im homogenen Feld E0 in x-Richtung: E = E0(1 + Rc²/z²)* ; innen E = 0
+function Ecyl(x,y,cx,cy,Rc){const dx=x-cx,dy=y-cy,r2=dx*dx+dy*dy;if(r2<Rc*Rc)return [0,0];const r4=r2*r2;return [1+Rc*Rc*(dx*dx-dy*dy)/r4,2*Rc*Rc*dx*dy/r4];}
+function drawPlates(ctx,p){
+  ctx.fillStyle=css('--pos');ctx.fillRect(p.xl-8,p.yt,8,p.ph);ctx.fillStyle=css('--neg');ctx.fillRect(p.xr,p.yt,8,p.ph);
+  for(let i=0;i<6;i++){const y=p.yt+p.ph*(i+0.5)/6;label(ctx,'+',p.xl-18,y,css('--pos'),'center',15);label(ctx,'−',p.xr+18,y,css('--neg'),'center',15);}
+}
+function drawField(){
+  if(!vis('cvField'))return;
+  const {ctx,W,H}=fit($('cvField')),ink=css('--ink'),acc=css('--accent');
+  if(fMode==='homogen'||fMode==='leiter'){
+    const p=plates(W,H),cx=W/2,cy=H/2,Rc=Math.min(H*0.17,W*0.12),N=13;
+    ctx.strokeStyle=ink;ctx.lineWidth=1.3;
+    if(fMode==='homogen'){
+      for(let i=0;i<N;i++){const y=p.yt+p.ph*(i+0.5)/N;ctx.beginPath();ctx.moveTo(p.xl,y);ctx.lineTo(p.xr,y);ctx.stroke();arrow(ctx,W/2-6,y,W/2+6,y,ink,1.3,8);}
+      // Randfeld andeuten
+      ctx.setLineDash([3,4]);ctx.strokeStyle=css('--muted');
+      [[p.yt,-1],[p.yt+p.ph,1]].forEach(([y,s])=>{for(let k=1;k<=2;k++){ctx.beginPath();ctx.moveTo(p.xl,y);ctx.bezierCurveTo(p.xl+30,y+s*18*k,p.xr-30,y+s*18*k,p.xr,y);ctx.stroke();}});
+      ctx.setLineDash([]);label(ctx,'Randfeld: inhomogen',W/2,p.yt+p.ph+H*0.05,css('--muted'));
+    }else{
+      // Linien von links (Plusplatte) vorwärts, von rechts (Minusplatte) rückwärts
+      for(const [sx,sgn] of [[p.xl,1],[p.xr,-1]]){
+        for(let i=0;i<N;i++){let x=sx,y=p.yt+p.ph*(i+0.5)/N;const pts=[[x,y]];
+          for(let s=0;s<3000;s++){const [ex,ey]=Ecyl(x,y,cx,cy,Rc),m=Math.hypot(ex,ey);if(!m)break;x+=sgn*ex/m*2;y+=sgn*ey/m*2;
+            if(Math.hypot(x-cx,y-cy)<=Rc){const a=Math.atan2(y-cy,x-cx);pts.push([cx+Rc*Math.cos(a),cy+Rc*Math.sin(a)]);break;}
+            pts.push([x,y]);if(sgn>0?x>=W/2:x<=W/2){if(Math.abs(y-cy)>Rc*1.05)break;}
+            if(x<p.xl||x>p.xr)break;}
+          ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(const q of pts)ctx.lineTo(q[0],q[1]);ctx.stroke();
+          const k=Math.min(18,pts.length-2);if(k>2){const a=pts[k],b=pts[k+1],ang=Math.atan2((b[1]-a[1])*sgn,(b[0]-a[0])*sgn);arrow(ctx,a[0]-Math.cos(ang)*6,a[1]-Math.sin(ang)*6,a[0]+Math.cos(ang)*4,a[1]+Math.sin(ang)*4,ink,1.3,8);}
+        }
+      }
+      ctx.fillStyle=css('--muted');ctx.globalAlpha=0.3;ctx.beginPath();ctx.arc(cx,cy,Rc,0,7);ctx.fill();ctx.globalAlpha=1;
+      ctx.strokeStyle=css('--ink');ctx.lineWidth=2;ctx.beginPath();ctx.arc(cx,cy,Rc,0,7);ctx.stroke();
+      for(let i=0;i<7;i++){const a=Math.PI*(0.5+i/6);label(ctx,'−',cx+Math.cos(a)*(Rc-10),cy+Math.sin(a)*(Rc-10),css('--neg'),'center',14);
+        const b=Math.PI*(-0.5+i/6);label(ctx,'+',cx+Math.cos(b)*(Rc-10),cy+Math.sin(b)*(Rc-10),css('--pos'),'center',14);}
+      label(ctx,'E = 0',cx,cy,css('--ink'),'center',13);
+    }
+    drawPlates(ctx,p);
+    if(probe){
+      const inside=probe.x>p.xl&&probe.x<p.xr&&probe.y>p.yt&&probe.y<p.yt+p.ph;charge(ctx,probe.x,probe.y,1,7);
+      if(!inside){$('fOut').innerHTML='<span>Außerhalb der Platten:</span><b>E ≈ 0</b>';return;}
+      if(fMode==='homogen'){arrow(ctx,probe.x+8,probe.y,probe.x+58,probe.y,acc,3,10);$('fOut').innerHTML='<span>Innerhalb:</span><b>gleiche Kraft an jedem Ort (homogen)</b>';}
+      else{const [ex,ey]=Ecyl(probe.x,probe.y,cx,cy,Rc),m=Math.hypot(ex,ey);
+        if(!m){$('fOut').innerHTML='<span>Im Metall:</span><b>E = 0, keine Kraft (abgeschirmt)</b>';}
+        else{const L=Math.min(90,50*m);arrow(ctx,probe.x,probe.y,probe.x+ex/m*L,probe.y+ey/m*L,acc,3,10);
+          $('fOut').innerHTML='<span>Feldstärke relativ zum ungestörten Feld:</span><b>'+de(m,2)+' · E₀</b>';}}
+    }
+    return;
+  }
+  const ch=fieldCharges(W,H);
+  ctx.strokeStyle=ink;ctx.lineWidth=1.3;
+  for(const c of ch){const n=16,sgn=c.q>0?1:-1;
+    for(let i=0;i<n;i++){const a=i*2*Math.PI/n;let x=c.x+Math.cos(a)*16,y=c.y+Math.sin(a)*16;const pts=[[x,y]];
+      for(let s=0;s<5000;s++){const [ex,ey]=Eat(ch,x,y),m=Math.hypot(ex,ey);if(!m)break;x+=sgn*ex/m*2;y+=sgn*ey/m*2;pts.push([x,y]);
+        if(x<-W||x>2*W||y<-W||y>H+W)break;
+        const hit=ch.find(o=>o!==c&&o.q*sgn<0&&Math.hypot(x-o.x,y-o.y)<15);
+        if(hit){const ang=Math.atan2(y-hit.y,x-hit.x);pts.push([hit.x+Math.cos(ang)*15,hit.y+Math.sin(ang)*15]);break;}}
+      ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(const p of pts)ctx.lineTo(p[0],p[1]);ctx.stroke();
+      const k=Math.min(25,pts.length-2);if(k>2){const p=pts[k],q=pts[k+1];const[a1,a2]=sgn>0?[p,q]:[q,p];const ang=Math.atan2(a2[1]-a1[1],a2[0]-a1[0]);
+        arrow(ctx,p[0]-Math.cos(ang)*6,p[1]-Math.sin(ang)*6,p[0]+Math.cos(ang)*4,p[1]+Math.sin(ang)*4,ink,1.3,8);}
+    }}
+  ch.forEach(c=>charge(ctx,c.x,c.y,c.q,15));
+  if(probe){const [ex,ey]=Eat(ch,probe.x,probe.y),m=Math.hypot(ex,ey);charge(ctx,probe.x,probe.y,1,7);
+    if(m>1e-12){const ref=1/(80*80),L=Math.max(14,Math.min(90,40*Math.sqrt(m/ref)));arrow(ctx,probe.x,probe.y,probe.x+ex/m*L,probe.y+ey/m*L,acc,3,10);
+      $('fOut').innerHTML='<span>relative Feldstärke am Ort:</span><b>'+de(m/ref,2)+'</b><span>(1 = Radialfeld im Abstand von 80 px)</span>';}
+    else $('fOut').innerHTML='<span>Hier heben sich die Felder auf:</span><b>E = 0</b>';}
+}
+$('cvField').addEventListener('click',e=>{probe=pos(e,e.currentTarget);drawField();});
+segGroup('fModes',b=>{fMode=b.dataset.mode;probe=null;$('fOut').innerHTML='<span>Tippe auf einen Punkt im Feld.</span>';drawField();});
+
+/* ---------- 3 F-q-Diagramm ---------- */
+const EFIELD={A:3e5,B:1e5};let eOrt='A';const meas={A:[],B:[]};
+function eF(q){return q*EFIELD[eOrt];}
+function drawFq(){
+  const q=+$('eq').value*1e-9,F=eF(q);
+  $('eqo').textContent=$('eq').value+' nC';
+  $('eOut').innerHTML='<span>Kraftsensor:</span><b>F = '+de(F*1e3,3)+' mN</b><span>F/q =</span><b>'+sci(F/q,3)+' N/C</b>';
+  if(!vis('cvFq'))return;
+  const {ctx,W,H}=fit($('cvFq')),mu=css('--muted');
+  const L=52,R=W-18,T0=18,B=H-36,sx=x=>L+(R-L)*x/40,sy=y=>B-(B-T0)*y/14;
+  ctx.strokeStyle=css('--line');ctx.lineWidth=1;
+  for(let x=0;x<=40;x+=5){ctx.beginPath();ctx.moveTo(sx(x),T0);ctx.lineTo(sx(x),B);ctx.stroke();}
+  for(let y=0;y<=14;y+=2){ctx.beginPath();ctx.moveTo(L,sy(y));ctx.lineTo(R,sy(y));ctx.stroke();}
+  ctx.strokeStyle=mu;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(L,T0-6);ctx.lineTo(L,B);ctx.lineTo(R,B);ctx.stroke();
+  for(let x=0;x<=40;x+=10)label(ctx,String(x),sx(x),B+12,mu);for(let y=0;y<=14;y+=2)label(ctx,String(y),L-8,sy(y),mu,'right');
+  label(ctx,'q in nC',R,B+26,mu,'right');label(ctx,'F in mN',L+6,T0-4,mu,'left');
+  for(const o of ['A','B']){const col=o==='A'?css('--accent'):css('--pos'),pts=meas[o];
+    if(pts.length>=2){const m=pts.reduce((s,p)=>s+p[1]*p[0],0)/pts.reduce((s,p)=>s+p[0]*p[0],0); // Ausgleichsgerade durch 0 (F in mN, q in nC)
+      const xe=Math.min(40,14/m);ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(sx(0),sy(0));ctx.lineTo(sx(xe),sy(m*xe));ctx.stroke();
+      const lx=Math.min(xe,36);label(ctx,'E'+(o==='A'?'ₐ':'ᵦ')+' ≈ '+sciT(m*1e6,2)+' N/C',sx(lx)-4,sy(m*lx)-14,col,'right',12);}
+    ctx.fillStyle=col;for(const p of pts){ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),4.5,0,7);ctx.fill();}}
+  // aktueller Messwert
+  ctx.strokeStyle=eOrt==='A'?css('--accent'):css('--pos');ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(sx(q*1e9),sy(F*1e3),7,0,7);ctx.stroke();
+}
+segGroup('eOrt',b=>{eOrt=b.dataset.ort;drawFq();});
+$('eq').addEventListener('input',drawFq);
+$('eAdd').addEventListener('click',()=>{const q=+$('eq').value,F=eF(q*1e-9)*1e3*(1+(Math.random()-0.5)*0.06);meas[eOrt].push([q,F]);drawFq();});
+$('eClear').addEventListener('click',()=>{meas.A=[];meas.B=[];drawFq();});
+
+/* ---------- 4 Superposition ---------- */
+let sp=null,sDrag=false;
+function supGeom(W,H){const d=Math.min(W*0.5,300);return {x1:W/2-d/2,x2:W/2+d/2,y:H*0.62,pxPerM:d/0.10};}
+function drawSup(){
+  const Q1=+$('sQ1').value*1e-9,Q2=+$('sQ2').value*1e-9;
+  $('sQ1o').textContent=(Q1>0?'+':'')+de(Q1*1e9,2)+' nC';$('sQ2o').textContent=(Q2>0?'+':'')+de(Q2*1e9,2)+' nC';
+  const c=$('cvSup');if(!vis('cvSup'))return;
+  const {ctx,W,H}=fit(c),g=supGeom(W,H);if(!sp)sp={x:W/2,y:H*0.25};
+  const E=[];for(const [x,Q] of [[g.x1,Q1],[g.x2,Q2]]){const dx=(sp.x-x)/g.pxPerM,dy=(sp.y-g.y)/g.pxPerM,r=Math.hypot(dx,dy);E.push(r>0.004?[K*Q*dx/r**3,K*Q*dy/r**3]:[0,0]);}
+  const Es=[E[0][0]+E[1][0],E[0][1]+E[1][1]],m=[Math.hypot(...E[0]),Math.hypot(...E[1]),Math.hypot(...Es)],mx=Math.max(...m);
+  const s=mx?110/mx:0;
+  ctx.setLineDash([4,4]);ctx.strokeStyle=css('--line');ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(g.x1,g.y);ctx.lineTo(sp.x,sp.y);ctx.lineTo(g.x2,g.y);ctx.stroke();
+  if(mx){ // Parallelogramm
+    ctx.strokeStyle=css('--muted');ctx.beginPath();ctx.moveTo(sp.x+E[0][0]*s,sp.y+E[0][1]*s);ctx.lineTo(sp.x+Es[0]*s,sp.y+Es[1]*s);ctx.lineTo(sp.x+E[1][0]*s,sp.y+E[1][1]*s);ctx.stroke();}
+  ctx.setLineDash([]);
+  if(m[0]>0)arrow(ctx,sp.x,sp.y,sp.x+E[0][0]*s,sp.y+E[0][1]*s,css('--pos'),2.5,9);
+  if(m[1]>0)arrow(ctx,sp.x,sp.y,sp.x+E[1][0]*s,sp.y+E[1][1]*s,css('--neg'),2.5,9);
+  if(m[2]*s>3)arrow(ctx,sp.x,sp.y,sp.x+Es[0]*s,sp.y+Es[1]*s,css('--accent'),3.5,11);
+  charge(ctx,g.x1,g.y,Q1,16);charge(ctx,g.x2,g.y,Q2,16);label(ctx,'Q₁',g.x1,g.y+30);label(ctx,'Q₂',g.x2,g.y+30);
+  ctx.fillStyle=css('--paper');ctx.strokeStyle=css('--ink');ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(sp.x,sp.y,8,0,7);ctx.fill();ctx.stroke();label(ctx,'+q',sp.x,sp.y-18,css('--ink'));
+  const r1=Math.hypot(sp.x-g.x1,sp.y-g.y)/g.pxPerM*100,r2=Math.hypot(sp.x-g.x2,sp.y-g.y)/g.pxPerM*100;
+  $('sOut').innerHTML='<span>r₁ =</span><b>'+de(r1,2)+' cm</b><span>E₁ =</span><b>'+sci(m[0],2)+' N/C</b><span>r₂ =</span><b>'+de(r2,2)+' cm</b><span>E₂ =</span><b>'+sci(m[1],2)+' N/C</b><span>resultierend E =</span><b>'+sci(m[2],2)+' N/C</b>';
+}
+(function(){const c=$('cvSup');
+  c.addEventListener('pointerdown',e=>{sDrag=true;c.setPointerCapture(e.pointerId);sp=pos(e,c);drawSup();});
+  c.addEventListener('pointermove',e=>{if(!sDrag)return;const p=pos(e,c),r=c.getBoundingClientRect();sp={x:Math.max(10,Math.min(r.width-10,p.x)),y:Math.max(10,Math.min(r.height-10,p.y))};drawSup();});
+  ['pointerup','pointercancel'].forEach(t=>c.addEventListener(t,()=>{sDrag=false;}));})();
+['sQ1','sQ2'].forEach(id=>$(id).addEventListener('input',drawSup));
+
+/* ---------- 5 Potential ---------- */
+let pAct=0,pPts=null;
+function potGeom(W,H){const ph=H-90,yt=34,yb=yt+ph,xl=Math.max(30,W*0.1),xr=W-Math.max(80,W*0.16);return {yt,yb,xl,xr};}
+function drawPot(){
+  const U=+$('vU').value,d=+$('vd').value/100;$('vUo').textContent=U+' V';$('vdo').textContent=de(d*100,2)+' cm';
+  if(!vis('cvPot'))return;
+  const {ctx,W,H}=fit($('cvPot')),g=potGeom(W,H),ink=css('--ink'),mu=css('--muted'),acc=css('--accent');
+  if(!pPts)pPts=[{x:g.xl+(g.xr-g.xl)*0.25,y:g.yt+(g.yb-g.yt)*0.25},{x:g.xl+(g.xr-g.xl)*0.7,y:g.yt+(g.yb-g.yt)*0.8}];
+  const phi=p=>U*(g.yb-p.y)/(g.yb-g.yt);
+  // Feldlinien
+  ctx.strokeStyle=ink;ctx.lineWidth=1.2;const n=U?9:0;
+  for(let i=0;i<n;i++){const x=g.xl+(g.xr-g.xl)*(i+0.5)/n;ctx.beginPath();ctx.moveTo(x,g.yt);ctx.lineTo(x,g.yb);ctx.stroke();arrow(ctx,x,(g.yt+g.yb)/2-6,x,(g.yt+g.yb)/2+6,ink,1.2,7);}
+  // Äquipotentiallinien
+  ctx.setLineDash([5,4]);ctx.strokeStyle=acc;ctx.lineWidth=1.4;
+  for(let k=1;k<5;k++){const y=g.yb-(g.yb-g.yt)*k/5;ctx.beginPath();ctx.moveTo(g.xl,y);ctx.lineTo(g.xr,y);ctx.stroke();label(ctx,'φ = '+de(U*k/5,3)+' V',g.xr+8,y,acc,'left',11);}
+  ctx.setLineDash([]);
+  ctx.fillStyle=css('--pos');ctx.fillRect(g.xl,g.yt-8,g.xr-g.xl,8);ctx.fillStyle=css('--neg');ctx.fillRect(g.xl,g.yb,g.xr-g.xl,8);
+  label(ctx,'+  φ = '+U+' V',g.xr+8,g.yt-4,css('--pos'),'left',11);label(ctx,'−  φ = 0 V (Erde)',g.xr+8,g.yb+4,css('--neg'),'left',11);
+  // Wege
+  const [a,b]=pPts;ctx.setLineDash([2,4]);ctx.strokeStyle=mu;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  ctx.setLineDash([]);ctx.strokeStyle=ink;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  pPts.forEach((p,i)=>{ctx.fillStyle=i===pAct?acc:css('--paper');ctx.strokeStyle=ink;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x,p.y,7,0,7);ctx.fill();ctx.stroke();label(ctx,'P'+(i?'₂':'₁'),p.x,p.y-16,ink,'center',13);});
+  label(ctx,'Abstand der Platten: d = '+de(d*100,2)+' cm',(g.xl+g.xr)/2,H-14,mu);
+  const f1=phi(a),f2=phi(b),U12=f1-f2;
+  $('vOut').innerHTML='<span>E = U/d =</span><b>'+sci(U/d,3)+' V/m</b><span>φ(P₁) =</span><b>'+de(f1,3)+' V</b><span>φ(P₂) =</span><b>'+de(f2,3)+' V</b><span>U₁₂ =</span><b>'+de(U12,3)+' V</b><span>Energie für ein Proton von P₁ nach P₂:</span><b>W = '+de(Math.abs(U12),3)+' eV '+(U12>=0?'(gewonnen)':'(aufzuwenden)')+'</b>';
+}
+segGroup('pPick',b=>{pAct=+b.dataset.p;drawPot();});
+$('cvPot').addEventListener('click',e=>{const c=e.currentTarget,p=pos(e,c),r=c.getBoundingClientRect(),g=potGeom(r.width,r.height);
+  if(p.x<g.xl||p.x>g.xr||p.y<g.yt||p.y>g.yb)return;pPts[pAct]={x:p.x,y:p.y};drawPot();});
+['vU','vd'].forEach(id=>$(id).addEventListener('input',drawPot));
+
+/* ---------- 6 Kapazität ---------- */
+let kOn=true,kQ=null;
+function kVals(){const A=+$('kA').value*1e-4,d=+$('kd').value*1e-3,er=+$('kE').value,C=E0*er*A/d;
+  let U,Q;if(kOn){U=+$('kU').value;Q=C*U;}else{Q=kQ;U=Q/C;}
+  const E=U/d,sig=Q/A;return {A,d,er,C,U,Q,E,sig};}
+function drawKap(){
+  const v=kVals();
+  $('kAo').textContent=$('kA').value+' cm²';$('kdo').textContent=de(v.d*1e3,2)+' mm';$('kUo').textContent=de(v.U,3)+' V';
+  $('kOut').innerHTML='<span>C =</span><b>'+de(v.C*1e12,3)+' pF</b><span>Q =</span><b>'+de(v.Q*1e9,3)+' nC</b><span>U =</span><b>'+de(v.U,3)+' V</b><span>E =</span><b>'+sci(v.E,3)+' V/m</b><span>σ =</span><b>'+sci(v.sig,3)+' C/m²</b>';
+  if(!vis('cvKap'))return;
+  const {ctx,W,H}=fit($('cvKap')),ink=css('--ink'),mu=css('--muted');
+  const ph=80+150*(+$('kA').value-50)/450,gap=30+(+$('kd').value)*30,cx=W/2,yt=16+(230-ph)/2,xl=cx-gap/2,xr=cx+gap/2;
+  if(v.er>1){ctx.fillStyle=css('--accent-soft');ctx.fillRect(xl,yt,gap,ph);label(ctx,'εᵣ = '+de(v.er,2),cx,yt-8,css('--accent'));}
+  const nl=Math.max(0,Math.min(16,Math.round(v.E/1.2e4*ph/120)));ctx.strokeStyle=ink;ctx.lineWidth=1.2;
+  for(let i=0;i<nl;i++){const y=yt+ph*(i+0.5)/nl;ctx.beginPath();ctx.moveTo(xl,y);ctx.lineTo(xr,y);ctx.stroke();if(gap>50)arrow(ctx,cx-5,y,cx+5,y,ink,1.2,7);}
+  ctx.fillStyle=css('--pos');ctx.fillRect(xl-8,yt,8,ph);ctx.fillStyle=css('--neg');ctx.fillRect(xr,yt,8,ph);
+  const ns=Math.max(0,Math.min(24,Math.round(v.sig*ph/4e-5)));
+  for(let i=0;i<ns;i++){const y=yt+ph*(i+0.5)/ns;label(ctx,'+',xl-18,y,css('--pos'),'center',14);label(ctx,'−',xr+18,y,css('--neg'),'center',14);}
+  // Stromkreis unter dem Kondensator: + Platte → Batterie → Schalter → − Platte
+  const yb=H-34,bxa=cx-36,bxb=cx-26,sw0=cx+14,sw1=cx+50;ctx.strokeStyle=mu;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(xl-4,yt+ph);ctx.lineTo(xl-4,yb);ctx.lineTo(bxa,yb);ctx.moveTo(bxb,yb);ctx.lineTo(sw0,yb);ctx.moveTo(sw1,yb);ctx.lineTo(xr+4,yb);ctx.lineTo(xr+4,yt+ph);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(bxa,yb-12);ctx.lineTo(bxa,yb+12);ctx.stroke();ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(bxb,yb-6);ctx.lineTo(bxb,yb+6);ctx.stroke();
+  label(ctx,'+',bxa-8,yb-14,css('--pos'),'center',12);label(ctx,'−',bxb+8,yb-14,css('--neg'),'center',12);
+  ctx.lineWidth=2;ctx.strokeStyle=kOn?css('--ok'):css('--bad');ctx.beginPath();ctx.moveTo(sw0,yb);ctx.lineTo(kOn?sw1:sw1-6,kOn?yb:yb-20);ctx.stroke();
+  ctx.fillStyle=mu;[sw0,sw1].forEach(x=>{ctx.beginPath();ctx.arc(x,yb,3,0,7);ctx.fill();});
+  label(ctx,kOn?'Schalter geschlossen: U bleibt fest':'Schalter offen: Q bleibt fest',cx,H-12,kOn?css('--ok'):css('--bad'),'center',12);
+}
+segGroup('kSrc',b=>{const on=b.dataset.src==='on';
+  if(!on&&kOn){kQ=kVals().Q;}
+  if(on&&!kOn){const U=Math.round(Math.min(500,kVals().U)/10)*10;$('kU').value=U;}
+  kOn=on;$('kU').disabled=!on;$('kUbox').classList.toggle('off',!on);drawKap();});
+['kA','kd','kE','kU'].forEach(id=>$(id).addEventListener('input',drawKap));
+
+/* ---------- 7 Schaltungen ---------- */
+let rM='par';
+function capSym(ctx,x,y,vert,col){ctx.strokeStyle=col;ctx.lineWidth=3;ctx.beginPath();
+  if(vert){ctx.moveTo(x-14,y-5);ctx.lineTo(x+14,y-5);ctx.moveTo(x-14,y+5);ctx.lineTo(x+14,y+5);}
+  else{ctx.moveTo(x-5,y-14);ctx.lineTo(x-5,y+14);ctx.moveTo(x+5,y-14);ctx.lineTo(x+5,y+14);}ctx.stroke();}
+function drawSch(){
+  const C=[+$('rC1').value,+$('rC2').value,+$('rC3').value],U=+$('rU').value;
+  ['rC1','rC2','rC3'].forEach((id,i)=>$(id+'o').textContent=C[i]+' µF');$('rUo').textContent=U+' V';
+  let Cg,Q,Ui;
+  if(rM==='par'){Cg=C[0]+C[1]+C[2];Ui=[U,U,U];Q=C.map(c=>c*U);}
+  else{Cg=1/(1/C[0]+1/C[1]+1/C[2]);const q=Cg*U;Q=[q,q,q];Ui=C.map(c=>q/c);}
+  $('rOut').innerHTML='<span>Ersatzkapazität C =</span><b>'+de(Cg,3)+' µF</b><span>Gesamtladung Q =</span><b>'+de(Cg*U,3)+' µC</b><span>'+(rM==='par'?'C = C₁ + C₂ + C₃':'1/C = 1/C₁ + 1/C₂ + 1/C₃')+'</span>';
+  if(!vis('cvSch'))return;
+  const {ctx,W,H}=fit($('cvSch')),ink=css('--ink'),mu=css('--muted'),acc=css('--accent');
+  const xL=Math.max(40,W*0.1),xR=W-Math.max(30,W*0.06),yT=50,yB=H-36;
+  ctx.strokeStyle=ink;ctx.lineWidth=1.6;
+  // Quelle links
+  ctx.beginPath();ctx.moveTo(xL,yT);ctx.lineTo(xL,(yT+yB)/2-8);ctx.moveTo(xL,(yT+yB)/2+8);ctx.lineTo(xL,yB);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(xL-12,(yT+yB)/2-8);ctx.lineTo(xL+12,(yT+yB)/2-8);ctx.stroke();ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(xL-6,(yT+yB)/2+8);ctx.lineTo(xL+6,(yT+yB)/2+8);ctx.stroke();
+  label(ctx,'U = '+U+' V',xL+16,(yT+yB)/2,mu,'left',12);
+  ctx.lineWidth=1.6;ctx.strokeStyle=ink;
+  if(rM==='par'){
+    const xs=[0,1,2].map(i=>xL+(xR-xL)*(0.42+i*0.25));
+    ctx.beginPath();ctx.moveTo(xL,yT);ctx.lineTo(xs[2],yT);ctx.moveTo(xL,yB);ctx.lineTo(xs[2],yB);ctx.stroke();
+    xs.forEach((x,i)=>{const ym=(yT+yB)/2;ctx.strokeStyle=ink;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(x,yT);ctx.lineTo(x,ym-5);ctx.moveTo(x,ym+5);ctx.lineTo(x,yB);ctx.stroke();
+      ctx.fillStyle=css('--paper');ctx.fillRect(x-16,ym-6,32,12);capSym(ctx,x,ym,true,ink);
+      label(ctx,'C'+'₁₂₃'[i]+' = '+C[i]+' µF',x,ym-34,ink,'center',12);label(ctx,'Q = '+de(Q[i],3)+' µC',x,ym+26,acc,'center',12);label(ctx,'U = '+de(Ui[i],3)+' V',x,ym+42,mu,'center',12);});
+  }else{
+    const xs=[0,1,2].map(i=>xL+(xR-xL)*(0.3+i*0.28));
+    ctx.beginPath();ctx.moveTo(xL,yT);xs.forEach(x=>{ctx.lineTo(x-5,yT);ctx.moveTo(x+5,yT);});ctx.lineTo(xR,yT);ctx.lineTo(xR,yB);ctx.lineTo(xL,yB);ctx.stroke();
+    xs.forEach((x,i)=>{capSym(ctx,x,yT,false,ink);
+      label(ctx,'C'+'₁₂₃'[i]+' = '+C[i]+' µF',x,yT+30,ink,'center',12);label(ctx,'Q = '+de(Q[i],3)+' µC',x,yT+48,acc,'center',12);label(ctx,'U = '+de(Ui[i],3)+' V',x,yT+64,mu,'center',12);});
+    xs.forEach(x=>{label(ctx,'+Q',x-16,yT-22,css('--pos'),'center',11);label(ctx,'−Q',x+16,yT-22,css('--neg'),'center',11);});
+    label(ctx,'Innere Platten werden durch Influenz geladen: Jeder Kondensator trägt dieselbe Ladung Q.',(xL+xR)/2,yB-18,mu,'center',11);
+  }
+}
+segGroup('rMode',b=>{rM=b.dataset.m;drawSch();});
+['rC1','rC2','rC3','rU'].forEach(id=>$(id).addEventListener('input',drawSch));
+
+/* ---------- Start ---------- */
+function drawAll(){drawIt();drawField();drawFq();drawSup();drawPot();drawKap();drawSch();}
+window.addEventListener('resize',()=>{probe=null;sp=null;pPts=null;drawAll();});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawAll);
+new MutationObserver(drawAll).observe(root,{attributes:true,attributeFilter:['data-theme']});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawAll);
+renderTasks();
+let start='start';const h=location.hash.slice(1);
+if(h&&$(h)&&$(h).classList.contains('station'))start=h;
+else{try{const s=localStorage.getItem('q1kond-tab');if(s&&$(s))start=s;}catch(e){}}
+show(start,false);
+})();
+</script>
+
+</body></html>
