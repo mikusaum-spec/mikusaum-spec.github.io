@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sammellinsen – Brennpunkt & Bildkonstruktion</title>
+<style>
+  :root{
+    --blau:#1e3a5f; --blau2:#2c5282; --hg:#f2f4f8; --karte:#ffffff; --rand:#d7dde7;
+    --text:#1f2937; --grau:#6b7280;
+    --par:#e63946; --mit:#2a9d8f; --bp:#3a86ff; --obj:#f4a261; --bild:#b388ff;
+    --ok:#2f855a; --fehler:#c53030;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--hg);color:var(--text);line-height:1.45}
+  header{background:var(--blau);color:#fff;padding:10px 18px 14px}
+  .kopf{font-size:.8rem;opacity:.8;letter-spacing:.02em}
+  h1{margin:4px 0 0;font-size:1.45rem;font-weight:650}
+  main{max-width:1250px;margin:0 auto;padding:14px}
+  .tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .tab{border:2px solid var(--blau2);background:#fff;color:var(--blau2);padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.95rem}
+  .tab.aktiv{background:var(--blau2);color:#fff}
+  .layout{display:grid;grid-template-columns:1fr 330px;gap:14px;align-items:start}
+  @media(max-width:950px){.layout{grid-template-columns:1fr}}
+  .karte{background:var(--karte);border:1px solid var(--rand);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+  .karte h2{font-size:1rem;margin:0 0 8px;color:var(--blau)}
+  #buehne{background:#0d1b2a;border-radius:10px;padding:0;overflow:hidden;position:relative}
+  canvas{display:block;width:100%;touch-action:none}
+  .linsen{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .linse-btn{border:2px solid var(--rand);background:#fff;border-radius:8px;padding:6px 2px 4px;cursor:pointer;text-align:center;font-weight:600;font-size:.85rem;color:var(--text)}
+  .linse-btn.aktiv{border-color:var(--blau2);background:#ebf2fb}
+  .linse-btn svg{display:block;margin:0 auto 2px}
+  .regler{margin:8px 0}
+  .regler label{display:flex;justify-content:space-between;font-size:.9rem}
+  .regler input{width:100%}
+  .wert{font-weight:700;font-variant-numeric:tabular-nums}
+  .schalter{display:flex;align-items:center;gap:8px;margin:7px 0;cursor:pointer;font-size:.92rem}
+  .schalter input{width:18px;height:18px}
+  .farbe{display:inline-block;width:22px;height:4px;border-radius:2px;vertical-align:middle}
+  .eingabe{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .eingabe input{width:80px;padding:6px;font-size:1rem;border:1px solid var(--rand);border-radius:6px}
+  button.knopf{background:var(--blau2);color:#fff;border:none;padding:7px 12px;border-radius:6px;font-weight:600;cursor:pointer;font-size:.9rem}
+  button.knopf.leise{background:#e5e9f0;color:var(--text)}
+  .meldung{margin-top:8px;font-size:.9rem;min-height:1.3em}
+  .meldung.ok{color:var(--ok);font-weight:600}
+  .meldung.fehler{color:var(--fehler)}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th,td{border-bottom:1px solid var(--rand);padding:4px 5px;text-align:left}
+  th{color:var(--grau);font-weight:600}
+  .auftrag ol{margin:4px 0 0;padding-left:20px}
+  .auftrag li{margin:3px 0}
+  .op{font-weight:700}
+  .merk{border-left:5px solid var(--blau2);background:#ebf2fb;padding:8px 10px;border-radius:6px;font-size:.92rem}
+  .regelbox{font-size:.88rem;margin:6px 0;padding:6px 8px;border-radius:6px;background:#f7f8fb}
+  .regelbox b{display:block}
+  .werte{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:.92rem}
+  .hinweis{font-size:.8rem;color:var(--grau);margin-top:6px}
+  .versteckt{display:none}
+  footer{text-align:center;font-size:.75rem;color:var(--grau);padding:10px}
+</style>
+</head>
+<body>
+<header>
+  <div class="kopf">Amplonius-Gymnasium Rheinberg · Physik · Klasse 7 · Claßen</div>
+  <h1>Sammellinsen – Brennpunkt messen &amp; Bilder konstruieren</h1>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab aktiv" data-modus="messen">① Brennpunkt messen</button>
+    <button class="tab" data-modus="konstruieren">② Bildkonstruktion</button>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div id="buehne"><canvas id="cv"></canvas></div>
+      <div class="hinweis" id="buehnenHinweis">Tipp: Den Schirm kannst du mit der Maus (oder dem Finger) verschieben. Feineinstellung mit den Pfeiltasten ← →.</div>
+
+      <!-- Arbeitsaufträge -->
+      <div class="karte auftrag" id="auftragMessen" style="margin-top:12px">
+        <h2>Arbeitsauftrag ① – Brennweite bestimmen</h2>
+        <ol>
+          <li>Wähle <b>Linse A</b>. Paralleles Licht fällt von links auf die Linse.</li>
+          <li>Verschiebe den Schirm so lange, bis der Lichtfleck auf dem Schirm <b>am kleinsten und am hellsten</b> ist. An dieser Stelle liegt der <b>Brennpunkt F</b>.</li>
+          <li><span class="op">Miss</span> den Abstand zwischen Linsenmitte und Schirm am Maßstab ab. Das ist die <b>Brennweite f</b>. Trage sie ein und prüfe.</li>
+          <li>Wiederhole die Messung für die Linsen B, C und D.</li>
+          <li><span class="op">Vergleiche</span> die Form der Linsen mit ihren Brennweiten. <span class="op">Formuliere</span> einen Je-desto-Satz.</li>
+        </ol>
+      </div>
+      <div class="karte auftrag versteckt" id="auftragKonstr" style="margin-top:12px">
+        <h2>Arbeitsauftrag ② – Bildentstehung</h2>
+        <ol>
+          <li>Blende nacheinander <b>Parallelstrahl</b>, <b>Mittelpunktstrahl</b> und <b>Brennpunktstrahl</b> ein. <span class="op">Beschreibe</span> jeweils den Verlauf vor und hinter der Linse.</li>
+          <li>Blende das Bild ein. <span class="op">Erläutere</span>, wie man den Ort des Bildes mithilfe der Strahlen findet.</li>
+          <li>Verschiebe den Gegenstand (orangefarbener Pfeil) langsam von weit links bis nah an die Linse. <span class="op">Beschreibe</span>, wie sich Lage, Größe und Ausrichtung des Bildes ändern.</li>
+          <li><span class="op">Untersuche</span>, was passiert, wenn der Gegenstand im Brennpunkt oder zwischen Brennpunkt und Linse steht.</li>
+        </ol>
+      </div>
+    </div>
+
+    <aside>
+      <div class="karte">
+        <h2>Linse auswählen</h2>
+        <div class="linsen" id="linsenWahl"></div>
+      </div>
+
+      <!-- Bedienfeld Messen -->
+      <div id="panelMessen">
+        <div class="karte">
+          <h2>Schirm</h2>
+          <div class="regler">
+            <label>Abstand Linse – Schirm <span class="wert" id="schirmWert">–</span></label>
+            <input type="range" id="schirmRegler" min="1" max="26" step="0.1" value="15">
+          </div>
+          <h2 style="margin-top:12px">Meine Messung</h2>
+          <div class="eingabe">
+            <span>f =</span><input id="fEingabe" inputmode="decimal" placeholder="z. B. 6,5"><span>cm</span>
+            <button class="knopf" id="pruefen">Prüfen</button>
+          </div>
+          <div class="meldung" id="meldung"></div>
+          <div style="margin-top:8px"><button class="knopf leise" id="loesung">Brennpunkt zeigen</button></div>
+        </div>
+        <div class="karte">
+          <h2>Messprotokoll</h2>
+          <table>
+            <thead><tr><th>Linse</th><th>Form</th><th>Brennweite f</th></tr></thead>
+            <tbody id="protokoll"></tbody>
+          </table>
+          <div class="merk versteckt" id="merkMessen" style="margin-top:10px">
+            <b>Merke:</b> Je stärker eine Sammellinse gewölbt ist, desto kleiner ist ihre Brennweite.
+          </div>
+        </div>
+      </div>
+
+      <!-- Bedienfeld Konstruieren -->
+      <div id="panelKonstr" class="versteckt">
+        <div class="karte">
+          <h2>Strahlen einblenden</h2>
+          <label class="schalter"><input type="checkbox" id="chkPar"><span class="farbe" style="background:var(--par)"></span>Parallelstrahl</label>
+          <label class="schalter"><input type="checkbox" id="chkMit"><span class="farbe" style="background:var(--mit)"></span>Mittelpunktstrahl</label>
+          <label class="schalter"><input type="checkbox" id="chkBp"><span class="farbe" style="background:var(--bp)"></span>Brennpunktstrahl</label>
+          <hr style="border:none;border-top:1px solid var(--rand)">
+          <label class="schalter"><input type="checkbox" id="chkBild"><span class="farbe" style="background:var(--bild)"></span>Bild anzeigen</label>
+          <label class="schalter"><input type="checkbox" id="chkWerte"> Messwerte anzeigen</label>
+        </div>
+        <div class="karte">
+          <h2>Gegenstand</h2>
+          <div class="regler">
+            <label>Gegenstandsweite g <span class="wert" id="gWert"></span></label>
+            <input type="range" id="gRegler" min="1" max="26" step="0.1" value="16">
+          </div>
+          <div class="regler">
+            <label>Gegenstandsgröße G <span class="wert" id="GWert"></span></label>
+            <input type="range" id="GRegler" min="0.5" max="4" step="0.1" value="2.5">
+          </div>
+          <div id="werteBox" class="versteckt" style="margin-top:8px">
+            <div class="werte" id="werte"></div>
+          </div>
+          <div class="meldung" id="bildMeldung"></div>
+        </div>
+        <div class="karte">
+          <h2>Besondere Strahlen</h2>
+          <div class="regelbox" style="border-left:4px solid var(--par)"><b>Parallelstrahl</b>läuft parallel zur optischen Achse und wird so gebrochen, dass er durch den Brennpunkt F hinter der Linse geht.</div>
+          <div class="regelbox" style="border-left:4px solid var(--mit)"><b>Mittelpunktstrahl</b>geht durch die Linsenmitte und läuft ungebrochen geradeaus weiter.</div>
+          <div class="regelbox" style="border-left:4px solid var(--bp)"><b>Brennpunktstrahl</b>geht durch den Brennpunkt F vor der Linse und verlässt die Linse parallel zur optischen Achse.</div>
+          <div class="hinweis">Vereinfachung: Die Brechung wird nur einmal an der Mittelebene der Linse (gestrichelt) gezeichnet.</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</main>
+<footer>Amplonius-Gymnasium Rheinberg · Physik · Klasse 7 · Claßen</footer>
+
+<script>
+// ---------- Daten ----------
+const LINSEN = [
+  {name:"A", f:8},
+  {name:"B", f:5},
+  {name:"C", f:12},
+  {name:"D", f:3.5}
+];
+const zustand = {
+  modus:"messen",
+  linse:0,
+  schirm:15,
+  zeigeF:false,
+  g:16, G:2.5,
+  gemessen:{}   // name -> f
+};
+const BEREICH = 28;       // sichtbarer Bereich ±28 cm
+const LINSE_H = 4;        // halbe Linsenhöhe in cm
+const BUENDEL = 2.4;      // halbe Bündelbreite in cm
+const N_STRAHLEN = 9;
+
+const fmt = (x, d=1) => x.toFixed(d).replace(".", ",");
+const $ = id => document.getElementById(id);
+const wölbung = f => 2.6 / f; // halbe Mittendicke je Seite in cm
+function formText(f){
+  if (f <= 4) return "sehr stark gewölbt";
+  if (f <= 6) return "stark gewölbt";
+  if (f <= 9) return "mittel gewölbt";
+  return "schwach gewölbt";
+}
+
+// ---------- Canvas ----------
+const cv = $("cv"), ctx = cv.getContext("2d");
+let W, H, s; // s = px pro cm
+function groesse(){
+  const dpr = window.devicePixelRatio || 1;
+  W = cv.parentElement.clientWidth;
+  H = Math.max(320, Math.round(W * 0.48));
+  cv.width = W * dpr; cv.height = H * dpr;
+  cv.style.height = H + "px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  s = W / (2 * BEREICH);
+  zeichne();
+}
+const X = x => W/2 + x*s;
+const Y = y => H/2 - 14 - y*s;
+const invX = px => (px - W/2)/s;
+const invY = py => (H/2 - 14 - py)/s;
+
+function linie(x1,y1,x2,y2,farbe,breite=2,strich=null){
+  ctx.save();
+  ctx.strokeStyle = farbe; ctx.lineWidth = breite;
+  if (strich) ctx.setLineDash(strich);
+  ctx.beginPath(); ctx.moveTo(X(x1),Y(y1)); ctx.lineTo(X(x2),Y(y2)); ctx.stroke();
+  ctx.restore();
+}
+function pfeilspitze(x1,y1,x2,y2,farbe,anteil=0.5){
+  const px1=X(x1),py1=Y(y1),px2=X(x2),py2=Y(y2);
+  const len = Math.hypot(px2-px1,py2-py1);
+  if (len < 30) return;
+  const mx = px1+(px2-px1)*anteil, my = py1+(py2-py1)*anteil;
+  const w = Math.atan2(py2-py1,px2-px1), a=9;
+  ctx.save(); ctx.fillStyle=farbe; ctx.beginPath();
+  ctx.moveTo(mx+Math.cos(w)*a, my+Math.sin(w)*a);
+  ctx.lineTo(mx+Math.cos(w+2.6)*a, my+Math.sin(w+2.6)*a);
+  ctx.lineTo(mx+Math.cos(w-2.6)*a, my+Math.sin(w-2.6)*a);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+function strahl(x1,y1,x2,y2,farbe,breite=2.5){
+  ctx.save(); ctx.shadowColor=farbe; ctx.shadowBlur=8;
+  linie(x1,y1,x2,y2,farbe,breite); ctx.restore();
+  pfeilspitze(x1,y1,x2,y2,farbe);
+}
+
+function achseUndMassstab(){
+  // optische Achse
+  linie(-BEREICH,0,BEREICH,0,"rgba(255,255,255,0.35)",1,[6,5]);
+  ctx.fillStyle="rgba(255,255,255,0.45)"; ctx.font="12px Segoe UI, sans-serif";
+  ctx.textAlign="right"; ctx.fillText("optische Achse", W-8, Y(0)+16); ctx.textAlign="left";
+  // Maßstab
+  const yb = H - 30;
+  ctx.fillStyle="#e9edf3"; ctx.fillRect(0, yb, W, 30);
+  ctx.strokeStyle="#333"; ctx.fillStyle="#333"; ctx.lineWidth=1;
+  ctx.font="11px Segoe UI, sans-serif"; ctx.textAlign="center";
+  for(let c=-BEREICH; c<=BEREICH; c++){
+    const px = X(c), lang = c%5===0;
+    if (s < 9 && !lang && c%1===0 && Math.abs(c)%1===0 && s<6) continue;
+    ctx.beginPath(); ctx.moveTo(px,yb); ctx.lineTo(px, yb + (lang?11:6)); ctx.stroke();
+    if (lang) ctx.fillText(Math.abs(c), px, yb+23);
+  }
+  // Millimeter bei genug Platz
+  if (s > 22){
+    for(let m=-BEREICH*10; m<=BEREICH*10; m++){
+      if (m%10===0) continue;
+      const px = X(m/10);
+      ctx.beginPath(); ctx.moveTo(px,yb); ctx.lineTo(px,yb+3); ctx.stroke();
+    }
+  }
+  ctx.textAlign="left"; ctx.fillText("cm", W-22, yb+23);
+}
+
+function linseZeichnen(f){
+  const t = wölbung(f), rand = 0.08, h = LINSE_H;
+  // Mittelebene
+  linie(0, -H/s, 0, H/s, "rgba(255,255,255,0.18)", 1, [3,5]);
+  ctx.save();
+  const grad = ctx.createLinearGradient(X(-t),0,X(t),0);
+  grad.addColorStop(0,"rgba(150,200,255,0.30)");
+  grad.addColorStop(0.5,"rgba(200,230,255,0.55)");
+  grad.addColorStop(1,"rgba(150,200,255,0.30)");
+  ctx.fillStyle = grad; ctx.strokeStyle="rgba(200,230,255,0.9)"; ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.moveTo(X(-rand),Y(h)); ctx.lineTo(X(rand),Y(h));
+  ctx.quadraticCurveTo(X(rand+2*t),Y(0),X(rand),Y(-h));
+  ctx.lineTo(X(-rand),Y(-h));
+  ctx.quadraticCurveTo(X(-rand-2*t),Y(0),X(-rand),Y(h));
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle="rgba(255,255,255,0.8)"; ctx.font="bold 13px Segoe UI, sans-serif"; ctx.textAlign="center";
+  ctx.fillText("Linse " + LINSEN[zustand.linse].name, X(0), Y(-h)+20);
+  ctx.textAlign="left";
+}
+
+function brennpunkt(x, text){
+  ctx.save();
+  ctx.fillStyle="#ffd166"; ctx.strokeStyle="#0d1b2a"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(X(x),Y(0),5,0,2*Math.PI); ctx.fill(); ctx.stroke();
+  ctx.font="bold 14px Segoe UI, sans-serif"; ctx.textAlign="center";
+  ctx.fillText(text, X(x), Y(0)+22);
+  ctx.restore();
+}
+
+// ---------- Modus 1: Messen ----------
+function zeichneMessen(){
+  const f = LINSEN[zustand.linse].f, sx = zustand.schirm;
+  achseUndMassstab();
+  // Lichtquelle
+  ctx.fillStyle="#3b4a5e"; ctx.fillRect(X(-BEREICH), Y(BUENDEL+0.8), X(-BEREICH+1.6)-X(-BEREICH), (BUENDEL+0.8)*2*s);
+  ctx.fillStyle="rgba(255,255,255,0.7)"; ctx.font="12px Segoe UI, sans-serif";
+  ctx.fillText("paralleles Licht", X(-BEREICH)+4, Y(BUENDEL+0.8)-8);
+  // Strahlen
+  ctx.save(); ctx.globalCompositeOperation="lighter";
+  for(let i=0;i<N_STRAHLEN;i++){
+    const y = -BUENDEL + 2*BUENDEL*i/(N_STRAHLEN-1);
+    const farbe = "rgba(255,214,90,0.75)";
+    linie(-BEREICH+1.6, y, 0, y, farbe, 2);
+    const ys = y*(1 - sx/f);
+    linie(0, y, sx, ys, farbe, 2);
+  }
+  ctx.restore();
+  for(let i of [0, N_STRAHLEN-1]){
+    const y = -BUENDEL + 2*BUENDEL*i/(N_STRAHLEN-1);
+    pfeilspitze(-BEREICH+1.6,y,0,y,"#ffd65a",0.55);
+  }
+  linseZeichnen(f);
+  if (zustand.zeigeF){ brennpunkt(f,"F"); brennpunkt(-f,"F"); }
+
+  // Schirm
+  const sh = 5.5;
+  ctx.fillStyle="#cfd6df"; ctx.fillRect(X(sx)-3, Y(sh), 8, sh*2*s);
+  ctx.fillStyle="#9aa6b5"; ctx.fillRect(X(sx)+5, Y(sh), 3, sh*2*s);
+  // Griff
+  ctx.fillStyle="#ffffff"; ctx.beginPath(); ctx.arc(X(sx)+1, Y(sh)-10, 8, 0, 2*Math.PI); ctx.fill();
+  ctx.fillStyle="#1e3a5f"; ctx.font="bold 11px Segoe UI"; ctx.textAlign="center"; ctx.fillText("⇔", X(sx)+1, Y(sh)-6);
+  ctx.fillStyle="rgba(255,255,255,0.75)"; ctx.font="12px Segoe UI"; ctx.fillText("Schirm", X(sx)+1, Y(-sh)+16);
+  ctx.textAlign="left";
+  // Lichtfleck auf Schirm
+  const d = 2*BUENDEL*Math.abs(1 - sx/f);
+  const hell = Math.min(1, 0.25 + 0.75*0.25/(d+0.25));
+  ctx.save(); ctx.shadowColor="#fff3b0"; ctx.shadowBlur=18*hell;
+  ctx.fillStyle=`rgba(255,245,180,${hell})`;
+  const halb = Math.min(d/2, sh);
+  ctx.fillRect(X(sx)-3, Y(halb)-1.5, 6, Math.max(3, halb*2*s));
+  ctx.restore();
+  // Maßpfeil Linse–Schirm
+  const ym = -sh - 0.9;
+  if (Y(ym) < H-40){
+    linie(0, ym, sx, ym, "rgba(255,255,255,0.6)", 1);
+    ctx.fillStyle="rgba(255,255,255,0.85)"; ctx.font="12px Segoe UI"; ctx.textAlign="center";
+    ctx.fillText(fmt(sx)+" cm", (X(0)+X(sx))/2, Y(ym)-5); ctx.textAlign="left";
+  }
+
+  // Vorderansicht Schirm (Inset)
+  const iw = Math.min(150, W*0.2), ix = W - iw - 10, iy = 10;
+  ctx.fillStyle="rgba(255,255,255,0.08)"; ctx.strokeStyle="rgba(255,255,255,0.3)";
+  ctx.fillRect(ix, iy, iw, iw+18); ctx.strokeRect(ix, iy, iw, iw+18);
+  ctx.fillStyle="#cfd6df"; ctx.fillRect(ix+8, iy+8, iw-16, iw-16);
+  ctx.save(); ctx.beginPath(); ctx.rect(ix+8, iy+8, iw-16, iw-16); ctx.clip();
+  const k = (iw-16)/(2*sh); // px pro cm im Inset
+  const r = Math.max(1.5, d/2*k);
+  const g = ctx.createRadialGradient(ix+iw/2, iy+iw/2, 0, ix+iw/2, iy+iw/2, r);
+  g.addColorStop(0, `rgba(255,250,200,${hell})`);
+  g.addColorStop(0.8, `rgba(255,220,90,${hell*0.9})`);
+  g.addColorStop(1, `rgba(255,200,60,0)`);
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(ix+iw/2, iy+iw/2, r*1.1, 0, 2*Math.PI); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle="rgba(255,255,255,0.8)"; ctx.font="11px Segoe UI"; ctx.textAlign="center";
+  ctx.fillText("Blick auf den Schirm", ix+iw/2, iy+iw+12); ctx.textAlign="left";
+}
+
+// ---------- Modus 2: Konstruieren ----------
+function bildDaten(){
+  const f = LINSEN[zustand.linse].f, g = zustand.g, G = zustand.G;
+  if (Math.abs(g-f) < 0.15) return {art:"keins"};
+  const b = g*f/(g-f), B = -G*b/g;
+  return {art: g>f ? "reell" : "virtuell", b, B};
+}
+function zeichneKonstr(){
+  const f = LINSEN[zustand.linse].f, g = zustand.g, G = zustand.G;
+  const P = [-g, G], R = BEREICH, L = -BEREICH;
+  achseUndMassstab();
+  linseZeichnen(f);
+  brennpunkt(f,"F"); brennpunkt(-f,"F");
+  const bd = bildDaten();
+  const virt = bd.art==="virtuell";
+
+  // Parallelstrahl
+  if ($("chkPar").checked){
+    const c = getComputedStyle(document.body).getPropertyValue("--par").trim();
+    strahl(P[0],P[1],0,G,c);
+    strahl(0,G,R,G - G*R/f,c);
+    if (virt) linie(0,G,bd.b,bd.B,c,1.5,[6,5]);
+  }
+  // Mittelpunktstrahl
+  if ($("chkMit").checked){
+    const c = getComputedStyle(document.body).getPropertyValue("--mit").trim();
+    strahl(P[0],P[1],0,0,c);
+    strahl(0,0,R,-G*R/g,c);
+    if (virt) linie(0,0,bd.b,bd.B,c,1.5,[6,5]);
+  }
+  // Brennpunktstrahl
+  if ($("chkBp").checked && bd.art!=="keins"){
+    const c = getComputedStyle(document.body).getPropertyValue("--bp").trim();
+    const yh = G*f/(f-g);
+    if (virt){
+      linie(-f,0,P[0],P[1],c,1.5,[6,5]);
+      strahl(P[0],P[1],0,yh,c);
+      strahl(0,yh,R,yh,c);
+      linie(0,yh,bd.b,bd.B,c,1.5,[6,5]);
+    } else {
+      strahl(P[0],P[1],0,yh,c);
+      strahl(0,yh,R,yh,c);
+    }
+  }
+
+  // Gegenstand
+  pfeilGross(-g, G, getComputedStyle(document.body).getPropertyValue("--obj").trim(), false, "G");
+  // Bild
+  if ($("chkBild").checked && bd.art!=="keins"){
+    pfeilGross(bd.b, bd.B, getComputedStyle(document.body).getPropertyValue("--bild").trim(), virt, "B");
+  }
+}
+function pfeilGross(x, h, farbe, gestrichelt, text){
+  const px = X(x), y0 = Y(0), y1 = Y(h);
+  ctx.save();
+  ctx.strokeStyle=farbe; ctx.fillStyle=farbe; ctx.lineWidth=4;
+  if (gestrichelt) ctx.setLineDash([7,5]);
+  ctx.beginPath(); ctx.moveTo(px,y0); ctx.lineTo(px,y1 + (h>0?8:-8)); ctx.stroke();
+  ctx.setLineDash([]);
+  const dir = h>0 ? 1 : -1;
+  ctx.beginPath(); ctx.moveTo(px,y1); ctx.lineTo(px-8,y1+dir*14); ctx.lineTo(px+8,y1+dir*14); ctx.closePath();
+  if (gestrichelt){ ctx.lineWidth=2; ctx.stroke(); } else ctx.fill();
+  ctx.font="bold 14px Segoe UI"; ctx.textAlign="left";
+  ctx.fillText(text, px+10, (y0+y1)/2+5);
+  ctx.restore();
+}
+
+// ---------- Zeichnen & UI ----------
+function zeichne(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#0d1b2a"; ctx.fillRect(0,0,W,H);
+  if (zustand.modus==="messen") zeichneMessen(); else zeichneKonstr();
+}
+
+function aktualisiere(){
+  $("schirmWert").textContent = fmt(zustand.schirm)+" cm";
+  $("schirmRegler").value = zustand.schirm;
+  $("gWert").textContent = fmt(zustand.g)+" cm";
+  $("gRegler").value = zustand.g;
+  $("GWert").textContent = fmt(zustand.G)+" cm";
+  $("GRegler").value = zustand.G;
+  $("loesung").textContent = zustand.zeigeF ? "Brennpunkt verbergen" : "Brennpunkt zeigen";
+  document.querySelectorAll(".linse-btn").forEach((b,i)=>b.classList.toggle("aktiv", i===zustand.linse));
+  // Messwerte Modus 2
+  const bd = bildDaten(), f = LINSEN[zustand.linse].f;
+  $("werteBox").classList.toggle("versteckt", !$("chkWerte").checked);
+  let html = `<span>Brennweite f</span><span class="wert">${fmt(f)} cm</span>
+              <span>Gegenstandsweite g</span><span class="wert">${fmt(zustand.g)} cm</span>
+              <span>Gegenstandsgröße G</span><span class="wert">${fmt(zustand.G)} cm</span>`;
+  if (bd.art==="reell") html += `<span>Bildweite b</span><span class="wert">${fmt(bd.b)} cm</span>
+              <span>Bildgröße B</span><span class="wert">${fmt(Math.abs(bd.B))} cm</span>`;
+  else if (bd.art==="virtuell") html += `<span>Bildweite b</span><span class="wert">${fmt(Math.abs(bd.b))} cm (links)</span>
+              <span>Bildgröße B</span><span class="wert">${fmt(Math.abs(bd.B))} cm</span>`;
+  $("werte").innerHTML = html;
+  let m = "";
+  if ($("chkBild").checked){
+    if (bd.art==="keins") m = "Der Gegenstand steht im Brennpunkt: Die Strahlen verlaufen hinter der Linse parallel – es entsteht kein Bild.";
+    else if (bd.art==="reell"){
+      const gr = Math.abs(bd.B) > zustand.G*1.03 ? "vergrößert" : (Math.abs(bd.B) < zustand.G*0.97 ? "verkleinert" : "gleich groß");
+      m = `Reelles Bild: umgekehrt, seitenvertauscht, ${gr}. Es lässt sich auf einem Schirm auffangen.`;
+    } else m = "Kein Bild auf dem Schirm! Die Strahlen laufen hinter der Linse auseinander. Schaut man durch die Linse, sieht man ein aufrechtes, vergrößertes (virtuelles) Bild – die Linse wirkt als Lupe.";
+  } else if (bd.art==="keins") m = "Der Gegenstand steht genau im Brennpunkt.";
+  $("bildMeldung").textContent = m;
+  // Protokoll
+  $("protokoll").innerHTML = LINSEN.map(l => {
+    const gem = zustand.gemessen[l.name];
+    return `<tr><td>${l.name}</td><td>${gem!==undefined ? formText(l.f) : "–"}</td><td>${gem!==undefined ? fmt(gem)+" cm" : "–"}</td></tr>`;
+  }).join("");
+  $("merkMessen").classList.toggle("versteckt", Object.keys(zustand.gemessen).length < 3);
+  zeichne();
+}
+
+// Linsenauswahl
+function linsenIcon(f){
+  const t = wölbung(f)*4.2;
+  return `<svg width="34" height="40" viewBox="-17 -20 34 40"><path d="M-1,-18 L1,-18 Q${1+2*t},0 1,18 L-1,18 Q${-1-2*t},0 -1,-18 Z" fill="#bcd9f5" stroke="#2c5282" stroke-width="1.2"/></svg>`;
+}
+LINSEN.forEach((l,i)=>{
+  const b = document.createElement("button");
+  b.className="linse-btn"; b.innerHTML = linsenIcon(l.f) + "Linse " + l.name;
+  b.onclick = ()=>{ zustand.linse=i; zustand.zeigeF=false; $("meldung").textContent=""; $("meldung").className="meldung"; $("fEingabe").value=""; aktualisiere(); };
+  $("linsenWahl").appendChild(b);
+});
+
+// Tabs
+document.querySelectorAll(".tab").forEach(t=>{
+  t.onclick = ()=>{
+    zustand.modus = t.dataset.modus;
+    document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("aktiv", x===t));
+    const m = zustand.modus==="messen";
+    $("panelMessen").classList.toggle("versteckt", !m);
+    $("panelKonstr").classList.toggle("versteckt", m);
+    $("auftragMessen").classList.toggle("versteckt", !m);
+    $("auftragKonstr").classList.toggle("versteckt", m);
+    $("buehnenHinweis").textContent = m
+      ? "Tipp: Den Schirm kannst du mit der Maus (oder dem Finger) verschieben. Feineinstellung mit den Pfeiltasten ← →."
+      : "Tipp: Den Gegenstand (orangefarbener Pfeil) kannst du mit der Maus verschieben – nach links/rechts und nach oben/unten.";
+    aktualisiere();
+  };
+});
+
+// Regler & Schalter
+$("schirmRegler").oninput = e => { zustand.schirm = +e.target.value; aktualisiere(); };
+$("gRegler").oninput = e => { zustand.g = +e.target.value; aktualisiere(); };
+$("GRegler").oninput = e => { zustand.G = +e.target.value; aktualisiere(); };
+["chkPar","chkMit","chkBp","chkBild","chkWerte"].forEach(id => $(id).onchange = aktualisiere);
+$("loesung").onclick = ()=>{ zustand.zeigeF = !zustand.zeigeF; aktualisiere(); };
+
+// Prüfen
+function pruefe(){
+  const l = LINSEN[zustand.linse];
+  const wert = parseFloat($("fEingabe").value.replace(",", "."));
+  const m = $("meldung");
+  if (isNaN(wert)){ m.textContent="Bitte gib eine Zahl ein."; m.className="meldung fehler"; return; }
+  const abw = Math.abs(wert - l.f);
+  if (abw <= 0.3){
+    m.textContent = `Sehr gut! Linse ${l.name} hat die Brennweite f = ${fmt(l.f)} cm.`;
+    m.className="meldung ok"; zustand.gemessen[l.name] = wert; zustand.zeigeF = true;
+  } else if (abw <= 1){
+    m.textContent = "Fast! Verschiebe den Schirm noch ein wenig – wo ist der Fleck wirklich am kleinsten?";
+    m.className="meldung fehler";
+  } else {
+    m.textContent = "Noch nicht. Tipp: Der Brennpunkt liegt dort, wo sich alle Lichtstrahlen in einem Punkt treffen.";
+    m.className="meldung fehler";
+  }
+  aktualisiere();
+}
+$("pruefen").onclick = pruefe;
+$("fEingabe").onkeydown = e => { if (e.key==="Enter") pruefe(); };
+
+// Ziehen auf dem Canvas
+let zieht = null;
+function pos(e){ const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+cv.addEventListener("pointerdown", e=>{
+  const [px,py] = pos(e), x = invX(px), y = invY(py);
+  if (zustand.modus==="messen"){
+    if (Math.abs(x - zustand.schirm) < 1.5 + 12/s && Math.abs(y) < 7) zieht = "schirm";
+  } else {
+    if (Math.abs(x + zustand.g) < 1.2 + 12/s && y > -1 && y < zustand.G + 1.5) zieht = "objekt";
+  }
+  if (zieht){ cv.setPointerCapture(e.pointerId); e.preventDefault(); }
+});
+cv.addEventListener("pointermove", e=>{
+  const [px,py] = pos(e), x = invX(px), y = invY(py);
+  if (!zieht){
+    let ueber = false;
+    if (zustand.modus==="messen") ueber = Math.abs(x - zustand.schirm) < 1.5 + 12/s && Math.abs(y) < 7;
+    else ueber = Math.abs(x + zustand.g) < 1.2 + 12/s && y > -1 && y < zustand.G + 1.5;
+    cv.style.cursor = ueber ? "grab" : "default";
+    return;
+  }
+  cv.style.cursor = "grabbing";
+  const r = v => Math.round(v*10)/10;
+  if (zieht==="schirm") zustand.schirm = Math.min(26, Math.max(1, r(x)));
+  else { zustand.g = Math.min(26, Math.max(1, r(-x))); zustand.G = Math.min(4, Math.max(0.5, r(y))); }
+  aktualisiere();
+});
+const loslassen = ()=>{ zieht = null; };
+cv.addEventListener("pointerup", loslassen);
+cv.addEventListener("pointercancel", loslassen);
+
+// Pfeiltasten
+document.addEventListener("keydown", e=>{
+  if (document.activeElement && document.activeElement.tagName==="INPUT" && document.activeElement.type!=="range" && document.activeElement.type!=="checkbox") return;
+  if (e.key!=="ArrowLeft" && e.key!=="ArrowRight") return;
+  if (document.activeElement && document.activeElement.type==="range") return;
+  const d = (e.key==="ArrowRight"?1:-1) * (e.shiftKey?1:0.1);
+  if (zustand.modus==="messen") zustand.schirm = Math.min(26, Math.max(1, Math.round((zustand.schirm+d)*10)/10));
+  else zustand.g = Math.min(26, Math.max(1, Math.round((zustand.g-d)*10)/10));
+  e.preventDefault(); aktualisiere();
+});
+
+window.addEventListener("resize", groesse);
+groesse(); aktualisiere();
+</script>
+</body>
+</html>
