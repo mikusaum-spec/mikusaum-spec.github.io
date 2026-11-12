@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Leises Aquarium – Lautstärke-Ampel</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;overflow:hidden;background:#0a3f66;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;
+    user-select:none;-webkit-user-select:none;touch-action:manipulation}
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+
+  /* Ampel */
+  #ampel{position:fixed;top:max(16px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));
+    background:#1d1f24;border:3px solid #3a3d44;border-radius:24px;padding:12px;
+    display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 24px #0007;z-index:2}
+  .l{width:min(9vh,72px);height:min(9vh,72px);border-radius:50%;opacity:.16;transition:opacity .25s,box-shadow .25s}
+  .l.r{background:#ff3b30}.l.y{background:#ffcc00}.l.g{background:#34c759}
+  .l.r.on{opacity:1;box-shadow:0 0 30px 6px #ff3b30aa}
+  .l.y.on{opacity:1;box-shadow:0 0 30px 6px #ffcc00aa}
+  .l.g.on{opacity:1;box-shadow:0 0 30px 6px #34c759aa}
+
+  /* oben rechts */
+  #top{position:fixed;top:max(16px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));
+    display:flex;gap:10px;align-items:center;z-index:2}
+  .chip{background:#00000080;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border-radius:999px;padding:10px 20px;font-size:clamp(20px,3.4vh,34px);font-weight:800;white-space:nowrap}
+  .ibtn{width:54px;height:54px;border-radius:50%;border:none;background:#00000080;color:#fff;font-size:24px;
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer}
+  .ibtn:active{transform:scale(.94)}
+
+  /* unten */
+  #bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:max(16px,env(safe-area-inset-bottom));
+    width:min(760px,82vw);background:#00000080;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border-radius:22px;padding:12px 20px 14px;z-index:2}
+  #msg{font-size:clamp(17px,2.8vh,28px);font-weight:700;text-align:center;margin-bottom:9px}
+  .bar{position:relative;height:16px;background:#ffffff26;border-radius:8px;overflow:hidden}
+  #prog{height:100%;width:0;background:linear-gradient(90deg,#34c759,#8ff0a4);border-radius:8px}
+  .lbar{height:7px;margin-top:8px}
+  #lvl{height:100%;width:0;background:#fff;border-radius:4px}
+  .mark{position:absolute;top:0;bottom:0;width:3px;border-radius:2px}
+  .mark.y{background:#ffcc00}.mark.r{background:#ff3b30}
+
+  /* Dialoge */
+  .modal{position:fixed;inset:0;background:#00000088;display:flex;align-items:center;justify-content:center;z-index:10}
+  .hidden{display:none!important}
+  .panel{background:#fff;color:#1b2733;border-radius:24px;padding:24px 26px;width:min(540px,92vw);max-height:90vh;overflow:auto;
+    box-shadow:0 20px 60px #0008}
+  .panel h1{margin:6px 0 10px;font-size:30px}
+  .panel h2{margin:0 0 14px;font-size:24px}
+  .panel p{line-height:1.45;margin:8px 0}
+  .center{text-align:center}
+  button.big,.panel button{font:inherit;font-weight:700;border:none;border-radius:14px;padding:12px 18px;cursor:pointer;
+    background:#137aa8;color:#fff;font-size:17px}
+  button.big{font-size:21px;padding:16px 26px;margin-top:12px}
+  .panel button.sec{background:#e6eef3;color:#1b2733}
+  .panel button.warn{background:#ffe1de;color:#b3261e}
+  .err{color:#b3261e;font-weight:600;min-height:1em}
+  .set{margin:14px 0}
+  .set label{display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px}
+  .set input[type=range]{width:100%;accent-color:#137aa8}
+  .chk{display:flex;gap:10px;align-items:center;font-weight:600;margin:14px 0}
+  .chk input{width:22px;height:22px;accent-color:#137aa8}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .row button{flex:1}
+  .pmeter{position:relative;height:22px;background:#e6eef3;border-radius:11px;overflow:hidden;margin:8px 0 6px}
+  #pLvl{height:100%;width:0;background:#137aa8}
+  .hint{font-size:14px;color:#56697a}
+  hr{border:none;border-top:1px solid #e3e9ee;margin:18px 0}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="ampel"><div class="l r"></div><div class="l y"></div><div class="l g"></div></div>
+
+<div id="top">
+  <div class="chip" id="count">🐟 0 / 20</div>
+  <button class="ibtn" id="pauseBtn" title="Pause">⏸</button>
+  <button class="ibtn" id="fsBtn" title="Vollbild">⛶</button>
+  <button class="ibtn" id="setBtn" title="Einstellungen">⚙️</button>
+</div>
+
+<div id="bottom">
+  <div id="msg">Mikrofon starten, um loszulegen</div>
+  <div class="bar"><div id="prog"></div></div>
+  <div class="bar lbar"><div id="lvl"></div><div class="mark y" id="bY"></div><div class="mark r" id="bR"></div></div>
+</div>
+
+<!-- Startbildschirm -->
+<div id="start" class="modal">
+  <div class="panel center">
+    <div style="font-size:64px">🐠</div>
+    <h1>Leises Aquarium</h1>
+    <p>Wenn es in der Klasse eine Weile leise ist, schwimmt ein neuer Fisch ins Aquarium.
+       Wird es zu laut, verstecken sich die Fische – und bei Dauerlärm schwimmt einer weg.</p>
+    <button id="go" class="big">🎙 Mikrofon starten</button>
+    <p id="err" class="err"></p>
+    <p class="hint">Das Mikrofonsignal wird nur im Gerät ausgewertet, nichts wird aufgenommen oder gesendet.</p>
+  </div>
+</div>
+
+<!-- Einstellungen -->
+<div id="settings" class="modal hidden">
+  <div class="panel">
+    <h2>⚙️ Einstellungen</h2>
+    <div class="hint">Aktuelle Lautstärke (gelbe/rote Markierung = Schwellen)</div>
+    <div class="pmeter"><div id="pLvl"></div><div class="mark y" id="pY"></div><div class="mark r" id="pR"></div></div>
+    <button id="calib" class="sec" style="width:100%">🎙 Ruhepegel messen (3 s still sein)</button>
+    <p id="calMsg" class="hint"></p>
+
+    <div class="set"><label>Gelb ab <span id="vY"></span></label><input type="range" id="sY" min="5" max="94" step="1"></div>
+    <div class="set"><label>Rot ab <span id="vR"></span></label><input type="range" id="sR" min="6" max="95" step="1"></div>
+    <hr>
+    <div class="set"><label>Ruhezeit pro neuem Fisch <span id="vS"></span></label><input type="range" id="sS" min="5" max="300" step="5"></div>
+    <div class="set"><label>Maximale Fischanzahl <span id="vM"></span></label><input type="range" id="sM" min="5" max="40" step="1"></div>
+    <div class="chk"><input type="checkbox" id="sP"><span>Bei Dauerlärm schwimmt ein Fisch weg</span></div>
+    <div class="set" id="penRow"><label>… nach Rot-Dauer von <span id="vD"></span></label><input type="range" id="sD" min="1" max="20" step="1"></div>
+    <hr>
+    <div class="row">
+      <button id="minus" class="sec">− Fisch</button>
+      <button id="plus" class="sec">+ Fisch</button>
+      <button id="clear" class="warn">Aquarium leeren</button>
+    </div>
+    <div class="row"><button id="close">Fertig</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/* ---------- Einstellungen (im Browser gespeichert) ---------- */
+const DEF = { yellow: 35, red: 60, secs: 30, max: 20, penalty: true, penaltySecs: 4 };
+const S = Object.assign({}, DEF, load('aq-settings', {}));
+function load(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
+function store(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+/* ---------- Canvas & Szene ---------- */
+const c = $('c'), ctx = c.getContext('2d');
+let W = 0, H = 0, dpr = 1, bg = null, plants = [], t = 0;
+
+function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let x = Math.imul(seed ^ seed >>> 15, 1 | seed); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
+
+function resize() {
+  const oldW = W, oldH = H;
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  W = window.innerWidth; H = window.innerHeight;
+  c.width = Math.round(W * dpr); c.height = Math.round(H * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (oldW && oldH) for (const f of fish) { f.x *= W / oldW; f.y *= H / oldH; f.ty *= H / oldH; f.L *= H / oldH; }
+  buildScene();
+}
+
+function buildScene() {
+  bg = document.createElement('canvas');
+  bg.width = c.width; bg.height = c.height;
+  const b = bg.getContext('2d'); b.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const r = rng(42);
+  // Wasser
+  const g = b.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#36c0e0'); g.addColorStop(.45, '#1583b3'); g.addColorStop(1, '#0a3f66');
+  b.fillStyle = g; b.fillRect(0, 0, W, H);
+  // Hintergrund-Silhouetten (Felsen weit hinten)
+  b.fillStyle = 'rgba(8,50,80,.35)';
+  b.beginPath(); b.moveTo(0, H);
+  for (let x = 0; x <= W + 40; x += 40) b.lineTo(x, H * .72 - Math.abs(Math.sin(x / 210)) * H * .12 - r() * 12);
+  b.lineTo(W, H); b.fill();
+  // Sand
+  const sy = H * .85;
+  b.beginPath(); b.moveTo(0, H); b.lineTo(0, sy);
+  for (let x = 0; x <= W + 20; x += 20) b.lineTo(x, sy + Math.sin(x / 130) * 9 + Math.sin(x / 47) * 4);
+  b.lineTo(W, H); b.closePath();
+  const sg = b.createLinearGradient(0, sy - 10, 0, H);
+  sg.addColorStop(0, '#ecd79f'); sg.addColorStop(1, '#b8955a');
+  b.fillStyle = sg; b.fill();
+  for (let i = 0; i < W * (H - sy) / 180; i++) {
+    b.fillStyle = `rgba(110,80,35,${r() * .35})`;
+    b.fillRect(r() * W, sy + 8 + r() * (H - sy), 2, 2);
+  }
+  // Steine
+  for (let i = 0; i < 6; i++) {
+    const x = r() * W, w = H * (.04 + r() * .07), h = w * (.55 + r() * .3), y = sy + 6 + r() * (H - sy) * .4;
+    const rg = b.createLinearGradient(0, y - h, 0, y + h * .3);
+    rg.addColorStop(0, '#9aa3ab'); rg.addColorStop(1, '#4f5961');
+    b.fillStyle = rg; b.beginPath(); b.ellipse(x, y, w, h, 0, Math.PI, 0); b.fill();
+  }
+  // Schatzkiste
+  drawChest(b, W * .9, sy + (H - sy) * .3, Math.min(W, H) * .1);
+  // Sprudelstein
+  b.fillStyle = '#5b6770'; b.beginPath(); b.ellipse(W * .12, sy + 6, H * .025, H * .014, 0, 0, Math.PI * 2); b.fill();
+
+  // Pflanzen
+  plants = [];
+  const n = Math.max(6, Math.round(W / 85));
+  const cols = ['#2f8f46', '#3fae55', '#1f6e3a', '#5cbf5a', '#4a9d3c'];
+  for (let i = 0; i < n; i++) {
+    const strands = [];
+    const k = 2 + Math.floor(r() * 3);
+    for (let s = 0; s < k; s++) strands.push({ dx: (r() - .5) * 26, h: H * (.14 + r() * .34), w: 5 + r() * 7, ph: r() * 6.28 });
+    plants.push({ x: r() * W, col: cols[Math.floor(r() * cols.length)], strands, front: i % 3 === 0 });
+  }
+}
+
+function drawChest(b, x, y, s) {
+  b.save(); b.translate(x, y);
+  b.fillStyle = '#7a4a1e'; b.fillRect(-s * .6, -s * .35, s * 1.2, s * .6);
+  b.fillStyle = '#93602c'; b.beginPath(); b.moveTo(-s * .62, -s * .35);
+  b.quadraticCurveTo(0, -s * .85, s * .62, -s * .35); b.closePath(); b.fill();
+  b.fillStyle = '#e0b43a';
+  b.fillRect(-s * .62, -s * .38, s * 1.24, s * .07);
+  b.fillRect(-s * .08, -s * .38, s * .16, s * .3);
+  b.fillRect(-s * .5, -s * .35, s * .07, s * .6); b.fillRect(s * .43, -s * .35, s * .07, s * .6);
+  b.fillStyle = '#ffe680'; b.beginPath(); b.arc(0, -s * .22, s * .05, 0, Math.PI * 2); b.fill();
+  b.restore();
+}
+
+function drawPlant(p, calm) {
+  const base = H * .86;
+  ctx.strokeStyle = p.col; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const s of p.strands) {
+    ctx.lineWidth = s.w;
+    ctx.beginPath(); ctx.moveTo(p.x + s.dx, base);
+    const seg = 9;
+    for (let i = 1; i <= seg; i++) {
+      const f = i / seg;
+      const sway = Math.sin(t * (calm ? 1.0 : 2.2) + s.ph + f * 2.6) * (calm ? 16 : 26) * f;
+      ctx.lineTo(p.x + s.dx + sway, base - s.h * f);
+    }
+    ctx.stroke();
+  }
+}
+
+/* ---------- Blasen ---------- */
+let bubbles = [];
+function addBubble(x, y) { bubbles.push({ x, y, r: 2 + Math.random() * 5, v: 40 + Math.random() * 50, ph: Math.random() * 6.28 }); }
+function updBubbles(dt) {
+  if (Math.random() < dt * 7) addBubble(W * .12 + (Math.random() - .5) * 12, H * .85);
+  if (Math.random() < dt * 1.2) addBubble(Math.random() * W, H * .88);
+  for (const b of bubbles) { b.y -= b.v * dt; b.x += Math.sin(t * 3 + b.ph) * .5; }
+  bubbles = bubbles.filter(b => b.y > -20);
+}
+function drawBubbles() {
+  for (const b of bubbles) {
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,.15)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.beginPath(); ctx.arc(b.x - b.r * .35, b.y - b.r * .35, b.r * .25, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fill();
+  }
+}
+function celebrate() { for (let i = 0; i < 120; i++) addBubble(Math.random() * W, H * (.8 + Math.random() * .2)); }
+
+/* ---------- Fische ---------- */
+const PALS = [
+  { body: '#ff8a1f', belly: '#ffd08a', fin: '#ff6a00', pat: 'stripes', pc: '#ffffff' },
+  { body: '#2f6fe0', belly: '#9cc0ff', fin: '#ffd23f', pat: 'none' },
+  { body: '#ffd23f', belly: '#fff3b0', fin: '#ffb000', pat: 'none' },
+  { body: '#e83e5c', belly: '#ffb8c4', fin: '#b5173a', pat: 'spots', pc: 'rgba(255,255,255,.55)' },
+  { body: '#9b5de5', belly: '#dbc2ff', fin: '#f15bb5', pat: 'stripes', pc: '#ffd23f' },
+  { body: '#2ec4b6', belly: '#c2fff8', fin: '#0f8b80', pat: 'spots', pc: 'rgba(255,255,255,.7)' },
+  { body: '#ff7aa2', belly: '#ffd6e3', fin: '#ff4d82', pat: 'none' },
+  { body: '#7bd389', belly: '#dcffdf', fin: '#3a9a4a', pat: 'stripes', pc: '#1e5e2a' },
+];
+const GOLD = { body: '#ffc400', belly: '#fff3a6', fin: '#ff9f00', pat: 'shine', pc: '#ffffff' };
+const SHAPES = ['normal', 'normal', 'round', 'long'];
+let fish = [];
+const liveCount = () => fish.filter(f => !f.leaving).length;
+
+function makeFish(enter) {
+  const n = liveCount() + 1;
+  const golden = n % 10 === 0;
+  const dir = Math.random() < .5 ? 1 : -1;
+  const L = H * (golden ? .12 : .055 + Math.random() * .04);
+  const f = {
+    pal: golden ? GOLD : PALS[Math.floor(Math.random() * PALS.length)],
+    shape: golden ? 'round' : SHAPES[Math.floor(Math.random() * SHAPES.length)],
+    L, dir, face: dir, golden,
+    speed: (35 + Math.random() * 45) * Math.max(.7, W / 1100),
+    y: H * (.15 + Math.random() * .58), ph: Math.random() * 6.28, leaving: false,
+    spots: Array.from({ length: 5 }, () => [Math.random() * 1.4 - .7, Math.random() * 1.2 - .6, .05 + Math.random() * .06])
+  };
+  f.ty = f.y;
+  f.x = enter ? (dir > 0 ? -L * 1.5 : W + L * 1.5) : L + Math.random() * (W - 2 * L);
+  fish.push(f);
+}
+function removeFish() {
+  for (let i = fish.length - 1; i >= 0; i--) {
+    const f = fish[i];
+    if (!f.leaving) { f.leaving = true; f.dir = f.x < W / 2 ? -1 : 1; return true; }
+  }
+  return false;
+}
+
+function updFish(dt) {
+  for (const f of fish) {
+    let mult = 1;
+    if (f.leaving) mult = 3.4;
+    else {
+      if (status === 'y') mult = 1.5;
+      if (status === 'r') { mult = 2.4; f.ty = H * .7 + Math.sin(f.ph * .1 + f.L) * H * .06; }
+      else if (Math.random() < dt * .25) f.ty = H * (.12 + Math.random() * .6);
+      if (f.x < f.L && f.dir < 0) f.dir = 1;
+      if (f.x > W - f.L && f.dir > 0) f.dir = -1;
+      if (Math.random() < dt * .04) f.dir *= -1;
+    }
+    f.face += (f.dir - f.face) * Math.min(1, dt * 4);
+    f.x += f.dir * f.speed * mult * dt * Math.max(.15, Math.abs(f.face));
+    f.y += (f.ty - f.y) * Math.min(1, dt * .8 * mult);
+    f.ph += dt * (4 + mult * 3);
+  }
+  fish = fish.filter(f => !(f.leaving && (f.x < -f.L * 2.5 || f.x > W + f.L * 2.5)));
+}
+
+function drawFish(f) {
+  const L = f.L, p = f.pal;
+  const rx = L * (f.shape === 'long' ? .56 : .45);
+  const ry = L * (f.shape === 'round' ? .36 : f.shape === 'long' ? .17 : .26);
+  const wag = Math.sin(f.ph) * L * .12;
+  ctx.save();
+  ctx.translate(f.x, f.y);
+  ctx.scale(f.face, 1);
+  ctx.rotate(clamp((f.ty - f.y) * .004, -.35, .35));
+  // Schwanz
+  ctx.fillStyle = p.fin;
+  ctx.beginPath(); ctx.moveTo(-rx * .85, 0);
+  ctx.lineTo(-rx - L * .32, -L * .22 + wag);
+  ctx.quadraticCurveTo(-rx - L * .2, wag, -rx - L * .32, L * .22 + wag);
+  ctx.closePath(); ctx.fill();
+  // Rückenflosse
+  ctx.beginPath(); ctx.moveTo(-rx * .45, -ry * .8);
+  ctx.quadraticCurveTo(-rx * .05, -ry - L * .2, rx * .35, -ry * .85);
+  ctx.closePath(); ctx.fill();
+  // Bauchflosse
+  ctx.beginPath(); ctx.moveTo(-rx * .3, ry * .8);
+  ctx.quadraticCurveTo(-rx * .1, ry + L * .1, rx * .15, ry * .85);
+  ctx.closePath(); ctx.fill();
+  // Körper
+  const g = ctx.createLinearGradient(0, -ry, 0, ry);
+  g.addColorStop(0, p.body); g.addColorStop(1, p.belly);
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+  // Muster
+  if (p.pat !== 'none') {
+    ctx.save(); ctx.clip();
+    if (p.pat === 'stripes') {
+      for (const sx of [rx * .3, -rx * .2, -rx * .7]) {
+        ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(sx - L * .065, -ry, L * .13, ry * 2);
+        ctx.fillStyle = p.pc; ctx.fillRect(sx - L * .05, -ry, L * .1, ry * 2);
+      }
+    } else if (p.pat === 'spots') {
+      ctx.fillStyle = p.pc;
+      for (const s of f.spots) { ctx.beginPath(); ctx.arc(s[0] * rx, s[1] * ry, s[2] * L, 0, Math.PI * 2); ctx.fill(); }
+    } else if (p.pat === 'shine') {
+      const a = .35 + .3 * Math.sin(t * 3);
+      ctx.fillStyle = `rgba(255,255,255,${a})`;
+      ctx.beginPath(); ctx.ellipse(rx * .05, -ry * .45, rx * .55, ry * .2, -.2, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  // Brustflosse
+  ctx.save(); ctx.globalAlpha = .85; ctx.fillStyle = p.fin;
+  ctx.translate(rx * .1, ry * .25); ctx.rotate(.5 + Math.sin(f.ph * 1.3) * .3);
+  ctx.beginPath(); ctx.ellipse(-L * .06, 0, L * .12, L * .05, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  // Auge
+  const ex = rx * .58, ey = -ry * .22, er = Math.max(3, L * .075);
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ex, ey, er, 0, Math.PI * 2); ctx.fill();
+  const scared = status === 'r' && !paused;
+  ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(ex + er * .15, ey, er * (scared ? .32 : .58), 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ex + er * .3, ey - er * .3, er * .2, 0, Math.PI * 2); ctx.fill();
+  // Mund
+  ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = Math.max(1, L * .015);
+  ctx.beginPath();
+  if (scared) ctx.arc(rx * .9, ry * .12, L * .03, 0, Math.PI * 2);
+  else ctx.arc(rx * .82, ry * .05, L * .045, .2, 1.3);
+  ctx.stroke();
+  // Krone für den goldenen Fisch
+  if (f.golden) {
+    ctx.fillStyle = '#ffe14d'; ctx.strokeStyle = '#c98a00'; ctx.lineWidth = 1.5;
+    const cx = rx * .1, cy = -ry - L * .12, w = L * .2;
+    ctx.beginPath(); ctx.moveTo(cx - w, cy); ctx.lineTo(cx - w, cy - w * .7); ctx.lineTo(cx - w * .5, cy - w * .35);
+    ctx.lineTo(cx, cy - w * .9); ctx.lineTo(cx + w * .5, cy - w * .35); ctx.lineTo(cx + w, cy - w * .7); ctx.lineTo(cx + w, cy);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ---------- Mikrofon ---------- */
+let analyser = null, buf = null, audioCtx = null;
+let level = 0, rawLevel = 0;
+
+async function startMic() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    throw new Error('https');
+  }
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+  });
+  const AC = window.AudioContext || window.webkitAudioContext;
+  audioCtx = new AC();
+  await audioCtx.resume();
+  const src = audioCtx.createMediaStreamSource(stream);
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 2048;
+  buf = new Float32Array(analyser.fftSize);
+  src.connect(analyser);
+}
+
+function readLevel() {
+  if (!analyser) return 0;
+  analyser.getFloatTimeDomainData(buf);
+  let s = 0;
+  for (let i = 0; i < buf.length; i++) s += buf[i] * buf[i];
+  const rms = Math.sqrt(s / buf.length);
+  const db = 20 * Math.log10(rms + 1e-9);          // ca. -90 (Stille) … 0 (Maximum)
+  return clamp((db + 75) / 65 * 100, 0, 100);      // auf 0–100 abbilden
+}
+
+/* ---------- Spiel-Logik ---------- */
+let status = 'g', paused = false, running = false;
+let quiet = 0, loud = 0, murk = 0, wasFull = false;
+let calibrating = 0, calSum = 0, calN = 0;
+
+function fmt(s) { s = Math.max(0, Math.ceil(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function saveCount() { store('aq-count', liveCount()); }
+
+function logic(dt) {
+  rawLevel = readLevel();
+  level += (rawLevel - level) * Math.min(1, dt * (rawLevel > level ? 12 : 2.5));   // schnell hoch, langsam runter
+
+  if (calibrating > 0) {
+    calibrating -= dt; calSum += rawLevel; calN++;
+    if (calibrating <= 0) finishCalib();
+  }
+
+  if (!running) { status = 'g'; return; }
+  if (paused) { status = 'p'; return; }
+
+  status = level >= S.red ? 'r' : level >= S.yellow ? 'y' : 'g';
+  const n = liveCount();
+  const full = n >= S.max;
+
+  if (status === 'g') {
+    loud = 0;
+    if (!full) {
+      quiet += dt;
+      if (quiet >= S.secs) { quiet = 0; makeFish(true); saveCount(); }
+    }
+  } else if (status === 'r') {
+    quiet = 0;
+    if (S.penalty && n > 0) {
+      loud += dt;
+      if (loud >= S.penaltySecs) { loud = 0; removeFish(); saveCount(); }
+    }
+  } else {
+    loud = Math.max(0, loud - dt);
+  }
+
+  const nowFull = liveCount() >= S.max;
+  if (nowFull && !wasFull) celebrate();
+  wasFull = nowFull;
+}
+
+/* ---------- HUD ---------- */
+const lights = { r: document.querySelector('.l.r'), y: document.querySelector('.l.y'), g: document.querySelector('.l.g') };
+function hud() {
+  for (const k in lights) lights[k].classList.toggle('on', running && !paused && status === k);
+  const n = liveCount();
+  $('count').textContent = '🐟 ' + n + ' / ' + S.max;
+  $('lvl').style.width = level + '%';
+  $('pLvl').style.width = level + '%';
+  let msg, prog = 0, col = 'linear-gradient(90deg,#34c759,#8ff0a4)';
+  if (!running) msg = 'Mikrofon starten, um loszulegen';
+  else if (paused) msg = '⏸ Pausiert';
+  else if (n >= S.max) { msg = '🎉 Das Aquarium ist voll – großartig!'; prog = 100; }
+  else if (status === 'g') { msg = 'Schön leise! Nächster Fisch in ' + fmt(S.secs - quiet); prog = quiet / S.secs * 100; }
+  else if (status === 'y') { msg = 'Etwas leiser … die Zeit läuft gerade nicht'; prog = quiet / S.secs * 100; col = '#ffcc00'; }
+  else {
+    if (S.penalty && n > 0) { msg = 'Zu laut! Gleich schwimmt ein Fisch weg …'; prog = loud / S.penaltySecs * 100; col = '#ff3b30'; }
+    else { msg = 'Zu laut! Die Fische verstecken sich'; prog = 0; }
+  }
+  $('msg').textContent = msg;
+  const pr = $('prog'); pr.style.width = prog + '%'; pr.style.background = col;
+  $('pauseBtn').textContent = paused ? '▶️' : '⏸';
+}
+
+function placeMarks() {
+  for (const [id, v] of [['bY', S.yellow], ['bR', S.red], ['pY', S.yellow], ['pR', S.red]]) $(id).style.left = v + '%';
+}
+
+/* ---------- Haupt-Schleife ---------- */
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.1, (now - last) / 1000); last = now; t += dt;
+  logic(dt);
+  updFish(dt); updBubbles(dt);
+
+  ctx.drawImage(bg, 0, 0, W, H);
+  // Lichtstrahlen
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 5; i++) {
+    const x = W * (i + .5) / 5 + Math.sin(t * .2 + i) * 40;
+    ctx.fillStyle = `rgba(255,255,255,${.035 + .025 * Math.sin(t * .5 + i * 2)})`;
+    ctx.beginPath(); ctx.moveTo(x - 30, 0); ctx.lineTo(x + 30, 0); ctx.lineTo(x + 150, H * .86); ctx.lineTo(x + 40, H * .86); ctx.fill();
+  }
+  ctx.restore();
+
+  const calm = status !== 'r';
+  for (const p of plants) if (!p.front) drawPlant(p, calm);
+  for (const f of fish) drawFish(f);
+  for (const p of plants) if (p.front) drawPlant(p, calm);
+  drawBubbles();
+
+  // Trübung & roter Rand bei Lärm
+  const tgt = status === 'r' ? .35 : status === 'y' ? .14 : 0;
+  murk += (tgt - murk) * Math.min(1, dt * 2);
+  if (murk > .01) { ctx.fillStyle = `rgba(70,80,60,${murk * .6})`; ctx.fillRect(0, 0, W, H); }
+  if (status === 'r') {
+    const a = .3 + .15 * Math.sin(t * 8);
+    const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.max(W, H) * .75);
+    vg.addColorStop(0, 'rgba(255,40,40,0)'); vg.addColorStop(1, `rgba(255,40,40,${a})`);
+    ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  }
+
+  hud();
+  requestAnimationFrame(frame);
+}
+
+/* ---------- Bildschirm wach halten ---------- */
+let wakeLock = null;
+async function keepAwake() {
+  try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) { keepAwake(); if (audioCtx) audioCtx.resume(); }
+});
+
+/* ---------- Bedienung ---------- */
+$('go').addEventListener('click', async () => {
+  $('err').textContent = '';
+  try {
+    await startMic();
+    running = true;
+    $('start').classList.add('hidden');
+    keepAwake();
+  } catch (e) {
+    if (e && e.message === 'https') $('err').textContent = 'Kein Mikrofon-Zugriff möglich. Die Seite muss über https:// geöffnet werden.';
+    else if (e && e.name === 'NotAllowedError') $('err').textContent = 'Zugriff verweigert. In Safari: „aA“ in der Adressleiste → Website-Einstellungen → Mikrofon → Erlauben. Dann neu laden.';
+    else $('err').textContent = 'Mikrofon konnte nicht gestartet werden (' + (e && (e.name || e.message)) + ').';
+  }
+});
+
+$('pauseBtn').addEventListener('click', () => { paused = !paused; quiet = 0; loud = 0; });
+
+$('fsBtn').addEventListener('click', () => {
+  const d = document, el = d.documentElement;
+  const isFs = d.fullscreenElement || d.webkitFullscreenElement;
+  try {
+    if (isFs) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    else (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+  } catch (e) {}
+});
+
+$('setBtn').addEventListener('click', () => { syncUI(); $('settings').classList.remove('hidden'); });
+$('close').addEventListener('click', () => $('settings').classList.add('hidden'));
+
+const sliders = [
+  ['sY', 'yellow', 'vY', v => v], ['sR', 'red', 'vR', v => v],
+  ['sS', 'secs', 'vS', v => v < 60 ? v + ' s' : fmt(v) + ' min'],
+  ['sM', 'max', 'vM', v => v], ['sD', 'penaltySecs', 'vD', v => v + ' s']
+];
+function syncUI() {
+  for (const [id, key, lab, f] of sliders) { $(id).value = S[key]; $(lab).textContent = f(S[key]); }
+  $('sP').checked = S.penalty;
+  $('penRow').style.opacity = S.penalty ? 1 : .4;
+  placeMarks();
+}
+for (const [id, key] of sliders) {
+  $(id).addEventListener('input', e => {
+    S[key] = +e.target.value;
+    if (key === 'yellow' && S.red <= S.yellow) S.red = S.yellow + 1;
+    if (key === 'red' && S.yellow >= S.red) S.yellow = S.red - 1;
+    if (key === 'secs') quiet = Math.min(quiet, S.secs);
+    store('aq-settings', S); syncUI();
+  });
+}
+$('sP').addEventListener('change', e => { S.penalty = e.target.checked; loud = 0; store('aq-settings', S); syncUI(); });
+
+$('plus').addEventListener('click', () => { if (liveCount() < S.max) { makeFish(true); saveCount(); } });
+$('minus').addEventListener('click', () => { removeFish(); saveCount(); });
+$('clear').addEventListener('click', () => {
+  if (confirm('Alle Fische entfernen?')) { for (const f of fish) if (!f.leaving) { f.leaving = true; f.dir = f.x < W / 2 ? -1 : 1; } quiet = 0; saveCount(); }
+});
+
+$('calib').addEventListener('click', () => {
+  if (!analyser) { $('calMsg').textContent = 'Bitte zuerst das Mikrofon starten.'; return; }
+  calibrating = 3; calSum = 0; calN = 0;
+  $('calMsg').textContent = 'Messe … bitte 3 Sekunden ruhig sein.';
+});
+function finishCalib() {
+  const base = calN ? calSum / calN : 20;
+  S.yellow = Math.round(clamp(base + 15, 5, 90));
+  S.red = Math.round(clamp(base + 30, S.yellow + 5, 95));
+  store('aq-settings', S); syncUI();
+  $('calMsg').textContent = 'Ruhepegel ' + Math.round(base) + ' → Gelb ab ' + S.yellow + ', Rot ab ' + S.red + '. Bei Bedarf unten feinjustieren.';
+}
+
+/* ---------- Start ---------- */
+window.addEventListener('resize', resize);
+resize();
+const saved = Math.min(load('aq-count', 0) | 0, S.max);
+for (let i = 0; i < saved; i++) makeFish(false);
+wasFull = liveCount() >= S.max;
+syncUI();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
