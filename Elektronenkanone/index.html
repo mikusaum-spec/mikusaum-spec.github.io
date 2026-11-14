@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Schattenkreuzröhre &amp; Elektronenkanone</title>
+<style>
+  :root{
+    --acc:#70AD47; --acc-d:#4f8a2d; --acc-l:#E2EFDA;
+    --ink:#1d2329; --mut:#46525c; --line:#d6dbe0; --bg:#f6f7f8; --card:#fff;
+    --glow:#7dff6a;
+  }
+  *{box-sizing:border-box}
+  :root{color-scheme:light}
+  button,input,select,textarea{color:var(--ink);-webkit-text-fill-color:currentColor}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.45}
+  header{background:#fff;border-bottom:3px solid var(--acc);padding:14px 20px 0}
+  .kopf{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+  h1{font-size:1.45rem;margin:0 0 4px;font-weight:650}
+  .sub{color:var(--mut);font-size:.85rem;text-align:right}
+  nav{display:flex;gap:4px;margin-top:12px;flex-wrap:wrap}
+  nav button{border:1px solid var(--line);border-bottom:none;background:#eef0f2;padding:9px 16px;font:inherit;font-size:.95rem;border-radius:8px 8px 0 0;cursor:pointer;color:var(--mut)}
+  nav button.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+  main{max-width:1250px;margin:0 auto;padding:18px}
+  .tab{display:none}.tab.on{display:block}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}
+  @media(max-width:950px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .card h2{font-size:1.05rem;margin:0 0 10px}
+  .card h3{font-size:.95rem;margin:14px 0 6px}
+  svg{display:block;width:100%;height:auto}
+  .ctrl{margin:12px 0}
+  .ctrl label{display:flex;justify-content:space-between;font-size:.92rem;margin-bottom:4px}
+  .ctrl b{font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--acc)}
+  .switch{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:.92rem;cursor:pointer;user-select:none}
+  .switch input{width:18px;height:18px;accent-color:var(--acc)}
+  .btn{background:var(--acc);color:#fff;border:none;border-radius:7px;padding:8px 14px;font:inherit;font-size:.9rem;cursor:pointer}
+  .btn.sec{background:#eef0f2;color:var(--ink);border:1px solid var(--line)}
+  .btn:hover{filter:brightness(.95)}
+  .btn:disabled{background:#6b7680;color:#fff;cursor:not-allowed;filter:none}
+  .btn.sec:disabled{background:#eef0f2;color:#6b7680;border-color:#c9cfd4}
+  .meter{height:16px;border-radius:8px;background:#e7eaec;overflow:hidden;border:1px solid var(--line)}
+  .meter>div{height:100%;background:linear-gradient(90deg,#b9f0a8,var(--acc));width:0;transition:width .2s}
+  .row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+  .row>*{flex:1 1 260px}
+  table{border-collapse:collapse;width:100%;font-size:.88rem;font-variant-numeric:tabular-nums}
+  th,td{border:1px solid var(--line);padding:4px 8px;text-align:center}
+  th{background:var(--acc-l)}
+  .hint{font-size:.92rem;color:var(--mut)}
+  .auftrag{background:var(--acc-l);border-left:4px solid var(--acc);padding:10px 14px;border-radius:6px;font-size:.92rem}
+  .auftrag ol{margin:6px 0 0 18px;padding:0}
+  .formel{font-family:"Cambria Math","Times New Roman",serif;font-size:1.15rem;text-align:center;margin:8px 0}
+  .res{font-variant-numeric:tabular-nums;font-size:.95rem}
+  .res div{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:4px 0}
+  .steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+  .steps button{flex:1 1 170px;border:1px solid #b8c0c7;background:#fff;color:var(--ink);border-radius:8px;padding:9px 10px;font:inherit;font-size:1rem;cursor:pointer;text-align:left}
+  .steps button.on{border-color:var(--acc);background:var(--acc-l);font-weight:600}
+  .steptext{min-height:96px;font-size:1.02rem;line-height:1.55;margin-top:6px}
+  .bars{display:flex;gap:14px;padding:6px 6px 0}
+  .bar{flex:1;display:flex;flex-direction:column;align-items:center}
+  .track{height:130px;width:60%;display:flex;flex-direction:column-reverse;border-bottom:2px solid #666}
+  .track>div{flex:0 0 auto;width:100%}
+  .track.sum{outline:1px dashed #aaa;outline-offset:1px}
+  .bar span{font-size:.9rem;margin-top:4px;text-align:center;line-height:1.25}
+  .ok{color:#2e7d32;font-weight:600}.no{color:#c62828;font-weight:600}
+  .task{font-size:1.05rem;margin:10px 0}
+  .inp{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .inp input{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:7px;width:200px}
+  .loesung{background:#fafbfb;border:1px dashed var(--line);border-radius:8px;padding:10px 14px;margin-top:10px;display:none}
+  .dstep{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0;transition:opacity .2s}
+  .dstep h3{margin:0 0 8px;font-size:1rem}
+  .dstep .num{display:inline-block;width:26px;height:26px;border-radius:50%;background:#e7eaec;text-align:center;line-height:26px;margin-right:8px;font-size:.9rem}
+  .dstep.wait .chips button,.dstep.wait .opts label,.dstep.wait .dirs button{opacity:.45;cursor:not-allowed}
+  .dstep.locked{opacity:.62;pointer-events:none;background:#fafbfb}
+  .dstep.done{border-color:var(--acc);background:#f8fbf5}
+  .dstep.done .num{background:var(--acc);color:#fff}
+  .dstep .q{font-size:.94rem;margin:6px 0}
+  .chips{display:inline-flex;flex-wrap:wrap;gap:6px;margin:4px 0 0 4px;vertical-align:middle}
+  .chips button{font:inherit;font-size:.98rem;padding:6px 12px;border:1.5px solid #7d8790;border-radius:16px;background:#fff;color:#111;cursor:pointer}
+  .chips button:hover{background:#eef5e9}
+  .chips button.on{background:var(--acc-d);color:#fff;border-color:var(--acc-d)}
+  .chips button:disabled{cursor:default;opacity:.45}
+  .chips button.on:disabled{opacity:1}
+  .opts label{display:flex;gap:8px;align-items:center;margin:4px 0;font-size:.94rem;cursor:pointer}
+  .opts input{width:17px;height:17px;accent-color:var(--acc)}
+  .dbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .fb{margin-top:8px;font-size:.92rem}
+  .tipp{display:none;background:#fff8e1;border-left:4px solid #e6a100;padding:8px 12px;border-radius:6px;margin-top:8px;font-size:.9rem}
+  .after{display:none;margin-top:8px;font-size:.92rem;background:var(--acc-l);padding:8px 12px;border-radius:6px}
+  .dirs{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0}
+  .dirs div{font-size:.93rem}
+  .dirs button{font:inherit;font-size:1.35rem;font-weight:700;line-height:1;width:46px;height:40px;border:1.5px solid #7d8790;background:#fff;color:#111;border-radius:7px;cursor:pointer;margin-left:3px}
+  .dirs button:hover{background:#eef5e9}
+  .dirs button.on{background:var(--acc-d);color:#fff;border-color:var(--acc-d)}
+  .dirs button:disabled{opacity:.45;cursor:default}
+  .dirs button.on:disabled{opacity:1}
+  .dirs div{display:flex;align-items:center;gap:2px;font-size:1rem}
+  .dirs div>span{margin-right:4px;min-width:30px}
+  .chain{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;margin:10px 0}
+  .chain .cb{flex:1 1 150px;border:1.5px solid var(--acc);border-radius:8px;padding:8px 10px;text-align:center;font-size:.92rem;background:#fff}
+  .chain .cb.hl{background:var(--acc-l)}
+  .chain .ca{align-self:center;font-size:1.4rem;color:var(--acc-d)}
+  .sumlist{margin:0;padding:0;list-style:none;font-size:.95rem;font-family:"Cambria Math","Times New Roman",serif}
+  .sumlist li{display:flex;gap:8px;margin:5px 0;padding:3px 6px;border-radius:5px;transition:background 1s}
+  .sumlist li.hint{font-family:inherit}
+  .sumlist li.new{background:#fff3c4}
+  .sumlist .sn{min-width:30px;color:var(--mut);font-family:"Segoe UI",system-ui,sans-serif;font-size:.82rem;padding-top:2px}
+  @media(min-width:951px){#t3 .grid>div:last-child{position:sticky;top:10px;align-self:start}}
+  .sprinter{border:2px solid #e6a100}
+  .sp{display:flex;align-items:center;gap:6px;margin:8px 0;font-size:.93rem;flex-wrap:wrap}
+  .sp label{min-width:110px}
+  .sp input{font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:6px;width:130px}
+  footer{text-align:center;color:var(--mut);font-size:.8rem;padding:16px}
+  sub,sup{font-size:.72em}
+</style>
+</head>
+<body>
+<header>
+  <div class="kopf">
+    <div>
+      <h1>Schattenkreuzröhre &amp; Elektronenkanone</h1>
+      <div class="hint">Wie kann man Elektronen gezielt beschleunigen – und wie schnell werden sie?</div>
+    </div>
+    <div class="sub">Amplonius-Gymnasium Rheinberg · Physik · Claßen</div>
+  </div>
+  <nav>
+    <button class="on" data-tab="t1">1 · Schattenkreuzröhre</button>
+    <button data-tab="t2">2 · Elektronenkanone</button>
+    <button data-tab="t3">3 · Herleitung</button>
+    <button data-tab="t4">4 · Rechentraining</button>
+  </nav>
+</header>
+
+<main>
+<!-- ================= TAB 1 ================= -->
+<section class="tab on" id="t1">
+  <div class="grid">
+    <div class="card">
+      <h2>Seitenansicht der Röhre</h2>
+      <svg id="tube" viewBox="0 0 820 400" aria-label="Schattenkreuzröhre in Seitenansicht">
+        <defs>
+          <radialGradient id="fil" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stop-color="#ffd27a"/><stop offset="1" stop-color="#ff8a00" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="blur6"><feGaussianBlur stdDeviation="6"/></filter>
+          <filter id="blur2"><feGaussianBlur stdDeviation="2"/></filter>
+        </defs>
+        <rect x="0" y="0" width="820" height="400" fill="#1b2026" rx="8"/>
+        <!-- Glas -->
+        <path d="M40,165 L270,165 C350,165 410,45 590,40 C710,37 785,110 790,200 C785,290 710,363 590,360 C410,355 350,235 270,235 L40,235 Z"
+              fill="rgba(170,200,230,.08)" stroke="#9fb3c6" stroke-width="2"/>
+        <!-- Leuchtschirm -->
+        <ellipse id="screenGlow" cx="772" cy="200" rx="16" ry="125" fill="var(--glow)" opacity="0" filter="url(#blur6)"/>
+        <path d="M762,78 C790,140 790,260 762,322" fill="none" stroke="#c9d6c4" stroke-width="5" id="screenLine"/>
+        <!-- Kathode (Heizwendel) -->
+        <circle id="filGlow" cx="85" cy="200" r="26" fill="url(#fil)" opacity="0"/>
+        <polyline id="filament" points="70,200 74,192 78,208 82,192 86,208 90,192 94,208 98,200" fill="none" stroke="#888" stroke-width="2.5"/>
+        <line x1="70" y1="200" x2="20" y2="185" stroke="#aaa" stroke-width="2"/>
+        <line x1="98" y1="200" x2="20" y2="215" stroke="#aaa" stroke-width="2"/>
+        <!-- Anode -->
+        <rect x="222" y="168" width="10" height="23" fill="#b9a36a"/>
+        <rect x="222" y="209" width="10" height="23" fill="#b9a36a"/>
+        <line x1="227" y1="232" x2="227" y2="250" stroke="#aaa" stroke-width="2"/>
+        <!-- Malteserkreuz (seitlich) -->
+        <rect x="537" y="160" width="6" height="80" fill="#c9b27a"/>
+        <line x1="540" y1="240" x2="540" y2="352" stroke="#aaa" stroke-width="2"/>
+        <g id="particles"></g>
+        <g id="hits"></g>
+        <!-- Polungs-Beschriftung -->
+        <text id="lblK" x="62" y="262" fill="#e6e6e6" font-size="14">Kathode (−)</text>
+        <text id="lblA" x="196" y="268" fill="#e6e6e6" font-size="14">Anode (+)</text>
+        <text x="500" y="378" fill="#e6e6e6" font-size="14">Malteserkreuz</text>
+        <text x="700" y="378" fill="#e6e6e6" font-size="14">Leuchtschirm</text>
+      </svg>
+      <div class="auftrag" style="margin-top:12px">
+        <b>Beobachtungsaufträge</b>
+        <ol>
+          <li>Stelle zuerst nur die Heizspannung U<sub>H</sub> ein (U<sub>B</sub> = 0). Was beobachtest du an der Kathode und am Schirm?</li>
+          <li>Erhöhe nun schrittweise die Beschleunigungsspannung U<sub>B</sub> und beobachte den Schirm.</li>
+          <li>Formuliere den Zusammenhang zwischen U<sub>B</sub> und der Helligkeit des Schirms als Je-desto-Satz.</li>
+          <li>Verändere bei fester Beschleunigungsspannung die Heizspannung U<sub>H</sub>. Beschreibe und erkläre deine Beobachtung.</li>
+          <li>Polung umkehren: Was passiert? Was folgt daraus über die Ladung der „Kathodenstrahlen“?</li>
+          <li>Erkläre, warum auf dem Schirm ein scharfer Schatten des Kreuzes entsteht.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Bedienung</h2>
+        <div class="ctrl">
+          <label><span>Heizspannung U<sub>H</sub></span> <b id="uhOut">0,0 V</b></label>
+          <input type="range" id="uh" min="0" max="6.3" step="0.1" value="0">
+          <div class="hint" style="display:flex;justify-content:space-between"><span>0 V</span><span>6,3 V</span></div>
+        </div>
+        <div class="ctrl">
+          <label><span>Beschleunigungsspannung U<sub>B</sub></span> <b id="uOut">0 V</b></label>
+          <input type="range" id="u" min="0" max="5000" step="50" value="0">
+          <div class="hint" style="display:flex;justify-content:space-between"><span>0 kV</span><span>5 kV</span></div>
+        </div>
+        <label class="switch"><input type="checkbox" id="rev"><span>Polung von U<sub>B</sub> umkehren</span></label>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>Blick auf den Leuchtschirm</h2>
+        <svg viewBox="0 0 300 300" aria-label="Frontansicht des Schirms">
+          <defs>
+            <radialGradient id="scr" cx="50%" cy="50%" r="50%">
+              <stop offset="0" stop-color="#b8ff9e"/><stop offset=".75" stop-color="#6be04f"/><stop offset="1" stop-color="#3c9a2b"/>
+            </radialGradient>
+          </defs>
+          <rect width="300" height="300" fill="#1b2026" rx="8"/>
+          <circle cx="150" cy="150" r="132" fill="#2a2f2b" stroke="#566" stroke-width="3"/>
+          <circle id="frontGlow" cx="150" cy="150" r="128" fill="url(#scr)" opacity="0"/>
+          <g id="cross" fill="#2a2f2b"></g>
+        </svg>
+        <div style="margin-top:10px;font-size:.92rem">Helligkeit (relativ): <b id="bOut">0 %</b></div>
+        <div class="meter"><div id="bBar"></div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 2 ================= -->
+<section class="tab" id="t2">
+  <div class="grid">
+    <div class="card">
+      <h2>Aufbau und Funktion der Elektronenkanone</h2>
+      <div class="steps">
+        <button class="on" data-step="0">① Glühelektrischer Effekt</button>
+        <button data-step="1">② Beschleunigung im E-Feld</button>
+        <button data-step="2">③ Austritt durch die Anode</button>
+        <button data-step="3">④ Energiebilanz</button>
+      </div>
+      <svg id="gun" viewBox="0 0 820 380" aria-label="Elektronenkanone">
+        <rect width="820" height="380" fill="#fff"/>
+        <!-- Hervorhebung -->
+        <rect id="hl" x="0" y="0" width="0" height="0" fill="rgba(112,173,71,.12)" stroke="var(--acc)" stroke-width="2" stroke-dasharray="6 4" rx="8"/>
+        <!-- Feldlinien -->
+        <g id="field"></g>
+        <!-- Kathode -->
+        <circle id="gFilGlow" cx="170" cy="190" r="34" fill="url(#fil)" opacity="0"/>
+        <polyline points="170,150 160,160 180,170 160,180 180,190 160,200 180,210 160,220 170,230" fill="none" stroke="#c0392b" stroke-width="3" id="gFil"/>
+        <!-- Anode -->
+        <rect x="560" y="70" width="12" height="105" fill="#b9a36a" stroke="#8a7a45"/>
+        <rect x="560" y="205" width="12" height="105" fill="#b9a36a" stroke="#8a7a45"/>
+        <!-- Leitungen Heizkreis -->
+        <polyline points="170,150 170,120 110,120 110,320 140,320" fill="none" stroke="#333" stroke-width="2"/>
+        <polyline points="170,230 170,320 160,320" fill="none" stroke="#333" stroke-width="2"/>
+        <line x1="140" y1="306" x2="140" y2="334" stroke="#333" stroke-width="3"/>
+        <line x1="150" y1="312" x2="150" y2="328" stroke="#333" stroke-width="6"/>
+        <line x1="150" y1="320" x2="160" y2="320" stroke="#333" stroke-width="2"/>
+        <text x="96" y="356" font-size="19" fill="#111">Heizspannung U<tspan baseline-shift="sub" font-size="14">H</tspan></text>
+        <!-- Leitungen Beschleunigungskreis -->
+        <polyline points="170,120 170,40 355,40" fill="none" stroke="#333" stroke-width="2"/>
+        <polyline points="385,40 566,40 566,70" fill="none" stroke="#333" stroke-width="2"/>
+        <line x1="355" y1="26" x2="355" y2="54" stroke="#333" stroke-width="6"/>
+        <line x1="365" y1="20" x2="365" y2="60" stroke="#333" stroke-width="3"/>
+        <line x1="375" y1="26" x2="375" y2="54" stroke="#333" stroke-width="6"/>
+        <line x1="385" y1="20" x2="385" y2="60" stroke="#333" stroke-width="3"/>
+        <text x="338" y="16" font-size="15" fill="#c62828">−</text>
+        <text x="390" y="16" font-size="15" fill="#c62828">+</text>
+        <text x="420" y="30" font-size="19" fill="#111">Beschleunigungsspannung U<tspan baseline-shift="sub" font-size="14">B</tspan> = <tspan id="gU">0 V</tspan></text>
+        <!-- Labels -->
+        <text x="12" y="106" font-size="19" fill="#111">Glühkathode (−)</text>
+        <text x="592" y="326" font-size="19" fill="#111">Anode (+) mit Loch</text>
+        <text x="290" y="350" font-size="19" fill="#3d6b22" id="lblE" font-weight="600">homogenes elektrisches Feld E</text>
+        <g id="gParticles"></g>
+        <!-- Verfolgtes Elektron -->
+        <g id="tracked" opacity="0">
+          <circle r="9" fill="none" stroke="#e6a100" stroke-width="2.5"/>
+          <line id="vArrow" x1="0" y1="0" x2="0" y2="0" stroke="#e6a100" stroke-width="3" marker-end="url(#arr)"/>
+        </g>
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#e6a100"/></marker>
+          <marker id="arrG" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4f8a2d"/></marker>
+          <marker id="arrF" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 z" fill="#4f8a2d"/></marker>
+          <marker id="arrR" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#c62828"/></marker>
+        </defs>
+        <text x="630" y="242" font-size="18" fill="#111">Elektronenstrahl</text>
+        <text x="630" y="264" font-size="16" fill="#333">(v = konstant)</text>
+      </svg>
+      <div class="steptext" id="stepText"></div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Spannungen einstellen</h2>
+        <div class="ctrl">
+          <label><span>Heizspannung U<sub>H</sub></span> <b id="uh2Out">0,0 V</b></label>
+          <input type="range" id="uh2" min="0" max="6.3" step="0.1" value="0">
+          <div class="hint" style="display:flex;justify-content:space-between"><span>0 V</span><span>6,3 V</span></div>
+        </div>
+        <div class="ctrl">
+          <label><span>Beschleunigungsspannung U<sub>B</sub></span> <b id="u2Out">0 V</b></label>
+          <input type="range" id="u2" min="0" max="5000" step="50" value="0">
+          <div class="hint" style="display:flex;justify-content:space-between"><span>0 kV</span><span>5 kV</span></div>
+        </div>
+        <label class="switch"><input type="checkbox" id="track" checked><span>ein Elektron verfolgen (gelb)</span></label>
+        <h3>Energie des verfolgten Elektrons</h3>
+        <div class="bars">
+          <div class="bar"><div class="track"><div id="barEpot" style="background:#9fc5e8;height:0"></div></div><span>elektrische<br>Energie</span></div>
+          <div class="bar"><div class="track"><div id="barEkin" style="background:var(--acc);height:0"></div></div><span>kinetische<br>Energie</span></div>
+          <div class="bar"><div class="track sum"><div id="sumEkin" style="background:var(--acc);height:0"></div><div id="sumEpot" style="background:#9fc5e8;height:0"></div></div><span><b>Summe</b><br>(Gesamtenergie)</span></div>
+        </div>
+        <div class="hint" style="margin-top:6px">Summe bleibt konstant: Die elektrische Energie e·U<sub>B</sub> wird vollständig in Bewegungsenergie umgewandelt.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 3 ================= -->
+<section class="tab" id="t3">
+  <div class="grid">
+    <div class="card">
+      <h2>Herleitung: Wie schnell wird das Elektron?</h2>
+      <p class="hint" style="margin-top:0">Ein Elektron startet an der Kathode in Ruhe und wird bis zur Anode (Abstand d) durch die Spannung U<sub>B</sub> beschleunigt. Zeichne zuerst die Kräfte ein und leite dann seine Endgeschwindigkeit v über die <b>Energieerhaltung</b> her. Löse die Schritte nacheinander – bei Bedarf helfen dir die Tipps.</p>
+      <div id="deriv"></div>
+      <div class="card sprinter" style="margin-top:18px">
+        <h2>★ Sprinteraufgabe</h2>
+        <p style="margin-top:0;font-size:.93rem">Darf man die Gewichtskraft auf das Elektron wirklich vernachlässigen? <b>Vergleiche</b> die Gewichtskraft mit der elektrischen Kraft.</p>
+        <div class="hint" style="font-size:.88rem">Gegeben: m<sub>e</sub> = 9,109 · 10<sup>−31</sup> kg; g = 9,81 N/kg; e = 1,602 · 10<sup>−19</sup> C; U<sub>B</sub> = 2,0 kV; d = 4,0 cm</div>
+        <div class="sp"><label>a) F<sub>G</sub> = </label><input id="sp1" placeholder="z. B. 1,2e-30"><span>N</span><b id="sp1f"></b></div>
+        <div class="sp"><label>b) F<sub>el</sub> = </label><input id="sp2" placeholder=""><span>N</span><b id="sp2f"></b></div>
+        <div class="sp"><label>c) F<sub>el</sub> / F<sub>G</sub> = </label><input id="sp3" placeholder=""><span></span><b id="sp3f"></b></div>
+        <div class="row" style="gap:8px;margin-top:8px">
+          <button class="btn" id="spCheck">Prüfen</button>
+          <button class="btn sec" id="spTip">Tipp</button>
+          <button class="btn sec" id="spSol">Lösung</button>
+        </div>
+        <div class="tipp" id="spTipBox"></div>
+        <div class="loesung" id="spSolBox">
+          a) F<sub>G</sub> = m<sub>e</sub> · g = 9,109 · 10<sup>−31</sup> kg · 9,81 N/kg ≈ <b>8,94 · 10<sup>−30</sup> N</b><br>
+          b) E = U<sub>B</sub>/d = 2000 V / 0,040 m = 5,0 · 10<sup>4</sup> V/m;<br>
+          &nbsp;&nbsp;&nbsp; F<sub>el</sub> = e · E = 1,602 · 10<sup>−19</sup> C · 5,0 · 10<sup>4</sup> V/m ≈ <b>8,01 · 10<sup>−15</sup> N</b><br>
+          c) F<sub>el</sub> / F<sub>G</sub> ≈ <b>9,0 · 10<sup>14</sup></b><br>
+          <b>Fazit:</b> Die elektrische Kraft ist rund eine Billiarde Mal größer als die Gewichtskraft. F<sub>G</sub> ist daher völlig vernachlässigbar – das Elektron fliegt praktisch geradlinig.
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h2>Deine Herleitung</h2>
+        <ul id="summary" class="sumlist"><li class="hint">Hier baut sich deine Herleitung Schritt für Schritt auf.</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TAB 4 ================= -->
+<section class="tab" id="t4">
+  <div class="grid">
+    <div class="card">
+      <h2>Rechentraining</h2>
+      <p class="hint">Rechne mit e = 1,602 · 10<sup>−19</sup> C und m<sub>e</sub> = 9,109 · 10<sup>−31</sup> kg. Gib das Ergebnis z. B. als <b>1,88e7</b> oder <b>1,88·10^7</b> ein. Toleranz: ±2 %.</p>
+      <div class="task" id="taskText"></div>
+      <div class="inp">
+        <input id="ans" placeholder="Ergebnis" autocomplete="off"> <span id="ansUnit"></span>
+        <button class="btn" id="check">Prüfen</button>
+        <button class="btn sec" id="showSol">Lösungsweg</button>
+        <button class="btn sec" id="next">Neue Aufgabe</button>
+      </div>
+      <div id="feedback" style="margin-top:10px"></div>
+      <div class="loesung" id="sol"></div>
+    </div>
+    <div class="card">
+      <h2>Fortschritt</h2>
+      <div class="res">
+        <div><span>richtig gelöst</span><b id="scOk">0</b></div>
+        <div><span>bearbeitet</span><b id="scAll">0</b></div>
+      </div>
+      <h3>Aufgabentypen</h3>
+      <label class="switch"><input type="checkbox" class="typ" value="v" checked><span>U<sub>B</sub> gegeben → v berechnen</span></label>
+      <label class="switch"><input type="checkbox" class="typ" value="u" checked><span>v gegeben → U<sub>B</sub> berechnen</span></label>
+      <label class="switch"><input type="checkbox" class="typ" value="e" checked><span>U<sub>B</sub> gegeben → E<sub>kin</sub> in J berechnen</span></label>
+    </div>
+  </div>
+</section>
+</main>
+<footer>Modell: klassische Rechnung (nicht-relativistisch), gut gültig für U<sub>B</sub> ≲ 10 kV. Helligkeit des Schirms vereinfacht modelliert.</footer>
+
+<script>
+const E = 1.602e-19, ME = 9.109e-31, C = 2.998e8, UMAX = 5000;
+const $ = id => document.getElementById(id);
+const NS = "http://www.w3.org/2000/svg";
+const mk = (tag, attrs) => { const el = document.createElementNS(NS, tag); for (const k in attrs) el.setAttribute(k, attrs[k]); return el; };
+const vOf = U => Math.sqrt(2 * E * U / ME);
+function sci(x, d = 2) {
+  if (x === 0) return "0";
+  let ex = Math.floor(Math.log10(Math.abs(x)));
+  let m = x / Math.pow(10, ex);
+  if (Math.abs(+m.toFixed(d)) >= 10) { m /= 10; ex++; }
+  return m.toFixed(d).replace(".", ",") + " · 10<sup>" + String(ex).replace("-", "−") + "</sup>";
+}
+const de = (x, d = 0) => x.toFixed(d).replace(".", ",");
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.id === b.dataset.tab));
+});
+
+/* ---------- TAB 1: Schattenkreuzröhre ---------- */
+const U0 = 250; // Schwelle, ab der der Leuchtstoff sichtbar leuchtet
+// Emissionsfaktor der Glühkathode: erst ab ca. 3 V glüht der Draht ausreichend
+function heatF() {
+  const uh = +$("uh").value;
+  return uh <= 3 ? 0 : Math.min(1, Math.pow((uh - 3) / 3.3, 1.5));
+}
+function brightness() {
+  const g = heatF();
+  if (g === 0 || $("rev").checked) return 0;
+  const U = +$("u").value;
+  if (U <= U0) return 0;
+  return g * Math.pow((U - U0) / (UMAX - U0), 1.3);
+}
+// Malteserkreuz-Schatten (Frontansicht)
+(function buildCross() {
+  const g = $("cross");
+  for (let k = 0; k < 4; k++) {
+    g.appendChild(mk("polygon", { points: "142,138 124,66 150,80 176,66 158,138", transform: `rotate(${k * 90} 150 150)` }));
+  }
+  g.appendChild(mk("rect", { x: 138, y: 138, width: 24, height: 24 }));
+})();
+
+let parts = [], hits = [], spawnAcc = 0;
+const KX = 98, AX = 227, CRX = 540, SX = 772;
+function updateT1Labels() {
+  const U = +$("u").value;
+  $("uOut").textContent = U.toLocaleString("de-DE") + " V";
+  const rev = $("rev").checked;
+  $("lblK").textContent = rev ? "Kathode (+)" : "Kathode (−)";
+  $("lblA").textContent = rev ? "Anode (−)" : "Anode (+)";
+  const uh = +$("uh").value, heat = heatF() > 0;
+  $("uhOut").textContent = uh.toFixed(1).replace(".", ",") + " V";
+  $("filGlow").setAttribute("opacity", Math.min(0.95, Math.pow(uh / 6.3, 2)));
+  $("filament").setAttribute("stroke", uh > 4 ? "#ffb347" : uh > 2 ? "#c0612b" : "#888");
+  const B = brightness();
+  $("screenGlow").setAttribute("opacity", Math.min(1, B * 1.1));
+  $("screenLine").setAttribute("stroke", B > 0.01 ? `rgb(${200 - 80 * B},${214 + 41 * B},${196 - 90 * B})` : "#c9d6c4");
+  $("frontGlow").setAttribute("opacity", B);
+  $("bOut").textContent = Math.round(B * 100) + " %";
+  $("bBar").style.width = (B * 100) + "%";
+
+}
+["uh", "u", "rev"].forEach(id => $(id).addEventListener("input", updateT1Labels));
+
+function stepT1(dt) {
+  const gH = heatF(), heat = gH > 0, rev = $("rev").checked, U = +$("u").value;
+  const vEnd = 1.5 + 9 * Math.sqrt(U / UMAX);   // Pixel pro Frame (maßstäblich ∝ √U)
+  // Emission
+  if (heat) {
+    const rate = ((U > 0 && !rev) ? 1.4 : 0.3) * gH;
+    spawnAcc += rate * dt;
+    while (spawnAcc > 1) {
+      spawnAcc -= 1;
+      if ((U > 0 && !rev) || parts.filter(p => p.cloud).length < 6 + 24 * gH) {
+        parts.push({ x: KX, y: 200 + (Math.random() - .5) * 6, s: (Math.random() - .5) * 0.38,
+          cloud: !(U > 0 && !rev), t: 0, cx: 0, cy: 0 });
+      }
+    }
+  }
+  const g = $("particles");
+  parts.forEach(p => {
+    if (p.cloud) {                 // Wolke an der Kathode
+      p.t += dt;
+      if (U > 0 && !rev && heat) { p.cloud = false; p.x = KX; return; }
+      p.cx = KX - 4 + 16 * Math.sin(p.t * 0.07 + p.s * 40) * Math.random();
+      p.cy = 200 + 22 * Math.cos(p.t * 0.05 + p.s * 70) * Math.random();
+      if (!heat && Math.random() < 0.05) p.dead = true;
+      return;
+    }
+    if (U === 0 || rev || !heat) { p.dead = true; return; }
+    let v;
+    if (p.x < AX) v = Math.max(0.5, vEnd * Math.sqrt(Math.max(0.02, (p.x - KX) / (AX - KX))));
+    else v = vEnd;
+    const nx = p.x + v * dt;
+    if (p.x < AX) { p.y += (200 - p.y) * 0.05 * dt; }
+    else p.y += p.s * v * dt;
+    // Kreuz
+    if (p.x < CRX && nx >= CRX && Math.abs(p.y - 200) < 40) p.dead = true;
+    p.x = nx;
+    if (p.x >= SX - 6) { p.dead = true; hits.push({ y: p.y, a: 1 }); }
+  });
+  parts = parts.filter(p => !p.dead);
+  // Zeichnen
+  g.innerHTML = "";
+  parts.forEach(p => {
+    const x = p.cloud ? p.cx : p.x, y = p.cloud ? p.cy : p.y;
+    g.appendChild(mk("circle", { cx: x, cy: y, r: 2.4, fill: "#8fd3ff" }));
+  });
+  const h = $("hits"); h.innerHTML = "";
+  hits.forEach(k => { k.a -= 0.05 * dt; if (k.a > 0) h.appendChild(mk("circle", { cx: SX - 4, cy: k.y, r: 4, fill: "#d8ffcf", opacity: k.a, filter: "url(#blur2)" })); });
+  hits = hits.filter(k => k.a > 0);
+}
+
+function axes(svg, xmax, ymax, xl, yl, xt, yt) {
+  svg.innerHTML = "";
+  const X = x => 40 + 245 * x / xmax, Y = y => 170 - 150 * y / ymax;
+  svg.appendChild(mk("line", { x1: 40, y1: 170, x2: 290, y2: 170, stroke: "#333" }));
+  svg.appendChild(mk("line", { x1: 40, y1: 170, x2: 40, y2: 15, stroke: "#333" }));
+  xt.forEach(v => { svg.appendChild(mk("line", { x1: X(v), y1: 170, x2: X(v), y2: 174, stroke: "#333" }));
+    const t = mk("text", { x: X(v), y: 186, "font-size": 10, "text-anchor": "middle", fill: "#333" }); t.textContent = v === 0 ? "0" : (v / 1000).toLocaleString("de-DE"); svg.appendChild(t); });
+  yt.forEach(([v, lab]) => { svg.appendChild(mk("line", { x1: 36, y1: Y(v), x2: 290, y2: Y(v), stroke: "#eee" }));
+    const t = mk("text", { x: 33, y: Y(v) + 3, "font-size": 10, "text-anchor": "end", fill: "#333" }); t.textContent = lab; svg.appendChild(t); });
+  let t = mk("text", { x: 290, y: 198, "font-size": 10, "text-anchor": "end", fill: "#333" }); t.textContent = xl; svg.appendChild(t);
+  t = mk("text", { x: 44, y: 11, "font-size": 10, fill: "#333" }); t.textContent = yl; svg.appendChild(t);
+  return { X, Y };
+}
+updateT1Labels();
+
+/* ---------- TAB 2: Elektronenkanone ---------- */
+const steps = [
+  { hl: [125, 110, 90, 170], t: "<b>Glühelektrischer Effekt:</b> Die Heizspannung U<sub>H</sub> bringt den Draht der Kathode zum Glühen. Durch die hohe Temperatur haben einige Elektronen genug Energie, um das Metall zu verlassen (<b>Austrittsarbeit</b>). Ohne weitere Spannung bilden sie eine Elektronenwolke um die Kathode." },
+  { hl: [195, 70, 365, 240], t: "<b>Beschleunigung im elektrischen Feld:</b> Zwischen Kathode (−) und Anode (+) liegt die Beschleunigungsspannung U<sub>B</sub>. Zwischen den Elektroden entsteht ein (näherungsweise) <b>homogenes elektrisches Feld</b>: Die Feldlinien verlaufen parallel und gleich dicht von der Anode (+) zur Kathode (−). Das Feld übt auf jedes Elektron die Kraft F<sub>el</sub> = e·E in Richtung Anode aus – <b>entgegen der Feldrichtung</b>, weil Elektronen negativ geladen sind. Die Elektronen werden <b>gleichmäßig beschleunigt</b>." },
+  { hl: [555, 150, 260, 80], t: "<b>Austritt durch die Anode:</b> Ein Teil der Elektronen fliegt durch das Loch in der Anode. Hinter der Anode wirkt kein Feld mehr – die Elektronen bewegen sich mit <b>konstanter Geschwindigkeit</b> geradlinig weiter (Elektronenstrahl). In der Schattenkreuzröhre treffen sie so auf den Leuchtschirm." },
+  { hl: [195, 70, 625, 240], t: "<b>Energiebilanz:</b> Durchläuft ein Elektron (Ladung e) die Spannung U<sub>B</sub>, verrichtet das Feld die Arbeit W = e·U<sub>B</sub>. Diese elektrische Energie wird vollständig in kinetische Energie umgewandelt: <b>e·U<sub>B</sub> = ½·m<sub>e</sub>·v²</b>. Wie man daraus die Geschwindigkeit berechnet, erarbeitest du in Reiter 3. Je größer U<sub>B</sub>, desto schneller die Elektronen – und desto heller leuchtet der Schirm." }
+];
+let fieldEmph = false;
+function setStep(i) {
+  fieldEmph = (i === 1);
+  document.querySelectorAll(".steps button").forEach(b => b.classList.toggle("on", +b.dataset.step === i));
+  const [x, y, w, h] = steps[i].hl;
+  Object.entries({ x, y, width: w, height: h }).forEach(([k, v]) => $("hl").setAttribute(k, v));
+  $("stepText").innerHTML = steps[i].t;
+  if (typeof drawField === "function" && $("u2")) drawField();
+}
+document.querySelectorAll(".steps button").forEach(b => b.onclick = () => setStep(+b.dataset.step));
+setStep(0);
+
+function drawField() {
+  const U = +$("u2").value, g = $("field"); g.innerHTML = "";
+  if (U === 0) { $("lblE").setAttribute("opacity", 0); return; }   // ohne Spannung kein Feld
+  if (!fieldEmph) {
+    const op = 0.2 + 0.4 * U / UMAX;
+    [95, 125, 155, 225, 255, 285].forEach(y =>
+      g.appendChild(mk("line", { x1: 555, y1: y, x2: 205, y2: y, stroke: "#70AD47", "stroke-width": 1.4, opacity: op, "marker-end": "url(#arrG)" })));
+    $("lblE").setAttribute("opacity", 0.6);
+    return;
+  }
+  $("lblE").setAttribute("opacity", 1);
+  // homogenes Feld: parallele, gleich dichte Feldlinien von + nach −
+  for (let y = 80; y <= 300; y += 22) {
+    g.appendChild(mk("line", { x1: 558, y1: y, x2: 197, y2: y, stroke: "#4f8a2d", "stroke-width": 2, "marker-end": "url(#arrF)" }));
+    g.appendChild(mk("line", { x1: 390, y1: y, x2: 375, y2: y, stroke: "#4f8a2d", "stroke-width": 2, "marker-end": "url(#arrF)" }));
+  }
+  // Ladungen auf den Elektroden
+  for (let y = 85; y <= 300; y += 30) {
+    if (y < 175 || y > 205) { const t = mk("text", { x: 578, y: y + 5, "font-size": 16, fill: "#c62828", "font-weight": 700 }); t.textContent = "+"; g.appendChild(t); }
+    const t2 = mk("text", { x: 200, y: y + 5, "font-size": 16, fill: "#1f5fbf", "font-weight": 700 }); t2.textContent = "−"; g.appendChild(t2);
+  }
+  // Kraft auf ein Elektron
+  g.appendChild(mk("circle", { cx: 300, cy: 267, r: 8, fill: "#2b7bd6", stroke: "#fff", "stroke-width": 2 }));
+  g.appendChild(mk("line", { x1: 310, y1: 267, x2: 370, y2: 267, stroke: "#c62828", "stroke-width": 3.5, "marker-end": "url(#arrR)" }));
+  let t = mk("text", { x: 376, y: 272, "font-size": 15, fill: "#c62828", "font-weight": 700 }); t.textContent = "F"; g.appendChild(t);
+  t = mk("text", { x: 386, y: 276, "font-size": 11, fill: "#c62828" }); t.textContent = "el"; g.appendChild(t);
+  t = mk("text", { x: 452, y: 95, "font-size": 15, fill: "#4f8a2d", "font-weight": 700 }); t.textContent = "E"; g.appendChild(t);
+}
+const GK = 195, GA = 560, GEND = 815;
+let gParts = [], gAcc = 0, tr = null;
+function updateT2() {
+  const U = +$("u2").value;
+  $("u2Out").textContent = U.toLocaleString("de-DE") + " V";
+  $("gU").textContent = U.toLocaleString("de-DE") + " V";
+  drawField();
+}
+$("u2").addEventListener("input", updateT2);
+function heatF2() {
+  const uh = +$("uh2").value;
+  return uh <= 3 ? 0 : Math.min(1, Math.pow((uh - 3) / 3.3, 1.5));
+}
+function updateHeat2() {
+  const uh = +$("uh2").value;
+  $("uh2Out").textContent = uh.toFixed(1).replace(".", ",") + " V";
+  $("gFilGlow").setAttribute("opacity", Math.min(0.95, Math.pow(uh / 6.3, 2)));
+  $("gFil").setAttribute("stroke", uh > 4 ? "#ff9a2e" : uh > 2 ? "#c0392b" : "#777");
+}
+$("uh2").addEventListener("input", updateHeat2);
+updateHeat2();
+
+function stepT2(dt) {
+  const U = +$("u2").value;
+  const vEnd = 1.2 + 8 * Math.sqrt(U / UMAX);
+  const g2 = heatF2();
+  gAcc += 0.5 * g2 * dt;          // Emission hängt von der Heizspannung ab
+  while (gAcc > 1) {
+    gAcc -= 1;
+    if (U > 0 || gParts.length < 4 + 28 * g2) gParts.push({ x: GK, y: 190 + (Math.random() - .5) * 70, t: Math.random() * 100, ph: Math.random() * 6.3 });
+  }
+  if (U === 0) {   // keine Beschleunigung: Elektronenwolke an der Glühkathode
+    if (gParts.length > 4 + 28 * g2 && Math.random() < 0.15 * dt) gParts.shift();   // Wolke schrumpft bei kälterer Kathode
+    const g0 = $("gParticles"); g0.innerHTML = "";
+    gParts.forEach(p => {
+      p.t = (p.t || 0) + dt;
+      p.x = GK + 4 + 14 * (1 + Math.sin(p.t * 0.05 + p.ph)) * (0.6 + 0.4 * Math.random());
+      p.y += (Math.random() - .5) * 1.5;
+      p.y = Math.max(130, Math.min(250, p.y));
+      g0.appendChild(mk("circle", { cx: p.x, cy: p.y, r: 3, fill: "#2b7bd6" }));
+    });
+    tr = { x: GK, y: 190, wait: 25 };
+    $("tracked").setAttribute("opacity", $("track").checked && g2 > 0 ? 1 : 0);
+    $("tracked").setAttribute("transform", `translate(${GK},190)`);
+    $("vArrow").setAttribute("opacity", 0);
+    $("barEkin").style.height = "0%"; $("barEpot").style.height = "0%";
+    $("sumEkin").style.height = "0%"; $("sumEpot").style.height = "0%";
+    return;
+  }
+  const adv = p => {
+    let v = p.x < GA ? Math.max(0.3, vEnd * Math.sqrt(Math.max(0.01, (p.x - GK) / (GA - GK)))) : vEnd;
+    p.x += v * dt;
+    if (p.x < GA) {
+      // nur die Elektronen nahe der Achse kommen durchs Loch
+      if (p.x > GA - 12 && Math.abs(p.y - 190) > 13) p.dead = true;
+      else p.y += (190 - p.y) * 0.004 * dt * (Math.abs(p.y - 190) < 40 ? 1 : 0);
+    }
+    if (p.x > GEND) p.dead = true;
+    return v;
+  };
+  gParts.forEach(adv);
+  gParts = gParts.filter(p => !p.dead);
+  const g = $("gParticles"); g.innerHTML = "";
+  gParts.forEach(p => g.appendChild(mk("circle", { cx: p.x, cy: p.y, r: 3, fill: "#2b7bd6" })));
+  // verfolgtes Elektron (nur, wenn die Kathode überhaupt Elektronen abgibt)
+  if (g2 === 0 && (!tr || tr.x <= GK + 1)) {
+    tr = { x: GK, y: 190, wait: 25 };
+    $("tracked").setAttribute("opacity", 0);
+    ["barEkin", "barEpot", "sumEkin", "sumEpot"].forEach(id => $(id).style.height = "0%");
+    return;
+  }
+  const show = $("track").checked;
+  $("tracked").setAttribute("opacity", show ? 1 : 0);
+  if (!tr || tr.x > GEND) tr = { x: GK, y: 190, wait: 25 };
+  if (tr.wait > 0) tr.wait -= dt; else adv(tr);
+  const frac = Math.min(1, Math.max(0, (tr.x - GK) / (GA - GK)));
+  const vNow = tr.x < GA ? vEnd * Math.sqrt(frac) : vEnd;
+  $("tracked").setAttribute("transform", `translate(${Math.min(tr.x, GEND)},190)`);
+  $("vArrow").setAttribute("x2", 12 + vNow * 7);
+  $("vArrow").setAttribute("x1", 12);
+  $("vArrow").setAttribute("opacity", vNow > 0.4 ? 1 : 0);
+  const scale = U / UMAX;   // Balkenhöhe ∝ e·U
+  $("barEkin").style.height = (100 * frac * scale) + "%";
+  $("barEpot").style.height = (100 * (1 - frac) * scale) + "%";
+  $("sumEkin").style.height = (100 * frac * scale) + "%";
+  $("sumEpot").style.height = (100 * (1 - frac) * scale) + "%";
+}
+updateT2();
+
+/* ---------- TAB 3: Herleitung ---------- */
+const dSteps = [
+  { title: "Kräfte benennen",
+    html: `<div class="q"><b>Nenne</b> alle Kräfte, die auf das Elektron zwischen Kathode und Anode wirken.</div>
+      <div class="opts">
+        <label><input type="checkbox" value="el"><span>elektrische Kraft F<sub>el</sub></span></label>
+        <label><input type="checkbox" value="g"><span>Gewichtskraft F<sub>G</sub></span></label>
+        <label><input type="checkbox" value="lor"><span>magnetische Kraft (Lorentzkraft)</span></label>
+        <label><input type="checkbox" value="reib"><span>Reibungskraft (Luftwiderstand)</span></label>
+        <label><input type="checkbox" value="auf"><span>Auftriebskraft</span></label>
+      </div>`,
+    tips: ["Welche Felder gibt es in der Röhre? Ein elektrisches Feld zwischen Kathode und Anode – und überall auf der Erde das Gravitationsfeld.",
+           "Die Röhre ist luftleer (evakuiert), und es ist kein Magnet in der Nähe."],
+    check(el) {
+      const c = new Set([...el.querySelectorAll("input:checked")].map(i => i.value));
+      if (c.has("reib") || c.has("auf")) return "In der Röhre herrscht Vakuum – ohne Luft gibt es weder Reibung noch Auftrieb.";
+      if (c.has("lor")) return "Eine magnetische Kraft wirkt nur in einem Magnetfeld. Hier ist kein Magnet vorhanden.";
+      if (!c.has("el")) return "Welche Kraft beschleunigt die Elektronen denn überhaupt zur Anode?";
+      if (!c.has("g")) return "Fast richtig! Auf jeden Körper mit Masse wirkt aber auch eine Gewichtskraft – auch auf ein Elektron.";
+      return true;
+    },
+    after: "Richtig: Es wirken die <b>elektrische Kraft</b> und die <b>Gewichtskraft</b>.",
+    sum: ["Kräfte auf das Elektron: F<sub>el</sub> und F<sub>G</sub>"] },
+
+  { title: "Kräfte einzeichnen",
+    html: `<div class="q"><b>Zeichne</b> die Kräfte ein: Wähle für jede Kraft die Richtung.</div>
+      <svg viewBox="0 0 380 210" style="max-width:420px;border:1px solid var(--line);border-radius:8px;background:#fff">
+        <defs>
+          <marker id="aG2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4f8a2d"/></marker>
+          <marker id="aR2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#c62828"/></marker>
+          <marker id="aB2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1f5fbf"/></marker>
+        </defs>
+        <rect x="40" y="20" width="10" height="170" fill="#555"/><text x="18" y="110" font-size="20" fill="#1f5fbf" font-weight="700">−</text>
+        <rect x="320" y="20" width="10" height="170" fill="#b9a36a"/><text x="338" y="110" font-size="20" fill="#c62828" font-weight="700">+</text>
+        <text x="14" y="206" font-size="13" fill="#111">Kathode</text><text x="300" y="206" font-size="13" fill="#111">Anode</text>
+        ${[35, 65, 145, 175].map(y => `<line x1="318" y1="${y}" x2="54" y2="${y}" stroke="#4f8a2d" stroke-width="1.6" marker-end="url(#aG2)"/>`).join("")}
+        <text x="250" y="58" font-size="13" fill="#4f8a2d" font-weight="700">E</text>
+        <g id="fArrows"></g>
+        <circle cx="185" cy="105" r="11" fill="#2b7bd6"/><text x="185" y="110" font-size="12" fill="#fff" text-anchor="middle">e⁻</text>
+      </svg>
+      <div class="dirs">
+        <div><span>F<sub>el</sub>:</span> ${["←", "→", "↑", "↓"].map((a, i) => `<button data-f="el" data-d="${"lrud"[i]}">${a}</button>`).join("")}</div>
+        <div><span>F<sub>G</sub>:</span> ${["←", "→", "↑", "↓"].map((a, i) => `<button data-f="g" data-d="${"lrud"[i]}">${a}</button>`).join("")}</div>
+      </div>`,
+    init(el) {
+      const sel = { el: null, g: null };
+      const vec = { l: [-1, 0], r: [1, 0], u: [0, -1], d: [0, 1] };
+      const draw = () => {
+        const g = el.querySelector("#fArrows"); g.innerHTML = "";
+        [["el", 75, "#c62828", "aR2", "F_el"], ["g", 28, "#1f5fbf", "aB2", "F_G"]].forEach(([k, len, col, m, lab]) => {
+          if (!sel[k]) return;
+          const [dx, dy] = vec[sel[k]];
+          const x1 = 185 + dx * 13, y1 = 105 + dy * 13, x2 = x1 + dx * len, y2 = y1 + dy * len;
+          g.appendChild(mk("line", { x1, y1, x2, y2, stroke: col, "stroke-width": 3.5, "marker-end": `url(#${m})` }));
+          const t = mk("text", { x: x2 + (dx >= 0 ? 6 : -36) + (dy ? 8 : 0), y: y2 + (dy > 0 ? 12 : dy < 0 ? -4 : -8), "font-size": 13, fill: col, "font-weight": 700 });
+          t.textContent = lab.replace("_", " "); g.appendChild(t);
+        });
+      };
+      el.querySelectorAll(".dirs button").forEach(b => b.onclick = () => {
+        sel[b.dataset.f] = b.dataset.d;
+        el.querySelectorAll(`.dirs button[data-f="${b.dataset.f}"]`).forEach(x => x.classList.toggle("on", x === b));
+        draw();
+      });
+      el._sel = sel;
+    },
+    tips: ["Feldlinien geben die Richtung der Kraft auf eine <b>positive</b> Probeladung an. Das Elektron ist negativ geladen.",
+           "Die elektrische Kraft auf das Elektron wirkt entgegen der Feldlinien – also zur Anode (+). Die Gewichtskraft zeigt immer zum Erdmittelpunkt."],
+    check(el) {
+      const s = el._sel;
+      if (!s.el || !s.g) return "Wähle für beide Kräfte eine Richtung.";
+      if (s.el === "l") return "Die Feldlinien zeigen nach links – aber das gilt für positive Ladungen! Was ändert sich beim Elektron?";
+      if (s.el !== "r") return "Die elektrische Kraft wirkt entlang der Feldlinien (bzw. entgegen). Prüfe die Richtung.";
+      if (s.g !== "d") return "Die elektrische Kraft stimmt. Wohin zeigt die Gewichtskraft?";
+      return true;
+    },
+    after: "Richtig! F<sub>el</sub> zeigt zur Anode, F<sub>G</sub> nach unten. Die Gewichtskraft ist aber winzig – wie winzig, zeigt die <b>Sprinteraufgabe</b>. Wir <b>vernachlässigen F<sub>G</sub></b> ab jetzt. Das elektrische Feld beschleunigt das Elektron – es gewinnt Bewegungsenergie.",
+    sum: ["F<sub>el</sub> zur Anode (entgegen E); F<sub>G</sub> vernachlässigbar"] },
+
+  { title: "Energieumwandlung benennen",
+    html: `<div class="q">Auf dem Weg von der Kathode zur Anode verrichtet das elektrische Feld Arbeit am Elektron. In welche Energieform wird die elektrische Energie dabei umgewandelt?</div>
+      <div class="opts">
+        <label><input type="radio" name="eu" value="w1"><span>Höhenenergie (potentielle Energie im Gravitationsfeld)</span></label>
+        <label><input type="radio" name="eu" value="ok"><span>kinetische Energie (Bewegungsenergie)</span></label>
+        <label><input type="radio" name="eu" value="w2"><span>thermische Energie (Wärme durch Reibung)</span></label>
+        <label><input type="radio" name="eu" value="w3"><span>Spannenergie</span></label>
+      </div>`,
+    tips: ["Was passiert mit dem Elektron auf dem Weg zur Anode? Es wird …",
+           "Die Röhre ist luftleer – es gibt keine Reibung. Die Gewichtskraft haben wir vernachlässigt."],
+    check(el) {
+      const r = el.querySelector("input:checked");
+      if (!r) return "Wähle eine Energieform aus.";
+      if (r.value === "w1") return "Das Elektron wird nicht angehoben – und die Gewichtskraft spielt keine Rolle.";
+      if (r.value === "w2") return "In der evakuierten Röhre gibt es keine Reibung.";
+      if (r.value !== "ok") return "Es wird nichts verformt oder gespannt.";
+      return true;
+    },
+    after: "Richtig: Die elektrische Energie wird <b>vollständig</b> in <b>kinetische Energie</b> umgewandelt – es gibt keine Reibung (Vakuum), und F<sub>G</sub> ist vernachlässigbar.",
+    sum: ["Energieumwandlung: E<sub>el</sub> → E<sub>kin</sub> (vollständig)"] },
+
+  { title: "Elektrische Energie",
+    html: `<div class="q">Welche Energie gibt das Feld an das Elektron (Ladung e) ab, wenn es die Beschleunigungsspannung U<sub>B</sub> durchläuft?</div>
+      <div class="q">E<sub>el</sub> = W = <span class="chips" data-k="a"><button type="button" data-v="w1">e · E</button><button type="button" data-v="ok">e · U<sub>B</sub></button><button type="button" data-v="w2">e / U<sub>B</sub></button><button type="button" data-v="w3">½ · e · U<sub>B</sub>²</button></span></div>`,
+    tips: ["Die Spannung ist die Energie pro Ladung: U = W / q.",
+           "Stelle U = W / q nach W um und setze q = e ein."],
+    check(el) {
+      const a = el.querySelector('[data-k="a"]').value;
+      if (!a) return "Wähle eine Möglichkeit aus.";
+      if (a === "w1") return "Vorsicht: e · E ist die elektrische <b>Kraft</b> F<sub>el</sub>, keine Energie. Einheit: C · V/m = N.";
+      if (a !== "ok") return "Prüfe mit der Definition der Spannung: U = W / q.";
+      return true;
+    },
+    after: "<b>E<sub>el</sub> = e · U<sub>B</sub></b>. Einheit: C · V = J ✔",
+    sum: ["U = W / q &nbsp;⇒&nbsp; E<sub>el</sub> = e · U<sub>B</sub>"] },
+
+  { title: "Wie kommt die Energie zum Elektron?",
+    info: true, btn: "Verstanden – weiter",
+    html: `<div class="q">Die elektrische Energie e · U<sub>B</sub> geht nicht einfach „von selbst“ in Bewegungsenergie über – sie wird durch <b>elektrische Arbeit</b> übertragen:</div>
+      <div class="chain">
+        <div class="cb"><b>elektrische Energie</b><br>E<sub>el</sub> = e · U<sub>B</sub></div>
+        <div class="ca">→</div>
+        <div class="cb hl"><b>elektrische Arbeit</b><br>W<sub>el</sub> = F<sub>el</sub> · d</div>
+        <div class="ca">→</div>
+        <div class="cb"><b>kinetische Energie</b><br>E<sub>kin</sub> = ½ · m<sub>e</sub> · v²</div>
+      </div>
+      <div class="q">Das elektrische Feld übt auf das Elektron die Kraft F<sub>el</sub> (Schritt 2) aus und verschiebt es längs der Strecke d von der Kathode zur Anode. Dabei verrichtet es am Elektron die <b>elektrische Arbeit</b></div>
+      <div class="q" style="text-align:center;font-family:'Cambria Math','Times New Roman',serif;font-size:1.08rem">W<sub>el</sub> = F<sub>el</sub> · d = e · E · d = e · (U<sub>B</sub> / d) · d = e · U<sub>B</sub></div>
+      <div class="q">Die Arbeit ist also genau so groß wie die elektrische Energie, die das Elektron abgibt. Sie wird vollständig zur <b>kinetischen Energie</b> des Elektrons – es wird schneller. Hier treffen sich der Blick auf die <b>Kräfte</b> (Schritte 1 und 2) und der Blick auf die <b>Energie</b>.</div>`,
+    tips: [],
+    check() { return true; },
+    after: "",
+    sum: ["E<sub>el</sub> → W<sub>el</sub> = F<sub>el</sub> · d = e · U<sub>B</sub> → E<sub>kin</sub>"] },
+
+  { title: "Kinetische Energie",
+    html: `<div class="q">Wie groß ist die kinetische Energie des Elektrons (Masse m<sub>e</sub>) an der Anode, wenn es dort die Geschwindigkeit v hat?</div>
+      <div class="q">E<sub>kin</sub> = <span class="chips" data-k="a"><button type="button" data-v="w1">m<sub>e</sub> · v</button><button type="button" data-v="w2">m<sub>e</sub> · g · h</button><button type="button" data-v="ok">½ · m<sub>e</sub> · v²</button><button type="button" data-v="w3">½ · m<sub>e</sub> · v</button></span></div>`,
+    tips: ["Die Formel kennst du aus der Mechanik (Bewegungsenergie).", "Die Geschwindigkeit geht quadratisch ein."],
+    check(el) {
+      const a = el.querySelector('[data-k="a"]').value;
+      if (!a) return "Wähle eine Möglichkeit aus.";
+      if (a === "w1") return "m · v ist der Impuls, keine Energie.";
+      if (a === "w2") return "m · g · h ist die Höhenenergie.";
+      if (a !== "ok") return "Fast – prüfe den Exponenten von v (Einheit: kg · m²/s² = J).";
+      return true;
+    },
+    after: "<b>E<sub>kin</sub> = ½ · m<sub>e</sub> · v²</b>. Das Elektron startet in Ruhe: Zu Beginn ist E<sub>kin</sub> = 0.",
+    sum: ["E<sub>kin</sub> = ½ · m<sub>e</sub> · v²"] },
+
+  { title: "Energien gleichsetzen",
+    html: `<div class="q">Die gesamte elektrische Energie wird in kinetische Energie umgewandelt (Energieerhaltung). <b>Setze</b> die beiden Energien <b>gleich</b>:</div>
+      <div class="q"><span class="chips" data-k="a"><button type="button" data-v="w1">e · E = ½ · m<sub>e</sub> · v²</button><button type="button" data-v="ok">e · U<sub>B</sub> = ½ · m<sub>e</sub> · v²</button><button type="button" data-v="w2">e · U<sub>B</sub> = m<sub>e</sub> · a</button><button type="button" data-v="w3">e · U<sub>B</sub> + ½ · m<sub>e</sub> · v² = 0</button></span></div>`,
+    tips: ["Links steht die elektrische Energie aus Schritt 4, rechts die kinetische Energie aus Schritt 6."],
+    check(el) {
+      const a = el.querySelector('[data-k="a"]').value;
+      if (!a) return "Wähle eine Möglichkeit aus.";
+      if (a === "w1") return "Links muss eine Energie stehen – e · E ist eine Kraft.";
+      if (a === "w2") return "Das ist ein Kräfteansatz (F = m · a). Hier sollen Energien gleichgesetzt werden.";
+      if (a !== "ok") return "Die abgegebene elektrische Energie <b>ist gleich</b> der gewonnenen kinetischen Energie.";
+      return true;
+    },
+    after: "<b>e · U<sub>B</sub> = ½ · m<sub>e</sub> · v²</b>",
+    sum: ["E<sub>el</sub> = E<sub>kin</sub>: &nbsp;e · U<sub>B</sub> = ½ · m<sub>e</sub> · v²"] },
+
+  { title: "Nach v² umstellen",
+    html: `<div class="q"><b>Stelle</b> e · U<sub>B</sub> = ½ · m<sub>e</sub> · v² nach v² <b>um</b>:</div>
+      <div class="q">v² = <span class="chips" data-k="a"><button type="button" data-v="w1">e · U<sub>B</sub> / (2 · m<sub>e</sub>)</button><button type="button" data-v="ok">2 · e · U<sub>B</sub> / m<sub>e</sub></button><button type="button" data-v="w2">2 · m<sub>e</sub> / (e · U<sub>B</sub>)</button><button type="button" data-v="w3">e · U<sub>B</sub> / m<sub>e</sub></button></span></div>`,
+    tips: ["Multipliziere beide Seiten mit 2 und teile durch m<sub>e</sub>."],
+    check(el) {
+      const a = el.querySelector('[data-k="a"]').value;
+      if (!a) return "Wähle eine Möglichkeit aus.";
+      if (a === "w1") return "Der Faktor ½ steht auf der rechten Seite – beim Umstellen kommt die 2 in den Zähler.";
+      if (a === "w2") return "Das ist der Kehrwert.";
+      if (a !== "ok") return "Der Faktor ½ ist verloren gegangen.";
+      return true;
+    },
+    after: "<b>v² = 2 · e · U<sub>B</sub> / m<sub>e</sub></b>",
+    sum: ["v² = 2 · e · U<sub>B</sub> / m<sub>e</sub>"] },
+
+  { title: "Wurzel ziehen",
+    html: `<div class="q">Bestimme aus v² = 2 · e · U<sub>B</sub> / m<sub>e</sub> die Geschwindigkeit:</div>
+      <div class="q">v = <span class="chips" data-k="a"><button type="button" data-v="w1">2 · e · U<sub>B</sub> / m<sub>e</sub></button><button type="button" data-v="ok">√( 2 · e · U<sub>B</sub> / m<sub>e</sub> )</button><button type="button" data-v="w2">√( e · U<sub>B</sub> / m<sub>e</sub> )</button><button type="button" data-v="w3">(2 · e · U<sub>B</sub> / m<sub>e</sub>)²</button></span></div>`,
+    tips: ["Auf beiden Seiten die Wurzel ziehen (v ist positiv)."],
+    check(el) {
+      const a = el.querySelector('[data-k="a"]').value;
+      if (!a) return "Wähle eine Möglichkeit aus.";
+      if (a === "w1") return "Das ist noch v², nicht v.";
+      if (a !== "ok") return "Unter der Wurzel muss genau der Ausdruck für v² stehen.";
+      return true;
+    },
+    after: `<b>v = √( 2 · e · U<sub>B</sub> / m<sub>e</sub> )</b><br>
+      Der Abstand d zwischen Kathode und Anode kommt gar nicht vor: Die Endgeschwindigkeit hängt nur von U<sub>B</sub> ab.
+      Je größer U<sub>B</sub>, desto schneller die Elektronen – vervierfacht man U<sub>B</sub>, verdoppelt sich v.<br>
+      Beispiel: U<sub>B</sub> = 2,0 kV ⇒ v ≈ 2,65 · 10<sup>7</sup> m/s.`,
+    sum: ["<b>v = √( 2 · e · U<sub>B</sub> / m<sub>e</sub> )</b>"] }
+
+];
+
+let dDone = 0;
+function nxtScroll(box, i) { const n = box.children[i + 1]; if (n) setTimeout(() => n.scrollIntoView({ behavior: "smooth", block: "nearest" }), 150); return !!n; }
+const WAIT_S = 10;
+function shuffleArr(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function shuffleOpts(el) {
+  el.querySelectorAll(".chips").forEach(c => shuffleArr([...c.children]).forEach(b => c.appendChild(b)));
+  el.querySelectorAll(".opts").forEach(o => shuffleArr([...o.children]).forEach(l => o.appendChild(l)));
+}
+function resetSel(el) {
+  el.querySelectorAll(".chips").forEach(c => { c.value = ""; c.querySelectorAll("button").forEach(b => b.classList.remove("on")); });
+  el.querySelectorAll(".opts input").forEach(i => i.checked = false);
+}
+(function buildDeriv() {
+  const box = $("deriv");
+  dSteps.forEach((st, i) => {
+    const el = document.createElement("div");
+    el.className = "dstep" + (i > 0 ? " locked" : "");
+    el.innerHTML = `<h3><span class="num">${i + 1}</span>${st.title}</h3>${st.html}
+      <div class="dbtns"><button class="btn chk">${st.btn || "Prüfen"}</button>${st.tips.length ? '<button class="btn sec tip">Tipp</button>' : ""}</div>
+      <div class="fb"></div><div class="tipp"></div><div class="after">${st.after}</div>`;
+    box.appendChild(el);
+    if (st.init) st.init(el);
+    el.querySelectorAll(".chips").forEach(c => {
+      c.value = "";
+      c.querySelectorAll("button").forEach(btn => btn.onclick = () => {
+        c.value = btn.dataset.v;
+        c.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === btn));
+      });
+    });
+    shuffleOpts(el);
+    let tipN = 0;
+    if (st.tips.length) el.querySelector(".tip").onclick = () => {
+      const t = el.querySelector(".tipp");
+      t.style.display = "block";
+      t.innerHTML = st.tips.slice(0, Math.min(++tipN, st.tips.length)).map((x, k) => `<b>Tipp ${k + 1}:</b> ${x}`).join("<br>");
+      if (tipN >= st.tips.length) el.querySelector(".tip").disabled = true;
+    };
+    el.querySelector(".chk").onclick = () => {
+      const r = st.check(el), fb = el.querySelector(".fb");
+      if (r !== true) {
+        fb.innerHTML = '<span class="no">✘ ' + r + '</span>';
+        // Sperrzeit: 10 s keine neue Antwort, danach werden die Antworten neu gemischt
+        const chk = el.querySelector(".chk"), label = chk.textContent;
+        const ctrls = el.querySelectorAll("input,.chips button,.dirs button,.chk");
+        ctrls.forEach(x => x.disabled = true);
+        el.classList.add("wait");
+        let left = WAIT_S;
+        chk.textContent = `Warte ${left} s …`;
+        const iv = setInterval(() => {
+          left--;
+          if (left > 0) { chk.textContent = `Warte ${left} s …`; return; }
+          clearInterval(iv);
+          shuffleOpts(el); resetSel(el);
+          ctrls.forEach(x => x.disabled = false);
+          el.classList.remove("wait");
+          chk.textContent = label;
+          fb.innerHTML += '<br><span class="hint">Die Antworten wurden neu gemischt – versuche es noch einmal.</span>';
+        }, 1000);
+        return;
+      }
+      fb.innerHTML = st.info ? "" : '<span class="ok">✔ Richtig!</span>';
+      if (st.after) el.querySelector(".after").style.display = "block";
+      if (el.classList.contains("done")) return;
+      el.classList.add("done");
+      el.querySelectorAll("input,.chips button,.dirs button,.chk,.tip").forEach(x => x.disabled = true);
+      dDone++;
+      const sum = $("summary");
+      if (dDone === 1) sum.innerHTML = "";
+      st.sum.forEach((line, k) => sum.insertAdjacentHTML("beforeend", `<li class="new"><span class="sn">${k === 0 ? "(" + (i + 1) + ")" : ""}</span><span>${line}</span></li>`));
+      setTimeout(() => sum.querySelectorAll("li.new").forEach(x => x.classList.remove("new")), 1200);
+      if (nxtScroll(box, i)) {}
+      const nxt = box.children[i + 1];
+      if (nxt) { nxt.classList.remove("locked"); }
+    };
+  });
+})();
+
+// Sprinteraufgabe
+const spSol = [9.109e-31 * 9.81, 1.602e-19 * 2000 / 0.04, (1.602e-19 * 2000 / 0.04) / (9.109e-31 * 9.81)];
+const spTips = ["Gewichtskraft: F<sub>G</sub> = m · g.",
+  "Elektrische Kraft: F<sub>el</sub> = e · E mit E = U<sub>B</sub> / d. Achte auf die Einheiten: 2,0 kV = 2000 V; 4,0 cm = 0,040 m.",
+  "Teile F<sub>el</sub> durch F<sub>G</sub> – Potenzen: 10<sup>−15</sup> / 10<sup>−30</sup> = 10<sup>15</sup>."];
+let spTipN = 0;
+$("spCheck").onclick = () => {
+  [1, 2, 3].forEach(k => {
+    const x = parseNum($("sp" + k).value), f = $("sp" + k + "f");
+    if (isNaN(x)) { f.innerHTML = ""; return; }
+    f.innerHTML = Math.abs(x - spSol[k - 1]) / spSol[k - 1] <= 0.03 ? '<span class="ok">✔</span>' : '<span class="no">✘</span>';
+  });
+};
+$("spTip").onclick = () => {
+  spTipN = Math.min(spTipN + 1, spTips.length);
+  $("spTipBox").style.display = "block";
+  $("spTipBox").innerHTML = spTips.slice(0, spTipN).map((x, k) => `<b>Tipp ${k + 1}:</b> ${x}`).join("<br>");
+};
+$("spSol").onclick = () => $("spSolBox").style.display = "block";
+
+/* ---------- Animationsschleife ---------- */
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(3, (now - last) / 16.67); last = now;
+  if ($("t1").classList.contains("on")) stepT1(dt);
+  if ($("t2").classList.contains("on")) stepT2(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---------- TAB 4: Rechentraining ---------- */
+let cur = null, ok = 0, all = 0, answered = false;
+function parseNum(s) {
+  s = s.trim().replace(/\s/g, "").replace(/,/g, ".").replace(/−/g, "-");
+  s = s.replace(/[·*x×]10\^?\(?(-?\d+)\)?/i, "e$1");
+  const n = Number(s); return isFinite(n) ? n : NaN;
+}
+function newTask() {
+  const types = [...document.querySelectorAll(".typ:checked")].map(c => c.value);
+  const t = types.length ? types[Math.floor(Math.random() * types.length)] : "v";
+  answered = false;
+  $("ans").value = ""; $("feedback").innerHTML = ""; $("sol").style.display = "none";
+  if (t === "v") {
+    const U = [150, 300, 450, 600, 800, 1200, 1500, 2500, 3000, 3500, 4500][Math.floor(Math.random() * 11)];
+    const v = vOf(U);
+    cur = { val: v, unit: "m/s" };
+    $("taskText").innerHTML = `Ein Elektron wird aus der Ruhe mit U<sub>B</sub> = ${U.toLocaleString("de-DE")} V beschleunigt. <b>Berechne</b> seine Endgeschwindigkeit v.`;
+    $("sol").innerHTML = `e·U<sub>B</sub> = ½·m<sub>e</sub>·v² &nbsp;⇒&nbsp; v = √(2·e·U<sub>B</sub>/m<sub>e</sub>)<br>
+      v = √(2 · 1,602·10<sup>−19</sup> C · ${U.toLocaleString("de-DE")} V / 9,109·10<sup>−31</sup> kg)<br>
+      v = √(${sci(2 * E * U / ME, 3)} m²/s²) ≈ <b>${sci(v, 2)} m/s</b> &nbsp;(≈ ${de(100 * v / C, 1)} % von c)`;
+  } else if (t === "u") {
+    const v = [0.5, 0.8, 1.0, 1.2, 1.5, 2.0, 2.5, 3.0, 3.5][Math.floor(Math.random() * 9)] * 1e7;
+    const U = ME * v * v / (2 * E);
+    cur = { val: U, unit: "V" };
+    $("taskText").innerHTML = `Elektronen sollen in einer Elektronenkanone die Geschwindigkeit v = ${sci(v, 1)} m/s erreichen. <b>Berechne</b> die nötige Beschleunigungsspannung U<sub>B</sub>.`;
+    $("sol").innerHTML = `e·U<sub>B</sub> = ½·m<sub>e</sub>·v² &nbsp;⇒&nbsp; U<sub>B</sub> = m<sub>e</sub>·v² / (2·e)<br>
+      U<sub>B</sub> = 9,109·10<sup>−31</sup> kg · (${sci(v, 1)} m/s)² / (2 · 1,602·10<sup>−19</sup> C)<br>
+      U<sub>B</sub> ≈ <b>${de(U, 0)} V</b>`;
+  } else {
+    const U = [200, 500, 750, 1000, 2000, 4000][Math.floor(Math.random() * 6)];
+    cur = { val: E * U, unit: "J" };
+    $("taskText").innerHTML = `<b>Berechne</b> die kinetische Energie eines Elektrons nach dem Durchlaufen der Spannung U<sub>B</sub> = ${U.toLocaleString("de-DE")} V (in Joule).`;
+    $("sol").innerHTML = `E<sub>kin</sub> = e·U<sub>B</sub> = 1,602·10<sup>−19</sup> C · ${U.toLocaleString("de-DE")} V ≈ <b>${sci(E * U, 3)} J</b> &nbsp;(= ${U.toLocaleString("de-DE")} eV)`;
+  }
+  $("ansUnit").textContent = cur.unit;
+}
+$("check").onclick = () => {
+  const x = parseNum($("ans").value);
+  if (isNaN(x)) { $("feedback").innerHTML = '<span class="no">Bitte eine Zahl eingeben, z. B. 1,88e7.</span>'; return; }
+  const rel = Math.abs(x - cur.val) / cur.val;
+  if (!answered) { all++; answered = true; if (rel <= 0.02) ok++; }
+  if (rel <= 0.02) $("feedback").innerHTML = '<span class="ok">✔ Richtig!</span>';
+  else if (Math.abs(Math.log10(x / cur.val)) > 0.9 && Math.abs(Math.log10(x / cur.val) - Math.round(Math.log10(x / cur.val))) < 0.05)
+    $("feedback").innerHTML = '<span class="no">✘ Die Ziffern stimmen, aber die Zehnerpotenz nicht. Prüfe die Einheiten (kV → V?) und die Potenzen.</span>';
+  else if (rel > 0.02 && Math.abs(x / cur.val - Math.SQRT2) < 0.05 || Math.abs(x / Math.pow(cur.val, 2) - 1) < 0.05)
+    $("feedback").innerHTML = '<span class="no">✘ Nicht ganz. Hast du die Wurzel bzw. den Faktor 2 richtig berücksichtigt?</span>';
+  else $("feedback").innerHTML = '<span class="no">✘ Leider falsch. Versuche es noch einmal oder schau dir den Lösungsweg an.</span>';
+  $("scOk").textContent = ok; $("scAll").textContent = all;
+};
+$("ans").addEventListener("keydown", e => { if (e.key === "Enter") $("check").click(); });
+$("showSol").onclick = () => { $("sol").style.display = "block"; if (!answered) { answered = true; all++; $("scAll").textContent = all; } };
+$("next").onclick = newTask;
+newTask();
+</script>
+</body>
+</html>
