@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lewis-Zeichner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: ruhiges, sachliches Werkzeug für den Chemieunterricht
+   IDEA: ein weißes Zeichenblatt aus dem Arbeitsheft
+   PICTURE: das Blatt selbst mit dem Molekül, füllt den Bildschirm
+   COLOUR and TYPE: Chemie-Orange als Akzent, Tinte auf Weiß; Source Sans 3
+   LAYOUT: Werkzeuge oben, Blatt in der Mitte, Formel und Prüfung unten */
+:root{color-scheme:light dark;--bg:light-dark(#f3efe9,#1b1a19);--ink:light-dark(#1d1b19,#ece8e3);--mut:light-dark(#6b645c,#a59d94);--line:light-dark(#d9d2c8,#3d3935);--btn:light-dark(#fff,#272523);--acc:#e2730b;--err:#d22d1f}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Source Sans 3",system-ui,sans-serif;display:flex;flex-direction:column;height:100dvh;overflow-x:clip;overflow-y:auto}
+header{display:flex;align-items:baseline;gap:12px;padding:10px max(2vw,12px) 2px;flex-wrap:wrap}
+h1{font-size:24px;margin:0;line-height:1.1}
+header .sub{color:var(--mut);font-size:14px}
+.bar{display:flex;flex-wrap:wrap;gap:6px;padding:5px max(2vw,12px);align-items:center}
+.grp{display:flex;flex-wrap:wrap;gap:4px;padding-right:8px;margin-right:2px;border-right:1px solid var(--line)}
+.grp:last-child{border:0}
+.seg{display:inline-flex;gap:0}.seg button{border-radius:0;margin-left:-1px}.seg button:first-child{border-radius:10px 0 0 10px;margin-left:0}.seg button:last-child{border-radius:0 10px 10px 0}
+.lab{font-size:13px;color:var(--mut);margin-right:2px}
+button{font:inherit;font-size:15px;min-height:44px;min-width:44px;padding:0 12px;border:1px solid var(--line);background:var(--btn);color:var(--ink);border-radius:10px;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+button.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+button:disabled{opacity:.35;cursor:default}
+.pal button{font-weight:700;font-size:17px;padding:0 6px}
+.pal button.m{font-weight:600}
+.pal button.on{color:#fff}
+.board{flex:1 1 320px;position:relative;margin:4px max(2vw,12px);border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px var(--line),0 8px 28px rgb(0 0 0 / .09)}
+#sv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none}
+.hint{position:absolute;left:12px;bottom:9px;right:12px;font-size:13px;color:#7a7168;pointer-events:none}
+footer{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;padding:4px max(2vw,12px) 10px;font-size:15px}
+#fo{font-size:19px;font-weight:600}
+#pr{color:#2f7d32}#pr.bad{color:var(--err)}
+#tn{color:var(--mut);font-size:13px}
+.opt{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.opt button{min-height:40px;font-size:14px}
+.modal{position:fixed;inset:0;background:rgb(0 0 0 / .45);display:none;align-items:center;justify-content:center;padding:16px;z-index:5}
+.modal.show{display:flex}
+.card{background:var(--btn);color:var(--ink);border-radius:14px;padding:18px;max-width:600px;width:100%;max-height:92vh;overflow:auto}
+.card img{max-width:100%;max-height:52vh;display:block;margin:12px auto;background:repeating-conic-gradient(#e9e9e9 0 25%,#fff 0 50%) 0 0/16px 16px;border:1px solid var(--line)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card p{margin:6px 0 12px;font-size:14px;color:var(--mut)}
+@media(max-width:600px){header .sub{display:none}.bar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.grp{flex-wrap:nowrap;border:0;padding:0}.bar button{flex:none}button{padding:0 9px;font-size:14px}.opt{margin-left:0}}
+</style>
+</head>
+<body>
+<header><h1>Lewis-Zeichner</h1><span class="sub">Valenzstrichformeln mit freien Elektronenpaaren und VSEPR-Winkeln</span></header>
+<div class="bar">
+  <div class="grp" id="tools">
+    <button data-t="draw" class="on">Zeichnen</button>
+    <button data-t="swap">Element tauschen</button>
+    <button data-t="move">Verschieben</button>
+    <button data-t="hand">Hand (Drehen)</button>
+    <button data-t="qp">Ladung +</button>
+    <button data-t="qm">Ladung −</button>
+    <button data-t="del">Löschen</button>
+  </div>
+  <div class="grp">
+    <button id="bU" aria-label="Rückgängig" title="Rückgängig">↶</button>
+    <button id="bR" aria-label="Wiederholen" title="Wiederholen">↷</button>
+    <button id="bH">H ergänzen</button>
+    <button id="bG">Gerade ausrichten</button>
+    <button id="bA">VSEPR-Winkel</button>
+    <button id="bB">Benzolring</button>
+    <button id="bC">Leeren</button>
+    <span class="seg" id="bM"><button data-m="lewis">Lewis</button><button data-m="half">Halbstruktur</button><button data-m="skel">Skelett</button></span>
+    <button id="bN">IUPAC-Name</button>
+    <button id="bP" class="on">PNG</button>
+  </div>
+</div>
+<div class="bar pal" id="pal"></div>
+<main class="board"><svg id="sv" aria-label="Zeichenfläche"></svg><div class="hint" id="hint"></div></main>
+<footer>
+  <span id="fo"></span><span id="pr"></span><span id="tn"></span>
+  <span class="opt">
+    <button id="oL">Paare: Striche</button>
+    <button id="oW">Winkel</button>
+    <button id="oO">Oktett-Prüfung</button>
+    <button id="oF">Farbig</button>
+  </span>
+</footer>
+<div class="modal" id="md"><div class="card">
+  <div class="row" style="justify-content:space-between"><b>PNG-Export</b><button id="mx">Schließen</button></div>
+  <img id="mi" alt="Exportiertes Molekül">
+  <p id="mm"></p>
+  <div class="row"><button id="md2" class="on">Herunterladen</button><button id="mc">In Zwischenablage kopieren</button><button id="mt">Hintergrund: weiß</button></div>
+</div></div>
+<script>
+{
+const EL={H:[1,'#5a5a5a',1.008],B:[3,'#b5651d',10.81],C:[4,'#111111',12.011],N:[5,'#1f4fd1',14.007],O:[6,'#d8261c',15.999],F:[7,'#1c8a3c',18.998],Na:[1,'#6b4fbb',22.990],Mg:[2,'#2e7d5b',24.305],Al:[3,'#7a7f86',26.982],P:[5,'#d9730d',30.974],S:[6,'#a88400',32.06],Cl:[7,'#1c8a3c',35.45],K:[1,'#6b4fbb',39.098],Ca:[2,'#2e7d5b',40.078],Br:[7,'#8a2a12',79.904],I:[7,'#6b2c91',126.904]};
+const MET=new Set(['Na','K','Mg','Ca','Al']),EXP=new Set(['P','S','Cl','Br','I']);
+const PAL=['H','C','N','O','S','P','F','Cl','Br','I','B','Na','K','Mg','Ca','Al'];
+const L=60,FONT='Arial,Helvetica,sans-serif',INK='#1d1b19',ACC='#e2730b',KEY='lewis-zeichner-1';
+const HINTS={draw:'Leere Fläche antippen: Atom setzen · Von einem Atom ziehen: Bindung · Atom antippen: durch gewähltes Element ersetzen (gleiches Element: Nachbaratom anhängen) · Bindung antippen: einfach → doppelt → dreifach',swap:'Atom antippen: wird zum gewählten Element · Bindung antippen: Bindungsordnung ändern',move:'Atom ziehen: verschieben · Leere Fläche ziehen: alles verschieben',hand:'Bindung oder Endatom ziehen: dreht diesen Molekülteil um das Nachbaratom (15°-Schritte), Bindungslänge bleibt gleich',qp:'Atom antippen: Ladung um +1 erhöhen',qm:'Atom antippen: Ladung um −1 verringern',del:'Atom oder Bindung antippen: löschen'};
+let S={atoms:[],bonds:[],n:1},O={lp:'bar',ang:true,chk:true,col:false,tr:false,nm:false,mode:'lewis'};
+let tool='draw',sel='C',U=[],R=[],drag=null,prev=null,exNote=false,blobUrl=null,lastBlob=null,ht=null;
+const $=id=>document.getElementById(id),sv=$('sv');
+const rad=d=>d*Math.PI/180,nrm=d=>((d%360)+360)%360,F=n=>Math.round(n*10)/10;
+const adiff=(a,b)=>{const d=Math.abs(nrm(a)-nrm(b));return d>180?360-d:d};
+const A=id=>S.atoms.find(a=>a.id===id);
+const nb=a=>S.bonds.filter(b=>b.a===a.id||b.b===a.id).map(b=>({b,o:A(b.a===a.id?b.b:b.a)}));
+const ang=(p,q)=>nrm(Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI);
+const pol=(a,d,r)=>({x:a.x+r*Math.cos(rad(d)),y:a.y+r*Math.sin(rad(d))});
+
+function info(a){const ns=nb(a);const bs=ns.reduce((s,n)=>s+n.b.o,0);const f=EL[a.el][0]-a.q-bs;let p=f>0?Math.floor(f/2):0,r=f>0?f%2:0;if(!ns.length&&f>0){p=Math.max(0,f-4);r=f-2*p}return{ns,bs,f,p,r,k:p+r,n:ns.length}}
+
+/* VSEPR: relative Richtungen der Bindungen je nach Zahl der Bindungspartner (n) und freien Elektronenpaare (k) */
+function idealRel(n,k){if(n<=1)return[0];if(n+k<=4){if(n===2)return k===0?[0,180]:k===1?[0,120]:[0,104.5];if(n===3)return k===0?[0,120,240]:[0,107,214];if(n===4)return[0,90,180,270]}return[...Array(n)].map((_,i)=>i*360/n)}
+function greedy(items,slots,used){let c=0;const pick=[];for(const it of items){let bi=-1,bd=1e9;slots.forEach((s,i)=>{if(!used.has(i)){const d=adiff(it,s);if(d<bd){bd=d;bi=i}}});if(bi<0){pick.push(null);continue}used.add(bi);c+=bd*bd;pick.push(slots[bi])}return[c,pick]}
+function fit(fixed,free,n,k){const rel=idealRel(n,k),cands=[],anchors=fixed.length?fixed:free.length?free:[0];
+  for(const an of anchors)for(let j=0;j<rel.length;j++)for(const m of[1,-1])cands.push(rel.map(r=>nrm(an+m*(r-rel[j]))));
+  if(!fixed.length&&free.length>1){const cm=a=>Math.atan2(a.reduce((s,v)=>s+Math.sin(rad(v)),0),a.reduce((s,v)=>s+Math.cos(rad(v)),0))*180/Math.PI;for(const m of[1,-1]){const r2=rel.map(r=>m*r),off=cm(free)-cm(r2);cands.push(r2.map(r=>nrm(r+off)))}}
+  let best=null;for(const slots of cands){const used=new Set();const[c1]=greedy(fixed,slots,used);const[c2,pf]=greedy(free,slots,used);const c=c1+(fixed.length?0.001:1)*c2;if(!best||c<best.c-1e-6)best={c,pf,slots,used}}return best}
+function suggest(a){const I=info(a);if(!I.n)return[];const f=I.f-1,k=f>0?Math.floor(f/2)+f%2:0;const b=fit(I.ns.map(n=>ang(a,n.o)),[],I.n+1,k);return b.slots.filter((s,i)=>!b.used.has(i))}
+function gapDir(d){if(!d.length)return 0;const s=[...d].sort((x,y)=>x-y);let bg=-1,bm=0;s.forEach((v,i)=>{const g=(i+1<s.length?s[i+1]:s[0]+360)-v;if(g>bg){bg=g;bm=v+g/2}});return nrm(bm)}
+function freeDir(a){const s=suggest(a);return s.length?s[0]:gapDir(nb(a).map(n=>ang(a,n.o)))}
+function lpDirs(a,I){const k=I.k;if(!k)return[];const d=I.ns.map(n=>ang(a,n.o)).sort((x,y)=>x-y);if(!d.length)return[270,0,90,180].slice(0,k);
+  const gaps=d.map((v,i)=>({s:v,g:(i+1<d.length?d[i+1]:d[0]+360)-v,c:0}));
+  for(let i=0;i<k;i++){let bi=0,bv=-1;gaps.forEach((g,j)=>{const v=g.g/(g.c+1);if(v>bv+1e-6){bv=v;bi=j}});gaps[bi].c++}
+  const out=[];gaps.forEach(g=>{for(let j=1;j<=g.c;j++)out.push(nrm(g.s+g.g*j/(g.c+1)))});return out}
+function check(a,I){if(I.f<0)return'zu viele Bindungen';if(MET.has(a.el))return null;const e=2*I.bs+I.f;
+  if(a.el==='H')return e===2?null:'kein Duplett';if(e===8)return null;if(e>8)return EXP.has(a.el)?null:'mehr als 8 Elektronen';return'nur '+e+' Valenzelektronen (Oktett unvollständig)'}
+function vlab(a,I){const n=I.n,k=I.k,allH=I.ns.every(x=>x.o.el==='H');if(n<2||n+k>4)return null;
+  if(n===2&&k===0)return'180°';if(n===3&&k===0)return'120°';if(n===2&&k===1)return'< 120°';if(n===4)return'109,5°*';
+  if(n===3)return a.el==='N'&&a.q===0&&allH?'107°':'< 109,5°';return a.el==='O'&&a.q===0&&allH?'104,5°':'< 109,5°'}
+
+/* Halbstrukturformel: H-Atome an Nicht-H-Atomen werden in die Gruppe gezogen (CH₃, OH …), keine freien Elektronenpaare */
+const half=()=>O.mode==='half'||O.mode==='skel',skel=()=>O.mode==='skel',isVert=a=>skel()&&a.el==='C'&&nb(a).some(n=>n.o.el!=='H'),isHid=a=>half()&&a.el==='H'&&nb(a).some(n=>n.o.el!=='H');
+const cw=ch=>/[0-9]/.test(ch)?8:/[a-z]/.test(ch)?11:15.5;
+function grp(a){const hc=half()?nb(a).filter(n=>isHid(n.o)).length:0;if(!hc)return{t:[[a.el,0]],w:[...a.el].reduce((s,c)=>s+cw(c),0)};
+  const hv=nb(a).filter(n=>!isHid(n.o)),hf=hv.length?hv.every(n=>Math.cos(rad(ang(a,n.o)))>0.35):['O','S','F','Cl','Br','I'].includes(a.el);
+  const hp=[['H',0]];if(hc>1)hp.push([String(hc),1]);const t=hf?[...hp,[a.el,0]]:[[a.el,0],...hp];return{t,w:t.reduce((s,[x,u])=>s+[...x].reduce((q,c)=>q+(u?8:cw(c)),0),0)}}
+function grpSvg(a,col){const g=grp(a);let inner='',sh=0;for(const[x,u]of g.t){const dy=u?6-sh:-sh;sh+=dy;inner+=`<tspan${dy?` dy="${dy}"`:''}${u?' font-size="15"':''}>${x}</tspan>`}
+  return`<text x="${F(a.x)}" y="${F(a.y)}" text-anchor="middle" dominant-baseline="central" font-family="${FONT}" font-size="22" fill="${col}">${inner}</text>`}
+function trim(a,ux,uy){if(isVert(a))return 0;if(!half())return a.el.length>1?17:13;const hw=grp(a).w/2+3,hh=13;return Math.min(Math.abs(ux)>1e-3?hw/Math.abs(ux):1e9,Math.abs(uy)>1e-3?hh/Math.abs(uy):1e9)+2}
+function body(ex){let h='';const probs=[];let tet=false;const hm=half(),ring=O.ang&&!hm?ringSet():new Set();
+  for(const b of S.bonds){const p=A(b.a),q=A(b.b);const dx=q.x-p.x,dy=q.y-p.y,len=Math.hypot(dx,dy)||1;const ux=dx/len,uy=dy/len,nx=-uy,ny=ux;if(isHid(p)||isHid(q))continue;const s1=trim(p,ux,uy),s2=trim(q,-ux,-uy);if(len<s1+s2+2)continue;
+    for(const o of b.o===1?[0]:b.o===2?[-3.6,3.6]:[-6,0,6])h+=`<line x1="${F(p.x+ux*s1+nx*o)}" y1="${F(p.y+uy*s1+ny*o)}" x2="${F(q.x-ux*s2+nx*o)}" y2="${F(q.y-uy*s2+ny*o)}" stroke="${INK}" stroke-width="2.2" stroke-linecap="round"/>`}
+  for(const a of S.atoms){if(isHid(a))continue;const I=info(a),col=O.col?EL[a.el][1]:INK,big=a.el.length>1,lp=hm?[]:lpDirs(a,I),bd=I.ns.filter(n=>!isHid(n.o)).map(n=>ang(a,n.o)),gw=hm?grp(a).w/2:0;
+    if(O.ang&&!hm&&!ring.has(a.id)){const t=vlab(a,I);if(t){const s=I.ns.map(n=>({d:ang(a,n.o),t:nb(n.o).length===1})).sort((x,y)=>x.d-y.d);let bg=null;
+      s.forEach((v,i)=>{const w=s[(i+1)%s.length],g=(i+1<s.length?w.d:w.d+360)-v.d,sc=(v.t&&w.t?0:1000)+g;if(lp.some(l=>{const r=nrm(l-v.d);return r>0.5&&r<g-0.5}))return;if(!bg||sc<bg.sc-0.01)bg={v:v.d,g,sc}});
+      if(bg){const r0=big?30:26,r1=big?48:44,p1=pol(a,bg.v,r0),p2=pol(a,bg.v+bg.g,r0),m=pol(a,bg.v+bg.g/2,r1);
+        h+=`<path d="M${F(p1.x)} ${F(p1.y)}A${r0} ${r0} 0 ${bg.g>180?1:0} 1 ${F(p2.x)} ${F(p2.y)}" fill="none" stroke="${ACC}" stroke-width="1.5"/><text x="${F(m.x)}" y="${F(m.y)}" text-anchor="middle" dominant-baseline="central" font-family="${FONT}" font-size="12" fill="#c25e00">${t}</text>`;if(t.includes('*'))tet=true}}}
+    const pb=check(a,I);if(pb){probs.push(a.el+': '+pb);if(!ex&&O.chk)h+=`<circle cx="${F(a.x)}" cy="${F(a.y)}" r="${Math.max(big?22:19,gw+5)}" fill="#d22d1f" fill-opacity=".08" stroke="#d22d1f" stroke-width="1.6" stroke-dasharray="4 3"/>`}
+    if(!isVert(a))h+=grpSvg(a,col);
+    const r=big?23:18;lp.forEach((d,i)=>{const c=pol(a,d,r),nx=-Math.sin(rad(d)),ny=Math.cos(rad(d));
+      if(i>=I.p)h+=`<circle cx="${F(c.x)}" cy="${F(c.y)}" r="2.3" fill="${col}"/>`;
+      else if(O.lp==='bar')h+=`<line x1="${F(c.x-nx*6.5)}" y1="${F(c.y-ny*6.5)}" x2="${F(c.x+nx*6.5)}" y2="${F(c.y+ny*6.5)}" stroke="${col}" stroke-width="2.2" stroke-linecap="round"/>`;
+      else h+=`<circle cx="${F(c.x-nx*4)}" cy="${F(c.y-ny*4)}" r="2.1" fill="${col}"/><circle cx="${F(c.x+nx*4)}" cy="${F(c.y+ny*4)}" r="2.1" fill="${col}"/>`});
+    if(a.q){const occ=bd.concat(lp);let bc=315,bv=-1;[315,225,45,135,0,180,270,90].forEach(c=>{const m=occ.length?Math.min(...occ.map(o=>adiff(o,c))):360;if(m>bv+0.5){bv=m;bc=c}});
+      const c=pol(a,bc,Math.max(big?31:28,gw+12)),t=(Math.abs(a.q)>1?Math.abs(a.q):'')+(a.q>0?'+':'−'),cr=Math.abs(a.q)>1?9:7.5;
+      h+=`<circle cx="${F(c.x)}" cy="${F(c.y)}" r="${cr}" fill="#fff" stroke="${col}" stroke-width="1.3"/><text x="${F(c.x)}" y="${F(c.y+0.5)}" text-anchor="middle" dominant-baseline="central" font-family="${FONT}" font-size="${Math.abs(a.q)>1?10:13}" font-weight="700" fill="${col}">${t}</text>`}}
+  h+=nameLabels(ex);return{h,probs,tet}}
+
+const GRID='<defs><pattern id="gp" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1" fill="#e4ddd3"/></pattern></defs><rect width="100%" height="100%" fill="url(#gp)"/>';
+function render(){const r=body(false);let pv='';
+  if(prev){pv=`<line x1="${F(prev.x1)}" y1="${F(prev.y1)}" x2="${F(prev.x2)}" y2="${F(prev.y2)}" stroke="${ACC}" stroke-width="2.5" stroke-dasharray="6 5"/>`;
+    if(!prev.t)pv+=`<text x="${F(prev.x2)}" y="${F(prev.y2)}" text-anchor="middle" dominant-baseline="central" font-family="${FONT}" font-size="22" fill="${ACC}" opacity=".75">${sel}</text>`;
+    if(!drag.a)pv+=`<text x="${F(prev.x1)}" y="${F(prev.y1)}" text-anchor="middle" dominant-baseline="central" font-family="${FONT}" font-size="22" fill="${ACC}" opacity=".75">${sel}</text>`}
+  sv.innerHTML=GRID+r.h+pv;status(r.probs,r.tet);$('bU').disabled=!U.length;$('bR').disabled=!R.length}
+
+const SUB='₀₁₂₃₄₅₆₇₈₉',SUP='⁰¹²³⁴⁵⁶⁷⁸⁹';
+const sub=n=>n>1?String(n).split('').map(d=>SUB[d]).join(''):'';
+function comps(){const seen=new Set(),out=[];for(const a of S.atoms){if(seen.has(a.id))continue;const c=[],q=[a];seen.add(a.id);while(q.length){const x=q.shift();c.push(x);for(const n of nb(x))if(!seen.has(n.o.id)){seen.add(n.o.id);q.push(n.o)}}out.push(c)}return out}
+function formula(c){const cnt={};let q=0;c.forEach(a=>{cnt[a.el]=(cnt[a.el]||0)+1;q+=a.q});let ks=Object.keys(cnt).sort();
+  if(cnt.C)ks=['C',...(cnt.H?['H']:[]),...ks.filter(k=>k!=='C'&&k!=='H')];else if(ks.length===2&&cnt.H&&['N','P','B','Al','Na','K','Mg','Ca'].includes(ks.find(k=>k!=='H')))ks=[ks.find(k=>k!=='H'),'H'];
+  let s=ks.map(k=>k+sub(cnt[k])).join('');if(q)s+=(Math.abs(q)>1?String(Math.abs(q)).split('').map(d=>SUP[d]).join(''):'')+(q>0?'⁺':'⁻');
+  const M=ks.reduce((m,k)=>m+EL[k][2]*cnt[k],0);return c.fOnly?s:s+' ('+M.toFixed(2).replace('.',',')+' g/mol)'}
+const fstr=c=>{const x=[...c];x.fOnly=true;return formula(x)};
+
+/* IUPAC-Benennung (deutsche Schulnomenklatur): acyclische Kohlenwasserstoffe mit Alkyl-, Halogen-, OH- und C=O-Gruppen,
+   einfache Ringe (Cycloalkane/-alkene, Benzol) und eine Liste anorganischer Teilchen */
+const STEM=['','Meth','Eth','Prop','But','Pent','Hex','Hept','Oct','Non','Dec','Undec','Dodec','Tridec','Tetradec','Pentadec','Hexadec','Heptadec','Octadec','Nonadec','Icos'];
+const MUL=['','','di','tri','tetra','penta','hexa','hepta','octa','nona','deca'],HAL={F:'fluor',Cl:'chlor',Br:'brom',I:'iod'};
+const INORG={'H₂O':'Wasser','NH₃':'Ammoniak','CO₂':'Kohlenstoffdioxid','CO':'Kohlenstoffmonooxid','O₂':'Sauerstoff','O₃':'Ozon','N₂':'Stickstoff','H₂':'Wasserstoff','F₂':'Fluor','Cl₂':'Chlor','Br₂':'Brom','I₂':'Iod',
+  'FH':'Fluorwasserstoff','ClH':'Chlorwasserstoff','BrH':'Bromwasserstoff','HI':'Iodwasserstoff','H₂S':'Schwefelwasserstoff','H₂O₂':'Wasserstoffperoxid','SO₂':'Schwefeldioxid','SO₃':'Schwefeltrioxid','NO':'Stickstoffmonooxid','NO₂':'Stickstoffdioxid',
+  'H₂O₄S':'Schwefelsäure','HNO₃':'Salpetersäure','H₃O₄P':'Phosphorsäure','CH₂O₃':'Kohlensäure','PH₃':'Phosphan','BF₃':'Bortrifluorid','CCl₄':'Tetrachlormethan',
+  'NH₄⁺':'Ammonium-Ion','H₃O⁺':'Oxonium-Ion','HO⁻':'Hydroxid-Ion','F⁻':'Fluorid-Ion','Cl⁻':'Chlorid-Ion','Br⁻':'Bromid-Ion','I⁻':'Iodid-Ion','O²⁻':'Oxid-Ion','S²⁻':'Sulfid-Ion',
+  'Na⁺':'Natrium-Ion','K⁺':'Kalium-Ion','Mg²⁺':'Magnesium-Ion','Ca²⁺':'Calcium-Ion','Al³⁺':'Aluminium-Ion','CO₃²⁻':'Carbonat-Ion','CHO₃⁻':'Hydrogencarbonat-Ion','NO₃⁻':'Nitrat-Ion','O₄S²⁻':'Sulfat-Ion','O₄P³⁻':'Phosphat-Ion','CH₃O₂⁻':'Acetat-Ion (Ethanoat-Ion)'};
+const lex=(x,y)=>{for(let i=0;i<Math.max(x.length,y.length);i++){if(x[i]===undefined)return-1;if(y[i]===undefined)return 1;if(x[i]!==y[i])return x[i]-y[i]}return 0};
+function nameOf(c){
+  if(c.some(a=>check(a,info(a))))return{err:'unvollständig – erst Oktett/Duplett erfüllen'};
+  const key=fstr(c);if(INORG[key])return{name:INORG[key]};
+  const C=c.filter(a=>a.el==='C');if(!C.length)return{err:'kein Name hinterlegt'};
+  if(c.some(a=>!['C','H','O','F','Cl','Br','I'].includes(a.el)||a.q))return{err:'nur C, H, O und Halogene ohne Ladung'};
+  const cn=a=>nb(a).filter(n=>n.o.el==='C'),G=new Map(C.map(a=>[a.id,{hal:[],oh:0,co:0,acid:0,ald:0,ket:0}]));
+  for(const o of c.filter(a=>a.el==='O')){const ns=nb(o),cs=ns.filter(n=>n.o.el==='C');
+    if(cs.length===1&&ns.length===2&&ns.some(n=>n.o.el==='H'))G.get(cs[0].o.id).oh++;
+    else if(cs.length===1&&ns.length===1&&cs[0].b.o===2)G.get(cs[0].o.id).co++;
+    else return{err:cs.length>1?'Ether/Ester noch nicht unterstützt':'diese Sauerstoffgruppe wird nicht unterstützt'}}
+  for(const a of C){const g=G.get(a.id);for(const n of nb(a))if(HAL[n.o.el])g.hal.push(n.o.el);
+    if(g.co&&g.oh){g.acid=1;g.co--;g.oh--}if(g.co){if(cn(a).length<=1)g.ald=g.co;else g.ket=g.co}}
+  const ring=ringSet();if(c.some(a=>ring.has(a.id)))return ringName(c,C);
+  const pr=['acid','ald','ket','oh'].find(t=>C.some(a=>G.get(a.id)[t]));
+  const adj=new Map(C.map(a=>[a.id,cn(a).map(n=>({id:n.o.id,o:n.b.o}))]));
+  const ord=(u,v)=>adj.get(u).find(x=>x.id===v).o;
+  const path=(u,v)=>{const par=new Map([[u,null]]),q=[u];while(q.length){const x=q.shift();for(const y of adj.get(x))if(!par.has(y.id)){par.set(y.id,x);q.push(y.id)}}const p=[];let x=v;while(x!=null){p.push(x);x=par.get(x)}return p.reverse()};
+  const alkyl=(st,fr)=>{let len=0,cur=st,prev=fr;for(;;){len++;const g=G.get(cur);if(ord(prev,cur)!==1||g.hal.length||g.oh||g.acid||g.ald||g.ket)return null;
+    const nx=adj.get(cur).filter(x=>x.id!==prev);if(nx.length>1||len>20)return null;if(!nx.length)return STEM[len].toLowerCase()+'yl';prev=cur;cur=nx[0].id}};
+  const evalP=P=>{const idx=new Set(P),en=[],yn=[],prL=[],subs=[];let ok=true;
+    for(let i=0;i<P.length-1;i++){const o=ord(P[i],P[i+1]);if(o===2)en.push(i+1);if(o===3)yn.push(i+1)}
+    P.forEach((id,i)=>{const g=G.get(id),l=i+1;if(pr)for(let k=0;k<g[pr];k++)prL.push(l);
+      if(pr!=='oh')for(let k=0;k<g.oh;k++)subs.push({n:'hydroxy',l});
+      for(const t of['ald','ket'])if(t!==pr)for(let k=0;k<g[t];k++)subs.push({n:'oxo',l});
+      g.hal.forEach(h=>subs.push({n:HAL[h],l}));
+      for(const x of adj.get(id))if(!idx.has(x.id)){const n=alkyl(x.id,id);if(!n)ok=false;else subs.push({n,l})}});
+    const al=[...subs].sort((a,b)=>a.n.localeCompare(b.n,'de')||a.l-b.l).map(s=>s.l);
+    return{P,ok,en,yn,prL,subs,pg:prL.length,mb:en.length+yn.length,ns:subs.length,mbL:[...en,...yn].sort((a,b)=>a-b),subL:subs.map(s=>s.l).sort((a,b)=>a-b),al}};
+  const cmp=(a,b)=>(b.pg-a.pg)||(b.mb-a.mb)||(b.P.length-a.P.length)||(b.ns-a.ns)||lex(a.prL,b.prL)||lex(a.mbL,b.mbL)||lex(a.en,b.en)||lex(a.subL,b.subL)||lex(a.al,b.al);
+  let best=null;for(let i=0;i<C.length;i++)for(let j=i;j<C.length;j++){const p=path(C[i].id,C[j].id);for(const P of i===j?[p]:[p,[...p].reverse()]){const e=evalP(P);if(!best||cmp(e,best)<0)best=e}}
+  if(!best.ok)return{err:'verzweigte/ungesättigte Seitenkette noch nicht unterstützt'};
+  const L=best.P.length,gr=new Map();best.subs.forEach(s=>{if(!gr.has(s.n))gr.set(s.n,[]);gr.get(s.n).push(s.l)});
+  const hasU=best.mb>0,citeS=!(L===1||(L===2&&best.ns===1&&!pr&&!hasU));
+  const pre=[...gr.keys()].sort((a,b)=>a.localeCompare(b,'de')).map(n=>{const l=gr.get(n).sort((x,y)=>x-y);return(citeS?l.join(',')+'-':'')+MUL[l.length]+n}).join(citeS?'-':'');
+  const citeU=!(L===2||(L===3&&best.mb===1&&!pr&&!best.ns));let core=STEM[L];
+  if(!hasU)core+='an';else{const e=best.en,y=best.yn;if(e.length>1||y.length>1)core+='a';
+    if(e.length)core+=(citeU?'-'+e.join(',')+'-':'')+MUL[e.length]+'en';if(y.length)core+=(citeU?'-'+y.join(',')+'-':'')+MUL[y.length]+'in'}
+  if(pr){const n=best.prL.length,l=best.prL;
+    if(pr==='acid')core+=MUL[n]+'säure';else if(pr==='ald')core+=MUL[n]+'al';
+    else{const cite=!((pr==='oh'&&L<=2&&n===1)||(pr==='ket'&&L===3&&n===1&&!hasU&&!best.ns));core+=(cite?'-'+l.join(',')+'-':'')+MUL[n]+(pr==='oh'?'ol':'on')}}
+  return{name:cap((pre+core).toLowerCase())}}
+const cap=s=>s.replace(/[a-zäöü]/,m=>m.toUpperCase());
+function ringName(c,C){if(c.some(a=>a.el!=='C'&&a.el!=='H')||C.some(a=>nb(a).filter(n=>n.o.el==='C').length!==2))return{err:'Ringe mit Seitengruppen noch nicht unterstützt'};
+  const bs=S.bonds.filter(b=>C.includes(A(b.a))&&C.includes(A(b.b))),d=bs.filter(b=>b.o===2).length,n=C.length;
+  if(bs.some(b=>b.o===3)||n>20)return{err:'dieser Ring wird nicht unterstützt'};
+  if(n===6&&d===3)return{name:'Benzol'};if(d===0)return{name:'Cyclo'+STEM[n].toLowerCase()+'an'};if(d===1)return{name:'Cyclo'+STEM[n].toLowerCase()+'en'};
+  return{err:'dieser Ring wird nicht unterstützt'}}
+function nameLabels(ex){if(!O.nm)return'';let h='';for(const c of comps()){const r=nameOf(c);if(ex&&!r.name)continue;
+    const x=(Math.min(...c.filter(a=>!isHid(a)).map(a=>a.x))+Math.max(...c.filter(a=>!isHid(a)).map(a=>a.x)))/2,y=Math.max(...c.filter(a=>!isHid(a)).map(a=>a.y))+(O.ang?56:42);
+    h+=r.name?`<text x="${F(x)}" y="${F(y)}" text-anchor="middle" dominant-baseline="central" font-family="${FONT}" font-size="17" fill="${INK}">${r.name}</text>`
+      :`<text x="${F(x)}" y="${F(y)}" text-anchor="middle" dominant-baseline="central" font-family="${FONT}" font-size="13" font-style="italic" fill="#9a8f84">Name: ${r.err}</text>`}return h}
+function status(probs,tet){const cs=comps();$('fo').textContent=cs.length?cs.slice(0,4).map(formula).join(' · ')+(cs.length>4?' …':''):'Leeres Blatt';
+  const pr=$('pr');if(!O.chk||!S.atoms.length){pr.textContent='';pr.className=''}
+  else if(probs.length){pr.className='bad';pr.textContent=probs.slice(0,2).join(' · ')+(probs.length>2?` · +${probs.length-2} weitere`:'')}
+  else{pr.className='';pr.textContent='✓ Oktett- und Duplettregel überall erfüllt'}
+  $('tn').textContent=tet&&O.ang?'* Tetraeder: räumlich 109,5°, in der Ebene als Kreuz gezeichnet':''}
+
+function setHint(){$('hint').textContent=HINTS[tool]+(exNote?' · Beispiel: H₂O und CO₂ – „Leeren“ startet neu':'')}
+function flash(m){$('hint').textContent=m;clearTimeout(ht);ht=setTimeout(setHint,2500)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({S,O,sel}))}catch(_){}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.S&&Array.isArray(d.S.atoms)){S=d.S;Object.assign(O,d.O||{});if(EL[d.sel])sel=d.sel;return true}}catch(_){}return false}
+function snap(){U.push(JSON.stringify(S));if(U.length>200)U.shift();R=[]}
+function commit(){if(exNote){exNote=false;setHint()}save();render()}
+function undo(){if(!U.length)return;R.push(JSON.stringify(S));S=JSON.parse(U.pop());commit()}
+function redo(){if(!R.length)return;U.push(JSON.stringify(S));S=JSON.parse(R.pop());commit()}
+function addAtom(el,x,y){const a={id:S.n++,el,x,y,q:0};S.atoms.push(a);return a}
+function addBond(a,b){if(a===b)return;const e=S.bonds.find(x=>(x.a===a.id&&x.b===b.id)||(x.a===b.id&&x.b===a.id));if(e)e.o=Math.min(3,e.o+1);else S.bonds.push({a:a.id,b:b.id,o:1})}
+function attach(a,el){const d=freeDir(a),p=pol(a,d,L),n=addAtom(el,p.x,p.y);addBond(a,n);return n}
+
+function ringSet(){const r=new Set();for(const b of S.bonds){const seen=new Set([b.a]),q=[b.a];let ok=false;
+  while(q.length&&!ok){const x=q.shift();for(const c of S.bonds){if(c===b)continue;const y=c.a===x?c.b:c.b===x?c.a:null;if(y===null||seen.has(y))continue;if(y===b.b){ok=true;break}seen.add(y);q.push(y)}}
+  if(ok){r.add(b.a);r.add(b.b)}}return r}
+function tidy(){const old=new Map(S.atoms.map(a=>[a.id,{x:a.x,y:a.y}])),ring=ringSet(),placed=new Set(ring),vis=new Set();
+  const deg=a=>nb(a).length;
+  const starts=[...S.atoms].sort((a,b)=>(ring.has(b.id)-ring.has(a.id))||(deg(b)-deg(a))||((a.el==='H')-(b.el==='H')));
+  for(const st of starts){if(vis.has(st.id))continue;placed.add(st.id);vis.add(st.id);const q=[st];
+    while(q.length){const c=q.shift(),I=info(c),fx=[],fr=[];
+      for(const n of I.ns){if(placed.has(n.o.id))fx.push(ang(c,n.o));else fr.push({a:n.o,d:ang(old.get(c.id),old.get(n.o.id))})}
+      if(fr.length&&!fx.length&&I.k&&I.n>1&&I.n+I.k<=4){const rel=idealRel(I.n,I.k),off=270-gapDir(rel),sl=rel.map(r=>nrm(r+off)),used=new Set();const[,pf]=greedy(fr.map(x=>x.d),sl,used);fr.forEach((x,i)=>{const p=pol(c,pf[i],L);x.a.x=p.x;x.a.y=p.y;placed.add(x.a.id)})}
+      else if(fr.length){const b=fit(fx,fr.map(x=>x.d),I.n,I.k);fr.forEach((x,i)=>{const d=b.pf[i];if(d==null)return;const p=pol(c,d,L);x.a.x=p.x;x.a.y=p.y;placed.add(x.a.id)})}
+      for(const n of I.ns)if(!vis.has(n.o.id)){vis.add(n.o.id);q.push(n.o)}}}}
+/* Gerade ausrichten: jede Bindung rastet auf die nächste 90°-Richtung ein, Anordnung bleibt.
+   Haben H-Atome an einer Verzweigung keinen Platz, wird nur die Bindung zu diesem Ast doppelt so lang. */
+function gridComp(comp,long,op={}){const DIR={0:[1,0],90:[0,1],180:[-1,0],270:[0,-1]},key=(i,j)=>i+','+j,heavyOf=a=>a.el!=='H'||!comp.some(x=>x.el!=='H');
+  const atomC=new Set(),bondC=new Set(),pos=new Map(),failed=new Set(),old=new Map(comp.map(a=>[a.id,{x:a.x,y:a.y}]));
+  const free=(i,j)=>!atomC.has(key(i,j))&&!bondC.has(key(i,j));
+  const pathFree=(i,j,d,st)=>{for(let m=1;m<=st;m++)if(!free(i+DIR[d][0]*m,j+DIR[d][1]*m))return false;return true};
+  const put=(k,i,j,d,st)=>{for(let m=1;m<st;m++)bondC.add(key(i+DIR[d][0]*m,j+DIR[d][1]*m));const p=[i+DIR[d][0]*st,j+DIR[d][1]*st];pos.set(k.id,p);atomC.add(key(p[0],p[1]))};
+  const place=(a,k,st0)=>{const[i,j]=pos.get(a.id);let w=ang(old.get(a.id),old.get(k.id));if(op.fx)w=nrm(180-w);if(op.fy)w=nrm(-w);const order=[0,90,180,270].sort((x,y)=>adiff(x,w)-adiff(y,w));
+    let d=order.find(d=>pathFree(i,j,d,st0));if(d!==undefined){put(k,i,j,d,st0);return true}
+    for(let st=st0+1;st<8;st++){d=order.find(d=>pathFree(i,j,d,st));if(d!==undefined){put(k,i,j,d,st);return false}}
+    put(k,i,j,order[0],st0);return false};
+  const heavy=comp.filter(heavyOf),root=(op.root&&comp.find(a=>a.id===op.root))||[...heavy].sort((a,b)=>nb(b).length-nb(a).length)[0];const kids=a=>{const l=nb(a);return op.rev?l.reverse():l};
+  pos.set(root.id,[0,0]);atomC.add('0,0');const order=[root],q=[root];
+  while(q.length){const a=q.shift();for(const n of kids(a)){const k=n.o;if(pos.has(k.id)||!heavyOf(k))continue;place(a,k,long.has(k.id)?2:1);order.push(k);q.push(k)}}
+  for(const a of order)for(const n of kids(a)){const k=n.o;if(pos.has(k.id))continue;if(half()&&k.el==='H'){const[i,j]=pos.get(a.id);let w=ang(old.get(a.id),old.get(k.id));const d=[0,90,180,270].sort((x,y)=>adiff(x,w)-adiff(y,w))[0];pos.set(k.id,[i+DIR[d][0]*0.6,j+DIR[d][1]*0.6]);continue}if(!place(a,k,1))failed.add(a.id)}
+  return{pos,failed,old,root}}
+function gridVariants(comp){const out=[],seen=new Set(),heavy=comp.filter(a=>a.el!=='H');const roots=[null,...(heavy.length?heavy:comp).slice(0,8).map(a=>a.id)];
+  for(const fy of[false,true])for(const fx of[false,true])for(const rev of[false,true])for(const last of[false,true])for(const root of roots){const op={fx,fy,rev,root};
+    const long=new Set();let r=gridComp(comp,long,op);
+    for(let t=0;t<8&&r.failed.size;t++){const ids=[...r.failed].filter(id=>id!==r.root.id&&!long.has(id));if(!ids.length)break;long.add(last?ids[ids.length-1]:ids[0]);r=gridComp(comp,long,op)}
+    const ps=comp.map(a=>r.pos.get(a.id)||[0,0]),mi=Math.min(...ps.map(p=>p[0])),mj=Math.min(...ps.map(p=>p[1]));
+    const sig=comp.map((a,i)=>half()&&a.el==='H'?'':a.el+'@'+(ps[i][0]-mi)+','+(ps[i][1]-mj)).sort().join(' ');if(seen.has(sig))continue;seen.add(sig);out.push({r,long:long.size>0,nl:long.size})}
+  const mn=Math.min(...out.map(o=>o.nl));return out.filter(o=>o.nl===mn)}
+function gridLayout(v=0){const ring=ringSet();let skipped=false,tight=false,n=1;
+  for(const comp of comps()){if(comp.some(a=>ring.has(a.id))){skipped=true;continue}
+    const vs=gridVariants(comp),pick=vs[v%vs.length],r=pick.r;n=Math.max(n,vs.length);if(pick.long)tight=true;
+    const cx=comp.reduce((t,a)=>t+a.x,0)/comp.length,cy=comp.reduce((t,a)=>t+a.y,0)/comp.length,ps=comp.map(a=>r.pos.get(a.id)||[0,0]);
+    const ci=ps.reduce((t,p)=>t+p[0],0)/ps.length,cj=ps.reduce((t,p)=>t+p[1],0)/ps.length;comp.forEach((a,i)=>{a.x=cx+(ps[i][0]-ci)*L;a.y=cy+(ps[i][1]-cj)*L})}
+  const bx=c=>{const xs=c.filter(a=>!isHid(a)).map(a=>a.x),ys=c.filter(a=>!isHid(a)).map(a=>a.y);return[Math.min(...xs)-30,Math.min(...ys)-30,Math.max(...xs)+30,Math.max(...ys)+30]},done=[];
+  for(const c of comps()){for(let t=0;t<50;t++){const b=bx(c),hit=done.find(o=>b[0]<o[2]&&b[2]>o[0]&&b[1]<o[3]&&b[3]>o[1]);if(!hit)break;const dy=hit[3]-b[1]+1;c.forEach(a=>a.y+=dy)}done.push(bx(c))}
+  return{skipped,tight,n}}
+/* Skelettformel: Zickzack-Anordnung der Nicht-H-Atome (120°), Dreifachbindungen linear */
+function spread(d,k){if(!k)return[];if(!d.length)return[...Array(k)].map((_,i)=>nrm(-90+i*360/k));const s=[...d].sort((x,y)=>x-y),g=s.map((v,i)=>({s:v,g:(i+1<s.length?s[i+1]:s[0]+360)-v,c:0}));
+  for(let i=0;i<k;i++){let bi=0,bv=-1;g.forEach((x,j)=>{const v=x.g/(x.c+1);if(v>bv+1e-6){bv=v;bi=j}});g[bi].c++}const o=[];g.forEach(x=>{for(let j=1;j<=x.c;j++)o.push(nrm(x.s+x.g*j/(x.c+1)))});return o}
+function placeH(a){const hs=nb(a).filter(n=>n.o.el==='H'&&nb(n.o).length===1);if(!hs.length)return;const dirs=spread(nb(a).filter(n=>!hs.includes(n)).map(n=>ang(a,n.o)),hs.length);hs.forEach((n,i)=>{const p=pol(a,dirs[i],L);n.o.x=p.x;n.o.y=p.y})}
+function placeHAll(){S.atoms.filter(a=>a.el!=='H').forEach(placeH)}
+function skelApply(){const ring=ringSet();
+  for(const comp of comps()){const hv=comp.filter(a=>a.el!=='H');if(comp.some(a=>ring.has(a.id))){hv.forEach(placeH);continue}if(hv.length<2)continue;
+    const ids=new Set(hv.map(a=>a.id)),hn=a=>nb(a).filter(n=>ids.has(n.o.id)).map(n=>n.o);
+    const far=st=>{const par=new Map([[st.id,null]]),q=[st];let last=st;while(q.length){const x=q.shift();last=x;for(const y of hn(x))if(!par.has(y.id)){par.set(y.id,x);q.push(y)}}return{last,par}};
+    const a0=far(hv[0]).last,r=far(a0),chain=[];let x=r.last;while(x){chain.push(x);x=r.par.get(x.id)}if(chain[0].x>chain[chain.length-1].x)chain.reverse();
+    const nextOn=new Map();chain.forEach((c,i)=>{if(i+1<chain.length)nextOn.set(c.id,chain[i+1].id)});
+    const size=(k,p)=>{const sd=side(k.id,p.id);return sd?sd.size:0},lin=a=>nb(a).some(n=>n.b.o===3)||nb(a).filter(n=>n.b.o===2).length>=2;
+    const cx=hv.reduce((t,a)=>t+a.x,0)/hv.length,cy=hv.reduce((t,a)=>t+a.y,0)/hv.length,pos=new Map([[chain[0].id,{x:0,y:0}]]),st=[{a:chain[0],din:null,t:-1}];
+    while(st.length){const{a,din,t}=st.pop(),P=pos.get(a.id);let kids=hn(a).filter(o=>!pos.has(o.id));if(!kids.length)continue;
+      const pref=kids.find(k=>k.id===nextOn.get(a.id))||[...kids].sort((u,v)=>size(v,a)-size(u,a))[0];kids=[pref,...kids.filter(k=>k!==pref)];
+      let d0,t0;if(din===null){d0=-30;t0=-1}else if(lin(a)){d0=din;t0=t}else{const sg=-t;d0=nrm(din+60*sg);t0=sg}
+      const occ=[d0];if(din!==null)occ.push(nrm(din+180));const rest=spread(occ,kids.length-1),dirs=[d0,...rest];
+      kids.forEach((k,i)=>{const d=dirs[i],p=pol(P,d,L);pos.set(k.id,{x:p.x,y:p.y});const tr=i===0?t0:(nrm(d-(din??d0))>180?-1:1);st.push({a:k,din:d,t:tr})})}
+    const ps=[...pos.values()],mx=ps.reduce((t,p)=>t+p.x,0)/ps.length,my=ps.reduce((t,p)=>t+p.y,0)/ps.length;
+    hv.forEach(a=>{const p=pos.get(a.id);if(p){a.x=cx+p.x-mx;a.y=cy+p.y-my}});hv.forEach(placeH)}}
+function want(a){if(a.el==='H'||MET.has(a.el))return 0;if(a.el==='C')return 4-Math.abs(a.q);if(a.el==='B')return 3-a.q;return 8-EL[a.el][0]+a.q}
+function addH(){snap();let any=false;for(const a of[...S.atoms]){let m=want(a)-info(a).bs;for(;m>0;m--){attach(a,'H');any=true}}if(!any){U.pop();flash('Alle Atome sind bereits abgesättigt.');return}commit()}
+function benz(){snap();const r=sv.getBoundingClientRect();let cx=r.width/2,cy=r.height/2;for(let i=0;i<12&&S.atoms.some(a=>Math.hypot(a.x-cx,a.y-cy)<L*2);i++)cx+=L*1.2;
+  const at=[];for(let i=0;i<6;i++)at.push(addAtom('C',cx+L*Math.cos(rad(-90+60*i)),cy+L*Math.sin(rad(-90+60*i))));
+  for(let i=0;i<6;i++)S.bonds.push({a:at[i].id,b:at[(i+1)%6].id,o:i%2?1:2});commit()}
+function example(){const r=sv.getBoundingClientRect(),w=r.width||800,h=r.height||480;
+  const o=addAtom('O',w*.3,h*.4),h1=addAtom('H',o.x-40,o.y+40),h2=addAtom('H',o.x+40,o.y+40);addBond(o,h1);addBond(o,h2);
+  const c=addAtom('C',w*.68,h*.45),o1=addAtom('O',c.x-L,c.y),o2=addAtom('O',c.x+L,c.y);addBond(c,o1);addBond(c,o1);addBond(c,o2);addBond(c,o2);tidy();exNote=true}
+
+function side(m,pv){const seen=new Set([m]),q=[m];while(q.length){const x=q.shift();for(const n of nb(A(x))){const y=n.o.id;if(x===m&&y===pv)continue;if(y===pv)return null;if(!seen.has(y)){seen.add(y);q.push(y)}}}return seen}
+function rotSetup(d){let pv=null,set=null;
+  if(d.b){const a=A(d.b.a),c=A(d.b.b),sa=side(a.id,c.id),sc=side(c.id,a.id);if(!sa||!sc)return null;if(sa.size<=sc.size){pv=c;set=sa}else{pv=a;set=sc}}
+  else if(d.a){for(const n of nb(d.a)){const s=side(d.a.id,n.o.id);if(s&&(!set||s.size<set.size)){set=s;pv=n.o}}if(!set)return null}else return null;
+  return{pv,set,a0:ang(pv,{x:d.x0,y:d.y0}),orig:new Map([...set].map(id=>{const a=A(id);return[id,{x:a.x,y:a.y}]}))}}
+function pt(e){const r=sv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+function hitA(x,y,ex){let best=null,bd=24;for(const a of S.atoms){if(a===ex||isHid(a))continue;const d=Math.hypot(a.x-x,a.y-y);if(d<bd){bd=d;best=a}}return best}
+function hitB(x,y){let best=null,bd=11;for(const b of S.bonds){const p=A(b.a),q=A(b.b),dx=q.x-p.x,dy=q.y-p.y,l2=dx*dx+dy*dy||1;const t=Math.max(0,Math.min(1,((x-p.x)*dx+(y-p.y)*dy)/l2));const d=Math.hypot(p.x+t*dx-x,p.y+t*dy-y);if(d<bd){bd=d;best=b}}return best}
+function calcEnd(p){const src=drag.a||{x:drag.x0,y:drag.y0},t=hitA(p.x,p.y,drag.a);if(t)return{x1:src.x,y1:src.y,x2:t.x,y2:t.y,t};
+  let d=ang(src,p),bs=null,bd=40;(drag.a?suggest(drag.a):[]).forEach(v=>{const x=adiff(v,d);if(x<bd){bd=x;bs=v}});d=bs!==null?bs:Math.round(d/15)*15;const e=pol(src,d,L);return{x1:src.x,y1:src.y,x2:e.x,y2:e.y,t:null}}
+sv.addEventListener('pointerdown',e=>{if(drag)return;const p=pt(e);try{sv.setPointerCapture(e.pointerId)}catch(_){}const a=hitA(p.x,p.y);drag={id:e.pointerId,x0:p.x,y0:p.y,a,b:a?null:hitB(p.x,p.y),mv:false,sn:false,last:p}});
+sv.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const p=pt(e);if(!drag.mv&&Math.hypot(p.x-drag.x0,p.y-drag.y0)>8)drag.mv=true;if(!drag.mv)return;
+  if(tool==='move'){if(!drag.sn){snap();drag.sn=true}const dx=p.x-drag.last.x,dy=p.y-drag.last.y;(drag.a?[drag.a]:S.atoms).forEach(a=>{a.x+=dx;a.y+=dy});drag.last=p;render();return}
+  if(tool==='hand'){if(!drag.rot){const r=rotSetup(drag);if(!r){drag.rot={none:true};flash(drag.a||drag.b?'Hier kann nicht gedreht werden (Ring oder einzelnes Atom).':'Eine Bindung oder ein Endatom ziehen.');return}snap();drag.rot=r}
+    const r=drag.rot;if(r.none)return;const w=rad(Math.round((ang(r.pv,p)-r.a0)/15)*15),co=Math.cos(w),si=Math.sin(w);
+    for(const id of r.set){const a=A(id),o=r.orig.get(id),rx=o.x-r.pv.x,ry=o.y-r.pv.y;a.x=r.pv.x+rx*co-ry*si;a.y=r.pv.y+rx*si+ry*co}render();return}
+  if(tool==='draw'&&!drag.b){prev=calcEnd(p);render()}});
+function up(e){if(!drag||e.pointerId!==drag.id)return;const d=drag,pv=prev;prev=null;
+  if(e.type==='pointercancel'){drag=null;render();return}
+  if(tool==='move'){drag=null;if(d.sn)commit();else render();return}
+  if(tool==='hand'){drag=null;if(d.rot&&!d.rot.none)commit();else render();return}
+  if(tool==='draw'){
+    if(!d.mv){snap();if(d.a){if(d.a.el!==sel){d.a.el=sel;d.a.q=0}else attach(d.a,sel)}else if(d.b)d.b.o=d.b.o%3+1;else addAtom(sel,d.x0,d.y0);drag=null;commit();return}
+    if(d.b||!pv){drag=null;render();return}
+    snap();const s=d.a||addAtom(sel,d.x0,d.y0),t=pv.t||addAtom(sel,pv.x2,pv.y2);addBond(s,t);drag=null;commit();return}
+  drag=null;if(d.mv||(!d.a&&!d.b)){render();return}
+  if((tool==='qp'||tool==='qm')&&!d.a)return;
+  snap();
+  if(tool==='swap'){if(d.a)d.a.el=sel;else d.b.o=d.b.o%3+1}
+  else if(tool==='qp'||tool==='qm')d.a.q=Math.max(-3,Math.min(3,d.a.q+(tool==='qp'?1:-1)));
+  else if(tool==='del'){if(d.a){S.bonds=S.bonds.filter(b=>b.a!==d.a.id&&b.b!==d.a.id);S.atoms=S.atoms.filter(a=>a!==d.a)}else S.bonds=S.bonds.filter(b=>b!==d.b)}
+  commit()}
+sv.addEventListener('pointerup',up);sv.addEventListener('pointercancel',up);
+
+function svgExport(){if(!S.atoms.length)return null;const pad=O.ang?54:40;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  S.atoms.filter(a=>!isHid(a)).forEach(a=>{x0=Math.min(x0,a.x);y0=Math.min(y0,a.y);x1=Math.max(x1,a.x);y1=Math.max(y1,a.y)});x0-=pad+(half()?24:0);y0-=pad;x1+=pad+(half()?24:0);y1+=pad;
+  if(O.nm)for(const c of comps()){const r=nameOf(c);if(!r.name)continue;const cx=(Math.min(...c.filter(a=>!isHid(a)).map(a=>a.x))+Math.max(...c.filter(a=>!isHid(a)).map(a=>a.x)))/2,hw=r.name.length*5.2+12;
+    x0=Math.min(x0,cx-hw);x1=Math.max(x1,cx+hw);y1=Math.max(y1,Math.max(...c.filter(a=>!isHid(a)).map(a=>a.y))+(O.ang?56:42)+20)}
+  const w=x1-x0,h=y1-y0;
+  return{w,h,s:`<svg xmlns="http://www.w3.org/2000/svg" width="${F(w)}" height="${F(h)}" viewBox="${F(x0)} ${F(y0)} ${F(w)} ${F(h)}">${O.tr?'':`<rect x="${F(x0)}" y="${F(y0)}" width="${F(w)}" height="${F(h)}" fill="#fff"/>`}${body(true).h}</svg>`}}
+function png(){const e=svgExport();if(!e){flash('Noch nichts gezeichnet.');return}const sc=3,img=new Image();
+  img.onload=()=>{const c=document.createElement('canvas');c.width=Math.ceil(e.w*sc);c.height=Math.ceil(e.h*sc);const g=c.getContext('2d');g.scale(sc,sc);g.drawImage(img,0,0,e.w,e.h);
+    c.toBlob(b=>{if(!b){flash('PNG konnte nicht erzeugt werden.');return}lastBlob=b;if(blobUrl)URL.revokeObjectURL(blobUrl);blobUrl=URL.createObjectURL(b);$('mi').src=blobUrl;
+      $('mm').textContent=`${c.width} × ${c.height} px (3-fache Auflösung). Falls „Herunterladen“ nichts tut: Bild gedrückt halten → „Bild sichern“ (Tablet) bzw. Rechtsklick → „Bild speichern unter“ (PC).`;$('md').classList.add('show')},'image/png')};
+  img.onerror=()=>flash('PNG konnte nicht erzeugt werden.');img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(e.s)}
+let DL=null;const dlp=(window.claude&&typeof window.claude.use==='function')?window.claude.use('downloads').then(d=>DL=d).catch(()=>null):null;
+$('md2').onclick=async()=>{if(dlp){await dlp;if(DL){try{await DL.save({filename:'molekuel.png',data:lastBlob})}catch(e){if(!e||e.code!=='declined')$('mm').textContent='Speichern hier nicht möglich – Bild gedrückt halten bzw. Rechtsklick → „Bild speichern unter“.'}return}}
+  try{const l=document.createElement('a');l.href=blobUrl;l.download='molekuel.png';document.body.appendChild(l);l.click();l.remove()}catch(_){}};
+$('mc').onclick=async()=>{const b=$('mc');try{await navigator.clipboard.write([new ClipboardItem({'image/png':lastBlob})]);b.textContent='Kopiert ✓'}catch(_){b.textContent='Kopieren hier nicht möglich'}setTimeout(()=>b.textContent='In Zwischenablage kopieren',2000)};
+$('mt').onclick=()=>{O.tr=!O.tr;$('mt').textContent='Hintergrund: '+(O.tr?'transparent':'weiß');save();png()};
+$('mx').onclick=()=>$('md').classList.remove('show');
+$('md').onclick=e=>{if(e.target===$('md'))$('md').classList.remove('show')};
+
+function setTool(t){tool=t;document.querySelectorAll('#tools button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));setHint()}
+document.querySelectorAll('#tools button').forEach(b=>b.onclick=()=>setTool(b.dataset.t));
+function pal(){$('pal').innerHTML='<span class="lab">Element</span>'+PAL.map(e=>`<button data-e="${e}" class="${MET.has(e)?'m ':''}${e===sel?'on':''}">${e}</button>`).join('');
+  $('pal').querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=b.dataset.e;if(tool!=='draw'&&tool!=='swap')setTool('draw');pal();save()})}
+function opts(){$('oL').textContent='Paare: '+(O.lp==='bar'?'Striche':'Punkte');$('oW').classList.toggle('on',O.ang);$('oO').classList.toggle('on',O.chk);$('oF').classList.toggle('on',O.col);$('bN').classList.toggle('on',O.nm);document.querySelectorAll('#bM button').forEach(x=>x.classList.toggle('on',x.dataset.m===O.mode));$('mt').textContent='Hintergrund: '+(O.tr?'transparent':'weiß')}
+$('oL').onclick=()=>{O.lp=O.lp==='bar'?'dot':'bar';opts();save();render()};
+$('oW').onclick=()=>{O.ang=!O.ang;opts();save();render()};
+$('oO').onclick=()=>{O.chk=!O.chk;opts();save();render()};
+$('oF').onclick=()=>{O.col=!O.col;opts();save();render()};
+const MSG={lewis:'Lewis-Formel mit allen Atomen und Elektronenpaaren.',half:'Halbstrukturformel: H-Atome in Gruppen zusammengefasst, freie Elektronenpaare ausgeblendet.',skel:'Skelettformel: C-Atome als Ecken der Zickzacklinie, H an C weggelassen.'};
+document.querySelectorAll('#bM button').forEach(x=>x.onclick=()=>{const m=x.dataset.m;if(m===O.mode)return;gS=null;snap();const wasSkel=skel();O.mode=m;if(m==='skel')skelApply();else if(wasSkel){placeHAll();gridLayout(0)}opts();commit();flash(MSG[m])});
+$('bN').onclick=()=>{O.nm=!O.nm;opts();save();render()};
+$('bU').onclick=undo;$('bR').onclick=redo;$('bH').onclick=addH;$('bB').onclick=benz;$('bP').onclick=png;
+$('bA').onclick=()=>{if(!S.atoms.length)return;snap();tidy();O.ang=true;opts();commit()};
+let gS=null;
+$('bG').onclick=()=>{if(!S.atoms.length)return;if(skel()){snap();skelApply();commit();flash('Zickzack neu angeordnet.');return}const cur=JSON.stringify(S),v=gS&&gS.after===cur?gS.v+1:0;snap();const g=gridLayout(v);O.ang=false;opts();commit();gS={after:JSON.stringify(S),v};
+  flash((g.n>1?`Anordnung ${v%g.n+1} von ${g.n} – nochmal tippen für die nächste. `:'Ausgerichtet. ')+(g.tight?'Eine Bindung zum Ast ist länger, sonst hätten die H-Atome keinen Platz.':g.skipped?'Ringe bleiben unverändert.':''))};
+$('bC').onclick=()=>{if(!S.atoms.length)return;snap();S={atoms:[],bonds:[],n:S.n};commit();flash('Blatt geleert – mit ↶ zurückholen.')};
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey)&&k==='z'){e.preventDefault();e.shiftKey?redo():undo();return}
+  if((e.ctrlKey||e.metaKey)&&k==='y'){e.preventDefault();redo();return}
+  if(e.ctrlKey||e.metaKey||e.altKey)return;const m={h:'H',c:'C',n:'N',o:'O',s:'S',p:'P',f:'F',b:'B',i:'I'}[k];if(m){sel=m;pal();save()}
+  if(k==='escape')$('md').classList.remove('show')});
+window.addEventListener('resize',render);
+
+if(!load())example();
+pal();opts();setTool('draw');render();
+}
+</script>
+</body>
+</html>
