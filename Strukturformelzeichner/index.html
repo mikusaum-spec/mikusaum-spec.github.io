@@ -477,21 +477,21 @@ function nameOf(c){
   const key=fstr(c);if(INORG[key])return{name:INORG[key]};
   const C=c.filter(a=>a.el==='C');if(!C.length)return{err:'kein Name hinterlegt'};
   if(c.some(a=>!['C','H','O','N','F','Cl','Br','I'].includes(a.el)||a.q))return{err:'nur C, H, O, N und Halogene ohne Ladung'};
-  const cn=a=>nb(a).filter(n=>n.o.el==='C'),G=new Map(C.map(a=>[a.id,{hal:[],oh:0,co:0,acid:0,ald:0,ket:0,nh:0,eth:[]}]));let ester=null;
+  const cn=a=>nb(a).filter(n=>n.o.el==='C'),G=new Map(C.map(a=>[a.id,{hal:[],oh:0,co:0,acid:0,ald:0,ket:0,nh:0,amid:0,eth:[]}]));let ester=null;
   for(const o of c.filter(a=>a.el==='O')){const ns=nb(o),cs=ns.filter(n=>n.o.el==='C');
     if(cs.length===1&&ns.length===2&&ns.some(n=>n.o.el==='H'))G.get(cs[0].o.id).oh++;
     else if(cs.length===1&&ns.length===1&&cs[0].b.o===2)G.get(cs[0].o.id).co++;
     else if(cs.length===2&&ns.length===2&&cs.every(n=>n.b.o===1)){const[x,y]=cs.map(n=>n.o),carb=z=>nb(z).some(n=>n.o.el==='O'&&n.b.o===2);
       if(carb(x)||carb(y)){if(ester)return{err:'mehrere Estergruppen noch nicht unterstützt'};ester=carb(x)?{ac:x,al:y}:{ac:y,al:x}}else{G.get(x.id).eth.push(y.id);G.get(y.id).eth.push(x.id)}}
     else return{err:'diese Sauerstoffgruppe wird nicht unterstützt'}}
-  for(const n of c.filter(a=>a.el==='N')){const ns=nb(n),cs=ns.filter(x=>x.o.el==='C');if(ns.some(x=>x.b.o!==1)||cs.length!==1)return{err:'nur primäre Amine (–NH₂) werden benannt'};G.get(cs[0].o.id).nh++}
+  for(const n of c.filter(a=>a.el==='N')){const ns=nb(n),cs=ns.filter(x=>x.o.el==='C');if(ns.some(x=>x.b.o!==1)||cs.length!==1)return{err:'nur primäre Amine (–NH₂) und Amide (–CONH₂) werden benannt'};const cc=cs[0].o;if(nb(cc).some(x=>x.o.el==='O'&&x.b.o===2))G.get(cc.id).amid++;else G.get(cc.id).nh++}
   for(const a of C){const g=G.get(a.id);for(const n of nb(a))if(HAL[n.o.el])g.hal.push(n.o.el);
-    if(ester&&a===ester.ac){g.acid=1;g.co--}else if(g.co&&g.oh){g.acid=1;g.co--;g.oh--}if(g.co){if(cn(a).length<=1)g.ald=g.co;else g.ket=g.co}}
+    if(ester&&a===ester.ac){g.acid=1;g.co--}else if(g.co&&g.oh){g.acid=1;g.co--;g.oh--}else if(g.co&&g.amid){g.co--}if(g.co){if(cn(a).length<=1)g.ald=g.co;else g.ket=g.co}}
   const adj=new Map(C.map(a=>[a.id,cn(a).map(n=>({id:n.o.id,o:n.b.o}))])),ord=(u,v)=>adj.get(u).find(x=>x.id===v).o;
-  const alkyl=(st,fr)=>{let len=0,cur=st,prev=fr;for(;;){len++;const g=G.get(cur);if((prev!=null&&ord(prev,cur)!==1)||g.hal.length||g.oh||g.acid||g.ald||g.ket||g.nh||(g.eth.length&&!(fr==null&&cur===st&&g.eth.length===1)))return null;
+  const alkyl=(st,fr)=>{let len=0,cur=st,prev=fr;for(;;){len++;const g=G.get(cur);if((prev!=null&&ord(prev,cur)!==1)||g.hal.length||g.oh||g.acid||g.ald||g.ket||g.nh||g.amid||(g.eth.length&&!(fr==null&&cur===st&&g.eth.length===1)))return null;
     const nx=adj.get(cur).filter(x=>x.id!==prev);if(nx.length>1||len>20)return null;if(!nx.length)return STEM[len].toLowerCase()+'yl';prev=cur;cur=nx[0].id}};
   const oxy=n=>{const st=n.slice(0,-2);return['meth','eth','prop','but'].includes(st)?st+'oxy':n+'oxy'};
-  const PR=['acid','ald','ket','oh','nh'];
+  const PR=['acid','amid','ald','ket','oh','nh'];
   const subsAt=(id,l,pr,skip)=>{const g=G.get(id),out=[];let ok=true;
     if(pr!=='oh')for(let k=0;k<g.oh;k++)out.push({n:'hydroxy',l});if(pr!=='nh')for(let k=0;k<g.nh;k++)out.push({n:'amino',l});
     for(const t of['ald','ket'])if(t!==pr)for(let k=0;k<g[t];k++)out.push({n:'oxo',l});g.hal.forEach(h=>out.push({n:HAL[h],l}));
@@ -518,7 +518,7 @@ function nameOf(c){
   if(!hasU)core+='an';else{const e=best.en,y=best.yn;if(e.length>1||y.length>1)core+='a';
     if(e.length)core+=(citeU?'-'+e.join(',')+'-':'')+MUL[e.length]+'en';if(y.length)core+=(citeU?'-'+y.join(',')+'-':'')+MUL[y.length]+'in'}
   if(pr){const n=best.prL.length,l=best.prL;
-    if(pr==='acid')core+=MUL[n]+'säure';else if(pr==='ald')core+=MUL[n]+'al';
+    if(pr==='acid')core+=MUL[n]+'säure';else if(pr==='amid')core+=MUL[n]+'amid';else if(pr==='ald')core+=MUL[n]+'al';
     else{const cite=!(((pr==='oh'||pr==='nh')&&L<=2&&n===1)||(pr==='ket'&&L===3&&n===1&&!hasU&&!best.ns));core+=(cite?'-'+l.join(',')+'-':'')+MUL[n]+({oh:'ol',ket:'on',nh:'amin'}[pr])}}
   return{name:cap((pre+core+(ester?esterAl+'ester':'')).toLowerCase())}}
 const cap=s=>s.replace(/[a-zäöü]/,m=>m.toUpperCase());
@@ -531,7 +531,7 @@ function ringName(c,C,G,adj,subsAt,PR,ring,ester){
   if(rb.some(o=>o===3)||n>20)return{err:'dieser Ring wird nicht unterstützt'};
   const dbl=rb.filter(o=>o===2).length,benz=n===6&&dbl===3&&rb.every((o,i)=>o!==rb[(i+1)%6]);
   if(!benz&&dbl>0&&rb.some((o,i)=>o===2&&rb[(i+1)%n]===2))return{err:'dieser Ring wird nicht unterstützt'};
-  const pr=['oh','nh','ket'].find(t=>R.some(a=>G.get(a.id)[t]));if(R.some(a=>{const g=G.get(a.id);return g.acid||g.ald}))return{err:'diese Ringverbindung wird noch nicht unterstützt'};
+  const pr=['oh','nh','ket'].find(t=>R.some(a=>G.get(a.id)[t]));if(R.some(a=>{const g=G.get(a.id);return g.acid||g.ald||g.amid}))return{err:'diese Ringverbindung wird noch nicht unterstützt'};
   if(benz&&pr==='ket')return{err:'dieser Ring wird nicht unterstützt'};
   const rs=new Set(seq0);let best=null;
   for(let s=0;s<n;s++)for(const d of[1,-1]){const sq=[...Array(n)].map((_,i)=>seq0[((s+d*i)%n+n)%n]),prL=[],subs=[],en=[];let ok=true;
@@ -568,7 +568,7 @@ function parseName(raw){let s=raw.trim().toLowerCase().replace(/\s+/g,'').replac
   if(mm||bm||s==='benzol'){n=6;for(let i=0;i<6;i++)add('C',i?i-1:null,i%2?2:1);g.bo.push([5,0,1]);g.bo[0][2]=1;
     /* Kekulé: 1=2,3=4,5=6 */g.bo=[[0,1,2],[1,2,1],[2,3,2],[3,4,1],[4,5,2],[5,0,1]];ring=true;
     if(mm)add(mm[1]==='phenol'?'O':'N',0);else if(bm&&bm[3]){const locs=bm[1]?bm[1].split(',').map(Number):[1];for(const l of locs)add(bm[3]==='ol'?'O':'N',l-1)}}
-  else{const RE=new RegExp('^(cyclo)?('+STEMS_RE+')(a)?(an)?((?:-[\\d,]+-)?(?:di|tri|tetra)?en)?((?:-[\\d,]+-)?(?:di|tri|tetra)?in)?((?:-[\\d,]+-)?(?:di|tri|tetra)?(?:ol|al|on|säure|amin))?$');
+  else{const RE=new RegExp('^(cyclo)?('+STEMS_RE+')(a)?(an)?((?:-[\\d,]+-)?(?:di|tri|tetra)?en)?((?:-[\\d,]+-)?(?:di|tri|tetra)?in)?((?:-[\\d,]+-)?(?:di|tri|tetra)?(?:ol|al|on|säure|amin|amid))?$');
     const m=s.match(RE);if(!m||(!m[4]&&!m[5]&&!m[6]))return{err:`„${raw.trim()}“ kann ich nicht lesen. Beispiele: 2-Methylbutan, But-2-en, Propan-2-ol, Ethansäureethylester.`};
     n=chainLen(m[2]);ring=!!m[1];if(ring&&n<3)return{err:'Ringe brauchen mindestens 3 C-Atome.'};
     for(let i=0;i<n;i++)add('C',i?i-1:null);if(ring)g.bo.push([n-1,0,1]);
@@ -577,9 +577,9 @@ function parseName(raw){let s=raw.trim().toLowerCase().replace(/\s+/g,'').replac
     for(const[x,o]of[[m[5],2],[m[6],3]]){const p=part(x,mu=>mu===1?[1]:[...Array(mu)].map((_,i)=>1+2*i));if(p)for(const l of p.locs)if(!bset(l,o))return{err:'Die Position der Mehrfachbindung passt nicht zur Kettenlänge.'}}
     const sf=part(m[7],mu=>{return null});
     if(sf){const t=sf.t,mu=m[7].match(/(di|tri|tetra)/)?MUL.indexOf(m[7].match(/(di|tri|tetra)/)[1]):1;let locs=sf.locs;
-      if(!locs)locs=t==='al'||t==='säure'?(mu===2?[1,n]:[1]):t==='on'?(ring?[1]:[2]):[...Array(mu)].map((_,i)=>i+1);
+      if(!locs)locs=t==='al'||t==='säure'||t==='amid'?(mu===2?[1,n]:[1]):t==='on'?(ring?[1]:[2]):[...Array(mu)].map((_,i)=>i+1);
       for(const l of locs){if(l<1||l>n)return{err:'Eine Positionsangabe ist größer als die Kette.'};const ci=l-1;
-        if(t==='ol')add('O',ci);else if(t==='amin')add('N',ci);else if(t==='on'||t==='al')add('O',ci,2);else if(t==='säure'){add('O',ci,2);acidO.push(add('O',ci))}}}}
+        if(t==='ol')add('O',ci);else if(t==='amin')add('N',ci);else if(t==='on'||t==='al')add('O',ci,2);else if(t==='säure'){add('O',ci,2);acidO.push(add('O',ci))}else if(t==='amid'){add('O',ci,2);add('N',ci)}}}}
   for(const p of pres){const locs=p.locs||[...Array(p.mu)].map((_,i)=>ring?i+1:1);for(const l of locs){if(l<1||l>n)return{err:'Eine Positionsangabe ist größer als die Kette.'};if(!attach(l-1,p.n))return{err:`Den Rest „${p.n}“ kenne ich nicht.`}}}
   if(esterAl){if(acidO.length!==1)return{err:'Ester nur aus einer Carbonsäure mit einer COOH-Gruppe.'};const k=chainLen(esterAl.slice(0,-2));let q=acidO[0];for(let j=0;j<k;j++)q=add('C',q)}
   const MAXV={C:4,N:3,O:2,S:2,P:3,F:1,Cl:1,Br:1,I:1,H:1,B:3},sum=g.at.map(()=>0);for(const[a,b,o]of g.bo){sum[a]+=o;sum[b]+=o}
