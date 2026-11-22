@@ -46,12 +46,23 @@ footer{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;padding:4px m
 .card img{max-width:100%;max-height:52vh;display:block;margin:12px auto;background:repeating-conic-gradient(#e9e9e9 0 25%,#fff 0 50%) 0 0/16px 16px;border:1px solid var(--line)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .card p{margin:6px 0 12px;font-size:14px;color:var(--mut)}
-@media(max-width:600px){header .sub{display:none}.bar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.grp{flex-wrap:nowrap;border:0;padding:0}.bar button{flex:none}button{padding:0 9px;font-size:14px}.opt{margin-left:0}}
+.mobOnly{display:none}
+.sheet{position:fixed;inset:0;background:rgb(0 0 0 / .4);display:none;align-items:flex-end;z-index:6}.sheet.show{display:flex}
+.sheetIn{background:var(--bg);width:100%;max-height:82vh;overflow:auto;border-radius:16px 16px 0 0;padding:14px 12px calc(16px + env(safe-area-inset-bottom))}
+#shBody .grp,#shBody .opt{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0;border:0}#shBody button{min-height:44px}
+body.mob .mobOnly{display:flex}body.mob .pal .lab{display:none}body.mob header{display:none}
+body.mob .bar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:4px 8px;gap:4px}body.mob .bar::-webkit-scrollbar{display:none}
+body.mob .bar .grp{flex:none;flex-wrap:nowrap;border:0;padding:0}body.mob .bar button{flex:none;min-height:40px;min-width:40px;font-size:14px;padding:0 10px}
+body.mob .board{margin:2px 6px;border-radius:10px}body.mob .hint{font-size:12px;left:8px;bottom:6px}
+body.mob footer{display:grid;gap:0;padding:3px 10px calc(6px + env(safe-area-inset-bottom))}
+body.mob #fo{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}body.mob #pr{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}body.mob #tn{display:none}
 </style>
 </head>
 <body>
 <header><h1>Lewis-Zeichner</h1><span class="sub">Valenzstrichformeln mit freien Elektronenpaaren und VSEPR-Winkeln</span></header>
-<div class="bar">
+<div class="bar" id="bar1">
+  <div class="grp mobOnly"><button id="bMore">☰ Mehr</button></div>
+  <div class="grp"><button id="bU" aria-label="Rückgängig" title="Rückgängig">↶</button><button id="bR" aria-label="Wiederholen" title="Wiederholen">↷</button><button id="bF" title="Alles ins Bild holen">Einpassen</button></div>
   <div class="grp" id="tools">
     <button data-t="draw" class="on">Zeichnen</button>
     <button data-t="swap">Element tauschen</button>
@@ -61,9 +72,7 @@ footer{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;padding:4px m
     <button data-t="qm">Ladung −</button>
     <button data-t="del">Löschen</button>
   </div>
-  <div class="grp">
-    <button id="bU" aria-label="Rückgängig" title="Rückgängig">↶</button>
-    <button id="bR" aria-label="Wiederholen" title="Wiederholen">↷</button>
+  <div class="grp" id="acts">
     <button id="bH">H ergänzen</button>
     <button id="bG">Gerade ausrichten</button>
     <button id="bA">VSEPR-Winkel</button>
@@ -76,15 +85,16 @@ footer{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;padding:4px m
 </div>
 <div class="bar pal" id="pal"></div>
 <main class="board"><svg id="sv" aria-label="Zeichenfläche"></svg><div class="hint" id="hint"></div></main>
-<footer>
+<footer id="foot">
   <span id="fo"></span><span id="pr"></span><span id="tn"></span>
-  <span class="opt">
+  <span class="opt" id="opts">
     <button id="oL">Paare: Striche</button>
     <button id="oW">Winkel</button>
     <button id="oO">Oktett-Prüfung</button>
     <button id="oF">Farbig</button>
   </span>
 </footer>
+<div class="sheet" id="sh"><div class="sheetIn"><div class="row" style="justify-content:space-between"><b>Weitere Funktionen</b><button id="shx">Schließen</button></div><div id="shBody"></div></div></div>
 <div class="modal" id="md"><div class="card">
   <div class="row" style="justify-content:space-between"><b>PNG-Export</b><button id="mx">Schließen</button></div>
   <img id="mi" alt="Exportiertes Molekül">
@@ -97,8 +107,9 @@ const EL={H:[1,'#5a5a5a',1.008],B:[3,'#b5651d',10.81],C:[4,'#111111',12.011],N:[
 const MET=new Set(['Na','K','Mg','Ca','Al']),EXP=new Set(['P','S','Cl','Br','I']);
 const PAL=['H','C','N','O','S','P','F','Cl','Br','I','B','Na','K','Mg','Ca','Al'];
 const L=60,FONT='Arial,Helvetica,sans-serif',INK='#1d1b19',ACC='#e2730b',KEY='lewis-zeichner-1';
-const HINTS={draw:'Leere Fläche antippen: Atom setzen · Von einem Atom ziehen: Bindung · Atom antippen: durch gewähltes Element ersetzen (gleiches Element: Nachbaratom anhängen) · Bindung antippen: einfach → doppelt → dreifach',swap:'Atom antippen: wird zum gewählten Element · Bindung antippen: Bindungsordnung ändern',move:'Atom ziehen: verschieben · Leere Fläche ziehen: alles verschieben',hand:'Bindung oder Endatom ziehen: dreht diesen Molekülteil um das Nachbaratom (15°-Schritte), Bindungslänge bleibt gleich',qp:'Atom antippen: Ladung um +1 erhöhen',qm:'Atom antippen: Ladung um −1 verringern',del:'Atom oder Bindung antippen: löschen'};
+const HINTS={draw:'Leere Fläche antippen: Atom setzen · Von einem Atom ziehen: Bindung · Atom antippen: durch gewähltes Element ersetzen (gleiches Element: Nachbaratom anhängen) · Bindung antippen: einfach → doppelt → dreifach',swap:'Atom antippen: wird zum gewählten Element · Bindung antippen: Bindungsordnung ändern',move:'Atom ziehen: verschieben · Leere Fläche ziehen: Ansicht verschieben · Zwei Finger: zoomen',hand:'Bindung oder Endatom ziehen: dreht diesen Molekülteil um das Nachbaratom (15°-Schritte), Bindungslänge bleibt gleich',qp:'Atom antippen: Ladung um +1 erhöhen',qm:'Atom antippen: Ladung um −1 verringern',del:'Atom oder Bindung antippen: löschen'};
 let S={atoms:[],bonds:[],n:1},O={lp:'bar',ang:true,chk:true,col:false,tr:false,nm:false,mode:'lewis'};
+let V={s:1,x:0,y:0},pinch=null;const pts=new Map(),clampS=v=>Math.max(.25,Math.min(4,v));
 let tool='draw',sel='C',U=[],R=[],drag=null,prev=null,exNote=false,blobUrl=null,lastBlob=null,ht=null;
 const $=id=>document.getElementById(id),sv=$('sv');
 const rad=d=>d*Math.PI/180,nrm=d=>((d%360)+360)%360,F=n=>Math.round(n*10)/10;
@@ -163,7 +174,7 @@ function render(){const r=body(false);let pv='';
   if(prev){pv=`<line x1="${F(prev.x1)}" y1="${F(prev.y1)}" x2="${F(prev.x2)}" y2="${F(prev.y2)}" stroke="${ACC}" stroke-width="2.5" stroke-dasharray="6 5"/>`;
     if(!prev.t)pv+=`<text x="${F(prev.x2)}" y="${F(prev.y2)}" text-anchor="middle" dominant-baseline="central" font-family="${FONT}" font-size="22" fill="${ACC}" opacity=".75">${sel}</text>`;
     if(!drag.a)pv+=`<text x="${F(prev.x1)}" y="${F(prev.y1)}" text-anchor="middle" dominant-baseline="central" font-family="${FONT}" font-size="22" fill="${ACC}" opacity=".75">${sel}</text>`}
-  sv.innerHTML=GRID+r.h+pv;status(r.probs,r.tet);$('bU').disabled=!U.length;$('bR').disabled=!R.length}
+  sv.innerHTML=GRID+`<g transform="translate(${F(V.x)} ${F(V.y)}) scale(${V.s.toFixed(4)})">`+r.h+pv+'</g>';status(r.probs,r.tet);$('bU').disabled=!U.length;$('bR').disabled=!R.length}
 
 const SUB='₀₁₂₃₄₅₆₇₈₉',SUP='⁰¹²³⁴⁵⁶⁷⁸⁹';
 const sub=n=>n>1?String(n).split('').map(d=>SUB[d]).join(''):'';
@@ -241,7 +252,7 @@ function status(probs,tet){const cs=comps();$('fo').textContent=cs.length?cs.sli
   else{pr.className='';pr.textContent='✓ Oktett- und Duplettregel überall erfüllt'}
   $('tn').textContent=tet&&O.ang?'* Tetraeder: räumlich 109,5°, in der Ebene als Kreuz gezeichnet':''}
 
-function setHint(){$('hint').textContent=HINTS[tool]+(exNote?' · Beispiel: H₂O und CO₂ – „Leeren“ startet neu':'')}
+let hf=null;function setHint(){$('hint').textContent=HINTS[tool]+(exNote?' · Beispiel: H₂O und CO₂ – „Leeren“ startet neu':'');clearTimeout(hf);if(document.body.classList.contains('mob'))hf=setTimeout(()=>{$('hint').textContent=''},5000)}
 function flash(m){$('hint').textContent=m;clearTimeout(ht);ht=setTimeout(setHint,2500)}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({S,O,sel}))}catch(_){}}
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.S&&Array.isArray(d.S.atoms)){S=d.S;Object.assign(O,d.O||{});if(EL[d.sel])sel=d.sel;return true}}catch(_){}return false}
@@ -318,10 +329,10 @@ function skelApply(){const ring=ringSet();
     hv.forEach(a=>{const p=pos.get(a.id);if(p){a.x=cx+p.x-mx;a.y=cy+p.y-my}});hv.forEach(placeH)}}
 function want(a){if(a.el==='H'||MET.has(a.el))return 0;if(a.el==='C')return 4-Math.abs(a.q);if(a.el==='B')return 3-a.q;return 8-EL[a.el][0]+a.q}
 function addH(){snap();let any=false;for(const a of[...S.atoms]){let m=want(a)-info(a).bs;for(;m>0;m--){attach(a,'H');any=true}}if(!any){U.pop();flash('Alle Atome sind bereits abgesättigt.');return}commit()}
-function benz(){snap();const r=sv.getBoundingClientRect();let cx=r.width/2,cy=r.height/2;for(let i=0;i<12&&S.atoms.some(a=>Math.hypot(a.x-cx,a.y-cy)<L*2);i++)cx+=L*1.2;
+function benz(){snap();const r=sv.getBoundingClientRect();let cx=(r.width/2-V.x)/V.s,cy=(r.height/2-V.y)/V.s;for(let i=0;i<12&&S.atoms.some(a=>Math.hypot(a.x-cx,a.y-cy)<L*2);i++)cx+=L*1.2;
   const at=[];for(let i=0;i<6;i++)at.push(addAtom('C',cx+L*Math.cos(rad(-90+60*i)),cy+L*Math.sin(rad(-90+60*i))));
   for(let i=0;i<6;i++)S.bonds.push({a:at[i].id,b:at[(i+1)%6].id,o:i%2?1:2});commit()}
-function example(){const r=sv.getBoundingClientRect(),w=r.width||800,h=r.height||480;
+function example(){const r=sv.getBoundingClientRect(),w=(r.width||800)/V.s,h=(r.height||480)/V.s;
   const o=addAtom('O',w*.3,h*.4),h1=addAtom('H',o.x-40,o.y+40),h2=addAtom('H',o.x+40,o.y+40);addBond(o,h1);addBond(o,h2);
   const c=addAtom('C',w*.68,h*.45),o1=addAtom('O',c.x-L,c.y),o2=addAtom('O',c.x+L,c.y);addBond(c,o1);addBond(c,o1);addBond(c,o2);addBond(c,o2);tidy();exNote=true}
 
@@ -330,19 +341,27 @@ function rotSetup(d){let pv=null,set=null;
   if(d.b){const a=A(d.b.a),c=A(d.b.b),sa=side(a.id,c.id),sc=side(c.id,a.id);if(!sa||!sc)return null;if(sa.size<=sc.size){pv=c;set=sa}else{pv=a;set=sc}}
   else if(d.a){for(const n of nb(d.a)){const s=side(d.a.id,n.o.id);if(s&&(!set||s.size<set.size)){set=s;pv=n.o}}if(!set)return null}else return null;
   return{pv,set,a0:ang(pv,{x:d.x0,y:d.y0}),orig:new Map([...set].map(id=>{const a=A(id);return[id,{x:a.x,y:a.y}]}))}}
-function pt(e){const r=sv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
-function hitA(x,y,ex){let best=null,bd=24;for(const a of S.atoms){if(a===ex||isHid(a))continue;const d=Math.hypot(a.x-x,a.y-y);if(d<bd){bd=d;best=a}}return best}
-function hitB(x,y){let best=null,bd=11;for(const b of S.bonds){const p=A(b.a),q=A(b.b),dx=q.x-p.x,dy=q.y-p.y,l2=dx*dx+dy*dy||1;const t=Math.max(0,Math.min(1,((x-p.x)*dx+(y-p.y)*dy)/l2));const d=Math.hypot(p.x+t*dx-x,p.y+t*dy-y);if(d<bd){bd=d;best=b}}return best}
+function sp(e){const r=sv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+function pt(e){const q=sp(e);return{x:(q.x-V.x)/V.s,y:(q.y-V.y)/V.s}}
+function fitView(){const vis=S.atoms.filter(a=>!isHid(a)),r=sv.getBoundingClientRect();if(!vis.length||!r.width){V={s:1,x:0,y:0};render();return}
+  const xs=vis.map(a=>a.x),ys=vis.map(a=>a.y),x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys)+(O.nm?50:0),pad=50;
+  const s=clampS(Math.min(r.width/(x1-x0+2*pad),(r.height-24)/(y1-y0+2*pad),1.6));V={s,x:r.width/2-(x0+x1)/2*s,y:(r.height-24)/2-(y0+y1)/2*s};render()}
+function hitA(x,y,ex){let best=null,bd=Math.max(24,24/V.s);for(const a of S.atoms){if(a===ex||isHid(a))continue;const d=Math.hypot(a.x-x,a.y-y);if(d<bd){bd=d;best=a}}return best}
+function hitB(x,y){let best=null,bd=Math.max(11,14/V.s);for(const b of S.bonds){const p=A(b.a),q=A(b.b),dx=q.x-p.x,dy=q.y-p.y,l2=dx*dx+dy*dy||1;const t=Math.max(0,Math.min(1,((x-p.x)*dx+(y-p.y)*dy)/l2));const d=Math.hypot(p.x+t*dx-x,p.y+t*dy-y);if(d<bd){bd=d;best=b}}return best}
 function calcEnd(p){const src=drag.a||{x:drag.x0,y:drag.y0},t=hitA(p.x,p.y,drag.a);if(t)return{x1:src.x,y1:src.y,x2:t.x,y2:t.y,t};
   let d=ang(src,p),bs=null,bd=40;(drag.a?suggest(drag.a):[]).forEach(v=>{const x=adiff(v,d);if(x<bd){bd=x;bs=v}});d=bs!==null?bs:Math.round(d/15)*15;const e=pol(src,d,L);return{x1:src.x,y1:src.y,x2:e.x,y2:e.y,t:null}}
-sv.addEventListener('pointerdown',e=>{if(drag)return;const p=pt(e);try{sv.setPointerCapture(e.pointerId)}catch(_){}const a=hitA(p.x,p.y);drag={id:e.pointerId,x0:p.x,y0:p.y,a,b:a?null:hitB(p.x,p.y),mv:false,sn:false,last:p}});
-sv.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const p=pt(e);if(!drag.mv&&Math.hypot(p.x-drag.x0,p.y-drag.y0)>8)drag.mv=true;if(!drag.mv)return;
-  if(tool==='move'){if(!drag.sn){snap();drag.sn=true}const dx=p.x-drag.last.x,dy=p.y-drag.last.y;(drag.a?[drag.a]:S.atoms).forEach(a=>{a.x+=dx;a.y+=dy});drag.last=p;render();return}
+sv.addEventListener('pointerdown',e=>{try{sv.setPointerCapture(e.pointerId)}catch(_){}pts.set(e.pointerId,sp(e));
+  if(pts.size===2){if(drag){if(drag.sn||(drag.rot&&!drag.rot.none))commit();drag=null;prev=null;render()}const[a,b]=[...pts.values()];pinch={d0:Math.hypot(a.x-b.x,a.y-b.y)||1,m0:{x:(a.x+b.x)/2,y:(a.y+b.y)/2},V0:{...V}};return}
+  if(pts.size>2||drag||pinch)return;const p=pt(e);const a=hitA(p.x,p.y);drag={id:e.pointerId,x0:p.x,y0:p.y,a,b:a?null:hitB(p.x,p.y),mv:false,sn:false,last:p,ls:sp(e)}});
+sv.addEventListener('pointermove',e=>{if(pts.has(e.pointerId))pts.set(e.pointerId,sp(e));
+  if(pinch&&pts.size>=2){const[a,b]=[...pts.values()],d=Math.hypot(a.x-b.x,a.y-b.y),m={x:(a.x+b.x)/2,y:(a.y+b.y)/2},P=pinch.V0,s=clampS(P.s*d/pinch.d0),wx=(pinch.m0.x-P.x)/P.s,wy=(pinch.m0.y-P.y)/P.s;V={s,x:m.x-wx*s,y:m.y-wy*s};render();return}
+  if(!drag||e.pointerId!==drag.id)return;const p=pt(e);if(!drag.mv&&Math.hypot(p.x-drag.x0,p.y-drag.y0)>8/V.s)drag.mv=true;if(!drag.mv)return;
+  if(tool==='move'){if(!drag.a){const q=sp(e);V.x+=q.x-drag.ls.x;V.y+=q.y-drag.ls.y;drag.ls=q;render();return}if(!drag.sn){snap();drag.sn=true}const dx=p.x-drag.last.x,dy=p.y-drag.last.y;drag.a.x+=dx;drag.a.y+=dy;drag.last=p;render();return}
   if(tool==='hand'){if(!drag.rot){const r=rotSetup(drag);if(!r){drag.rot={none:true};flash(drag.a||drag.b?'Hier kann nicht gedreht werden (Ring oder einzelnes Atom).':'Eine Bindung oder ein Endatom ziehen.');return}snap();drag.rot=r}
     const r=drag.rot;if(r.none)return;const w=rad(Math.round((ang(r.pv,p)-r.a0)/15)*15),co=Math.cos(w),si=Math.sin(w);
     for(const id of r.set){const a=A(id),o=r.orig.get(id),rx=o.x-r.pv.x,ry=o.y-r.pv.y;a.x=r.pv.x+rx*co-ry*si;a.y=r.pv.y+rx*si+ry*co}render();return}
   if(tool==='draw'&&!drag.b){prev=calcEnd(p);render()}});
-function up(e){if(!drag||e.pointerId!==drag.id)return;const d=drag,pv=prev;prev=null;
+function up(e){pts.delete(e.pointerId);if(pinch){if(pts.size<2)pinch=null;return}if(!drag||e.pointerId!==drag.id)return;const d=drag,pv=prev;prev=null;
   if(e.type==='pointercancel'){drag=null;render();return}
   if(tool==='move'){drag=null;if(d.sn)commit();else render();return}
   if(tool==='hand'){drag=null;if(d.rot&&!d.rot.none)commit();else render();return}
@@ -358,6 +377,7 @@ function up(e){if(!drag||e.pointerId!==drag.id)return;const d=drag,pv=prev;prev=
   else if(tool==='del'){if(d.a){S.bonds=S.bonds.filter(b=>b.a!==d.a.id&&b.b!==d.a.id);S.atoms=S.atoms.filter(a=>a!==d.a)}else S.bonds=S.bonds.filter(b=>b!==d.b)}
   commit()}
 sv.addEventListener('pointerup',up);sv.addEventListener('pointercancel',up);
+sv.addEventListener('wheel',e=>{e.preventDefault();const q=sp(e),s0=V.s,s=clampS(s0*Math.exp(-e.deltaY*0.0015)),wx=(q.x-V.x)/s0,wy=(q.y-V.y)/s0;V={s,x:q.x-wx*s,y:q.y-wy*s};render()},{passive:false});
 
 function svgExport(){if(!S.atoms.length)return null;const pad=O.ang?54:40;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
   S.atoms.filter(a=>!isHid(a)).forEach(a=>{x0=Math.min(x0,a.x);y0=Math.min(y0,a.y);x1=Math.max(x1,a.x);y1=Math.max(y1,a.y)});x0-=pad+(half()?24:0);y0-=pad;x1+=pad+(half()?24:0);y1+=pad;
@@ -402,9 +422,15 @@ document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();
   if(e.ctrlKey||e.metaKey||e.altKey)return;const m={h:'H',c:'C',n:'N',o:'O',s:'S',p:'P',f:'F',b:'B',i:'I'}[k];if(m){sel=m;pal();save()}
   if(k==='escape')$('md').classList.remove('show')});
 window.addEventListener('resize',render);
-
-if(!load())example();
-pal();opts();setTool('draw');render();
+const mq=matchMedia('(max-width: 700px), (max-height: 520px)');
+function layoutMode(){const m=mq.matches;document.body.classList.toggle('mob',m);if(m){$('shBody').appendChild($('acts'));$('shBody').appendChild($('opts'))}else{$('sh').classList.remove('show');$('bar1').appendChild($('acts'));$('foot').appendChild($('opts'))}render()}
+mq.addEventListener?mq.addEventListener('change',layoutMode):mq.addListener(layoutMode);
+$('bMore').onclick=()=>$('sh').classList.add('show');$('shx').onclick=()=>$('sh').classList.remove('show');$('sh').onclick=e=>{if(e.target===$('sh'))$('sh').classList.remove('show')};
+$('acts').addEventListener('click',e=>{if(e.target.closest('button')&&document.body.classList.contains('mob'))$('sh').classList.remove('show')});
+$('bF').onclick=fitView;
+document.body.classList.toggle('mob',mq.matches);if(mq.matches)V.s=.8;
+const had=load();if(!had)example();
+pal();opts();setTool('draw');layoutMode();if(had&&mq.matches)fitView();
 }
 </script>
 </body>
