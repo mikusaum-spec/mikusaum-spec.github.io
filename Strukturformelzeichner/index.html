@@ -340,7 +340,7 @@ function layoutNew(ids){const ring=ringSet(),R0=S.atoms.filter(a=>ids.has(a.id)&
   if(oth.length){const ox=oth.map(a=>a.x),oy=oth.map(a=>a.y),b=[Math.min(...ox)-50,Math.min(...oy)-50,Math.max(...ox)+50,Math.max(...oy)+50];if(tx+w/2>b[0]&&tx-w/2<b[2]&&ty>b[1]-60&&ty<b[3]+60)tx=b[2]+40+w/2}
   for(const a of S.atoms)if(ids.has(a.id)){a.x+=tx-cx0;a.y+=ty-cy0}
   const sx=tx*V.s+V.x;if(sx<0||sx>(r.width||800))fitView()}
-function insertName(name){const g=parseName(name);if(g.err)return g;snap();const ids=buildGraph(g);addHFor(ids);layoutNew(ids);const r=nameOf(S.atoms.filter(a=>ids.has(a.id)));commit();return{ok:true,name:r.name}}
+function insertName(name){const g=parseName(name);if(g.err)return g;snap();const ids=buildGraph(g);addHFor(ids);layoutNew(ids);const r=fullName(S.atoms.filter(a=>ids.has(a.id)));commit();return{ok:true,name:r.name,sys:r.sys}}
 const cntOf=c=>{const m={};c.forEach(a=>m[a.el]=(m[a.el]||0)+1);return m};
 function parseFormula(f){const s=f.replace(/[₀-₉]/g,d=>'0123456789'['₀₁₂₃₄₅₆₇₈₉'.indexOf(d)]).replace(/\s/g,'');if(!/^([A-Z][a-z]?\d*)+$/.test(s))return null;const m={};for(const[,e,n]of s.matchAll(/([A-Z][a-z]?)(\d*)/g)){if(!EL[e])return null;m[e]=(m[e]||0)+(n?+n:1)}return m}
 const sameCnt=(a,b)=>{for(const x of new Set([...Object.keys(a),...Object.keys(b)]))if((a[x]||0)!==(b[x]||0))return false;return true};
@@ -348,11 +348,12 @@ const cntOrd=m=>{const ks=Object.keys(m).sort();return m.C?['C',...(m.H?['H']:[]
 const cntStr=m=>cntOrd(m).map(k=>k+sub(m[k])).join(''),cntKey=m=>cntOrd(m).map(k=>k+(m[k]>1?m[k]:'')).join('');
 const ISO_TOTAL={C4H10:2,C5H12:3,C6H14:5,C7H16:9,C8H18:18,C3H6:2,C4H8:5,C2H6O:2,C3H8O:3,C4H10O:7,C3H7Cl:2,C4H9Cl:4,C2H4Cl2:2,C3H6Cl2:4,C3H6O2:3};
 const hsh=s=>{let h=5381;for(const ch of s)h=((h*33)^ch.charCodeAt(0))>>>0;return h.toString(36)};
-function wl(c){let lab=new Map(c.map(a=>[a.id,a.el]));for(let r=0;r<5;r++){const nl=new Map();for(const a of c)nl.set(a.id,hsh(lab.get(a.id)+'('+nb(a).map(n=>n.b.o+lab.get(n.o.id)).sort().join(',')+')'));lab=nl}return hsh([...lab.values()].sort().join('|'))}
+function wl(c){let lab=new Map(c.map(a=>[a.id,a.el]));for(let r=0;r<Math.max(5,Math.min(c.length,40));r++){const nl=new Map();for(const a of c)nl.set(a.id,hsh(lab.get(a.id)+'('+nb(a).map(n=>n.b.o+lab.get(n.o.id)).sort().join(',')+')'));lab=nl}return hsh([...lab.values()].sort().join('|'))}
 let TASK=null;const BASE='https://classen.contagged.info/Strukturformelzeichner/',TT={name:'n',formula:'f',iso:'i'};
 const hexE=s=>[...new TextEncoder().encode(s)].map(b=>b.toString(16).padStart(2,'0')).join(''),hexD=h=>new TextDecoder().decode(new Uint8Array(h.match(/../g).map(x=>parseInt(x,16))));
 function prepTask(type,target,sol){target=target.trim();if(!target)return{err:'Bitte ein Ziel eingeben.'};
-  if(type==='name'){const r=withTemp(()=>{const g=parseName(target);if(g.err)return g;const ids=buildGraph(g);addHFor(ids);const c=S.atoms,n=nameOf(c);return n.name?{canon:n.name,cnt:cntOf(c)}:{err:'Zu diesem Namen kann ich die Lösung nicht prüfen ('+n.err+').'}});if(r.err)return r;return{type,target:r.canon,canon:r.canon,cnt:r.cnt,sol}}
+  if(type==='name'){const r=withTemp(()=>{const g=parseName(target);if(g.err)return g;const ids=buildGraph(g);addHFor(ids);const c=S.atoms,n=nameOf(c),f=fullName(c);return{canon:n.name||'#'+wl(c),show:f.name||n.name,cnt:cntOf(c)}});if(r.err)return r;
+  const tv=TRIV.find(x=>x.k.includes(target.toLowerCase().replace(/\s+/g,'')));return{type,target:tv?target.trim():r.canon,canon:r.canon,show:r.show,cnt:r.cnt,sol}}
   const m=parseFormula(target);if(!m)return{err:'Summenformel bitte so eingeben: C4H10O'};return{type,target:cntStr(m),cnt:m,sol:false,total:ISO_TOTAL[cntKey(m)]}}
 function startTask(t,fresh){TASK={...t,found:new Map(),fb:'',ok:null};if(fresh&&(S.atoms.length||S.items.length)){snap();selClear();S={atoms:[],bonds:[],items:[],n:S.n};commit()}renderTask()}
 function renderTask(){const el=$('task');if(!TASK){el.classList.remove('show');el.innerHTML='';return}
@@ -364,14 +365,14 @@ function renderTask(){const el=$('task');if(!TASK){el.classList.remove('show');e
 function checkTask(){const t=TASK,cs=comps().filter(c=>c.some(a=>a.el!=='H')||c.length>1);let fb,ok=false;
   const bad=c=>c.some(a=>check(a,info(a)));
   if(!cs.length)fb='Zeichne zuerst ein Molekül.';
-  else if(t.type==='name'){if(cs.some(c=>!bad(c)&&nameOf(c).name===t.canon)){ok=true;fb=`✓ Richtig! Das ist ${escX(t.canon)}.`}
-    else{const c=[...cs].sort((a,b)=>b.length-a.length)[0],m=cntOf(c),r=nameOf(c);
+  else if(t.type==='name'){if(cs.some(c=>!bad(c)&&(nameOf(c).name||'#'+wl(c))===t.canon)){ok=true;fb=`✓ Richtig! Das ist ${escX(t.show||t.canon)}.`}
+    else{const c=[...cs].sort((a,b)=>b.length-a.length)[0],m=cntOf(c),r=fullName(c);
       fb=bad(c)?'Noch nicht fertig: Prüfe die Oktett- und Duplettregel – rot markierte Atome brauchen noch Bindungen, H-Atome oder Elektronenpaare.':
         !sameCnt(m,t.cnt)?`Die Summenformel stimmt noch nicht: Dein Molekül hat ${cntStr(m)}, gesucht ist ${cntStr(t.cnt)}.`:
         r.name?`Die Summenformel stimmt, aber du hast ${escX(r.name)} gezeichnet – ein Isomer. Prüfe Kettenlänge, Verzweigung und die Position der Gruppen.`:`Dein Molekül kann ich nicht einordnen (${escX(r.err)}).`}}
-  else if(t.type==='formula'){const hit=cs.find(c=>!bad(c)&&sameCnt(cntOf(c),t.cnt));if(hit){ok=true;const r=nameOf(hit);fb='✓ Richtig!'+(r.name?` Du hast ${escX(r.name)} gezeichnet.`:'')}
+  else if(t.type==='formula'){const hit=cs.find(c=>!bad(c)&&sameCnt(cntOf(c),t.cnt));if(hit){ok=true;const r=fullName(hit);fb='✓ Richtig!'+(r.name?` Du hast ${escX(r.name)} gezeichnet.`:'')}
     else{const c=[...cs].sort((a,b)=>b.length-a.length)[0];fb=bad(c)?'Noch nicht fertig: Prüfe die Oktett- und Duplettregel (rot markiert).':`Dein Molekül hat ${cntStr(cntOf(c))}, gesucht ist ${escX(t.target)}.`}}
-  else{let nw=0,dp=0,wr=0,inc=0;for(const c of cs){if(bad(c)){inc++;continue}if(!sameCnt(cntOf(c),t.cnt)){wr++;continue}const r=nameOf(c),k=r.name||'S-'+wl(c);if(t.found.has(k))dp++;else{t.found.set(k,r.name||'Isomer ohne Namen');nw++}}
+  else{let nw=0,dp=0,wr=0,inc=0;for(const c of cs){if(bad(c)){inc++;continue}if(!sameCnt(cntOf(c),t.cnt)){wr++;continue}const r=nameOf(c),k=r.name||'S-'+wl(c);if(t.found.has(k))dp++;else{t.found.set(k,fullName(c).name||'Isomer ohne Namen');nw++}}
     const parts=[];if(nw)parts.push(`${nw} neu`);if(dp)parts.push(`${dp} schon gefunden`);if(wr)parts.push(`${wr} mit falscher Summenformel`);if(inc)parts.push(`${inc} noch unvollständig`);
     ok=nw>0&&!wr&&!inc;fb=(parts.join(' · ')||'Nichts Neues.')+(t.total&&t.found.size>=t.total?' – ✓ Alle Isomere gefunden!':'');if(t.total&&t.found.size>=t.total)ok=true}
   t.fb=fb;t.ok=ok;renderTask()}
@@ -512,7 +513,7 @@ function nameOf(c){
   if(!best||!best.ok)return{err:'verzweigte/ungesättigte Seitenkette noch nicht unterstützt'};
   let esterAl='';if(ester){esterAl=alkyl(ester.al.id,null);if(!esterAl)return{err:'verzweigter Alkylrest im Ester noch nicht unterstützt'}}
   const L=best.P.length,gr=new Map();best.subs.forEach(s=>{if(!gr.has(s.n))gr.set(s.n,[]);gr.get(s.n).push(s.l)});
-  const hasU=best.mb>0,citeS=!(L===1||(L===2&&best.ns===1&&!pr&&!hasU));
+  const hasU=best.mb>0,citeS=!(L===1||(L===2&&best.ns===1&&!pr));
   const pre=[...gr.keys()].sort((a,b)=>a.localeCompare(b,'de')).map(n=>{const l=gr.get(n).sort((x,y)=>x-y);return(citeS?l.join(',')+'-':'')+MUL[l.length]+n}).join(citeS?'-':'');
   const citeU=!(L===2||(L===3&&best.mb===1&&!pr&&!best.ns));let core=STEM[L];
   if(!hasU)core+='an';else{const e=best.en,y=best.yn;if(e.length>1||y.length>1)core+='a';
@@ -553,8 +554,12 @@ const INORG_SMI={'wasser':'O','ammoniak':'N','kohlenstoffdioxid':'O=C=O','sauers
 function smiGraph(s){const t=s.match(/Cl|Br|[CNOSPFIHB]|\(|\)|=|#|\d/g)||[],at=[],bo=[],st=[];let prev=null,o=1;const rg={};
   for(const k of t){if(k==='(')st.push(prev);else if(k===')')prev=st.pop();else if(k==='=')o=2;else if(k==='#')o=3;else if(/\d/.test(k)){if(rg[k]!=null){bo.push([rg[k],prev,o]);delete rg[k];o=1}else rg[k]=prev}
     else{at.push(k);const i=at.length-1;if(prev!=null){bo.push([prev,i,o]);o=1}prev=i}}return{at,bo}}
+const TRIV=[{"k": ["ethylen"], "t": "Ethylen", "s": "C=C", "y": null}, {"k": ["acetylen"], "t": "Acetylen", "s": "C#C", "y": null}, {"k": ["toluol"], "t": "Toluol", "s": "CC1=CC=CC=C1", "y": null}, {"k": ["glycerin", "glyzerin"], "t": "Glycerin", "s": "OCC(O)CO", "y": null}, {"k": ["glykol", "ethylenglykol", "glycol"], "t": "Glykol", "s": "OCCO", "y": null}, {"k": ["formaldehyd"], "t": "Formaldehyd", "s": "C=O", "y": null}, {"k": ["acetaldehyd"], "t": "Acetaldehyd", "s": "CC=O", "y": null}, {"k": ["aceton"], "t": "Aceton", "s": "CC(C)=O", "y": null}, {"k": ["ameisensäure"], "t": "Ameisensäure", "s": "OC=O", "y": null}, {"k": ["essigsäure"], "t": "Essigsäure", "s": "CC(=O)O", "y": null}, {"k": ["buttersäure"], "t": "Buttersäure", "s": "CCCC(=O)O", "y": null}, {"k": ["oxalsäure"], "t": "Oxalsäure", "s": "OC(=O)C(=O)O", "y": null}, {"k": ["milchsäure"], "t": "Milchsäure", "s": "CC(O)C(=O)O", "y": null}, {"k": ["citronensäure", "zitronensäure"], "t": "Citronensäure", "s": "OC(=O)CC(O)(CC(=O)O)C(=O)O", "y": "2-Hydroxypropan-1,2,3-tricarbonsäure"}, {"k": ["benzoesäure"], "t": "Benzoesäure", "s": "OC(=O)C1=CC=CC=C1", "y": "Benzolcarbonsäure"}, {"k": ["palmitinsäure"], "t": "Palmitinsäure", "s": "CCCCCCCCCCCCCCCC(=O)O", "y": null}, {"k": ["stearinsäure"], "t": "Stearinsäure", "s": "CCCCCCCCCCCCCCCCCC(=O)O", "y": null}, {"k": ["ölsäure"], "t": "Ölsäure", "s": "CCCCCCCCC=CCCCCCCCC(=O)O", "y": null}, {"k": ["linolsäure"], "t": "Linolsäure", "s": "CCCCCC=CCC=CCCCCCCCC(=O)O", "y": null}, {"k": ["ethylacetat", "essigsäureethylester", "essigester"], "t": "Essigsäureethylester / Ethylacetat", "s": "CC(=O)OCC", "y": null}, {"k": ["harnstoff"], "t": "Harnstoff", "s": "NC(N)=O", "y": "Kohlensäurediamid"}, {"k": ["glycin"], "t": "Glycin", "s": "NCC(=O)O", "y": null}, {"k": ["alanin"], "t": "Alanin", "s": "CC(N)C(=O)O", "y": null}, {"k": ["styrol"], "t": "Styrol", "s": "C=CC1=CC=CC=C1", "y": "Ethenylbenzol"}, {"k": ["vinylchlorid"], "t": "Vinylchlorid", "s": "C=CCl", "y": null}];
+let TRIVH=null;function trivTab(){if(TRIVH)return TRIVH;TRIVH=new Map();withTemp(()=>{for(const e of TRIV){S={atoms:[],bonds:[],items:[],n:1};const ids=buildGraph(smiGraph(e.s));addHFor(ids);TRIVH.set(wl(S.atoms),e)}});return TRIVH}
+function fullName(c){const r=nameOf(c);if(c.some(a=>check(a,info(a))))return r;const e=trivTab().get(wl(c));if(!e)return r;const tn=e.t.split(' / ')[0];
+  const sy=e.y||r.name;if(sy)return{name:sy.toLowerCase()===tn.toLowerCase()?sy:`${sy} (${e.t})`,sys:sy,triv:e.t};return{name:e.y?`${e.y} (${e.t})`:e.t,sys:e.y||e.t,triv:e.t}}
 function parseName(raw){let s=raw.trim().toLowerCase().replace(/\s+/g,'').replace(/[−–‐]/g,'-').replace(/ae/g,'ä');if(!s)return{err:'Bitte einen Namen eingeben.'};
-  if(INORG_SMI[s])return smiGraph(INORG_SMI[s]);
+  if(INORG_SMI[s])return smiGraph(INORG_SMI[s]);{const e=TRIV.find(x=>x.k.includes(s));if(e)return smiGraph(e.s)}
   let esterAl=null;const em=s.match(/^(.*säure)((?:meth|eth|prop|but|pent|hex)yl)ester$/);if(em){s=em[1];esterAl=em[2]}
   const pres=[];const PRE=new RegExp('^(?:(\\d+(?:,\\d+)*)-)?(di|tri|tetra|penta|hexa)?(fluor|chlor|brom|iod|hydroxy|oxo|amino|(?:meth|eth|prop|but)oxy|(?:'+STEMS_RE+')yl(?:oxy)?)-?');
   for(let g=0;g<12;g++){const m=s.match(PRE);if(!m)break;const locs=m[1]?m[1].split(',').map(Number):null,mu=m[2]?MUL.indexOf(m[2]):1;if(locs&&locs.length!==mu)return{err:`„${m[0]}“: Anzahl der Ziffern passt nicht zu „${m[2]||''}“.`};pres.push({locs,mu,n:m[3]});s=s.slice(m[0].length)}
@@ -586,7 +591,7 @@ function parseName(raw){let s=raw.trim().toLowerCase().replace(/\s+/g,'').replac
   if(sum.some((v,i)=>v>MAXV[g.at[i]]))return{err:'Dieser Name passt zu keinem gültigen Molekül (zu viele Bindungen an einem Atom).'};return g}
 const HALR={fluor:'F',chlor:'Cl',brom:'Br',iod:'I'};
 
-function nameLabels(ex){if(!O.nm)return'';let h='';for(const c of comps()){const r=nameOf(c);if(ex&&!r.name)continue;
+function nameLabels(ex){if(!O.nm)return'';let h='';for(const c of comps()){const r=fullName(c);if(ex&&!r.name)continue;
     const x=(Math.min(...c.filter(a=>!isHid(a)).map(a=>a.x))+Math.max(...c.filter(a=>!isHid(a)).map(a=>a.x)))/2,y=Math.max(...c.filter(a=>!isHid(a)).map(a=>a.y))+(O.ang?56:42);
     h+=r.name?`<text x="${F(x)}" y="${F(y)}" text-anchor="middle" dominant-baseline="central" font-family="${FONT}" font-size="17" fill="${INK}">${r.name}</text>`
       :`<text x="${F(x)}" y="${F(y)}" text-anchor="middle" dominant-baseline="central" font-family="${FONT}" font-size="13" font-style="italic" fill="#9a8f84">Name: ${r.err}</text>`}return h}
@@ -775,7 +780,7 @@ sv.addEventListener('wheel',e=>{e.preventDefault();const q=sp(e),s0=V.s,s=clampS
 
 function svgExport(){if(!S.atoms.length&&!S.items.length)return null;const pad=O.ang?54:40;let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
   S.atoms.filter(a=>!isHid(a)).forEach(a=>{x0=Math.min(x0,a.x);y0=Math.min(y0,a.y);x1=Math.max(x1,a.x);y1=Math.max(y1,a.y)});x0-=pad+(half()?24:0);y0-=pad;x1+=pad+(half()?24:0);y1+=pad;
-  if(O.nm)for(const c of comps()){const r=nameOf(c);if(!r.name)continue;const cx=(Math.min(...c.filter(a=>!isHid(a)).map(a=>a.x))+Math.max(...c.filter(a=>!isHid(a)).map(a=>a.x)))/2,hw=r.name.length*5.2+12;
+  if(O.nm)for(const c of comps()){const r=fullName(c);if(!r.name)continue;const cx=(Math.min(...c.filter(a=>!isHid(a)).map(a=>a.x))+Math.max(...c.filter(a=>!isHid(a)).map(a=>a.x)))/2,hw=r.name.length*5.2+12;
     x0=Math.min(x0,cx-hw);x1=Math.max(x1,cx+hw);y1=Math.max(y1,Math.max(...c.filter(a=>!isHid(a)).map(a=>a.y))+(O.ang?56:42)+20)}
   for(const it of S.items){const b=itemBox(it);x0=Math.min(x0,b[0]-12);y0=Math.min(y0,b[1]-12);x1=Math.max(x1,b[2]+12);y1=Math.max(y1,b[3]+12)}
   const w=x1-x0,h=y1-y0;
@@ -851,13 +856,13 @@ $('v3p').onclick=()=>{const cv=$('c3');cv.toBlob(b=>{if(b)dlFile('molekuel-3d.pn
   cv.addEventListener('pointerup',up3);cv.addEventListener('pointercancel',up3);
   cv.addEventListener('wheel',e=>{e.preventDefault();Z3=Math.max(8,Math.min(400,Z3*Math.exp(-e.deltaY*.0015)));if(!ROT3)draw3()},{passive:false});
   new ResizeObserver(()=>{if($('v3').classList.contains('show')&&!ROT3)draw3()}).observe(cv)}
-const NEX=['2-Methylbutan','But-2-en','Propan-2-ol','Butanon','Ethansäure','Ethansäureethylester','Methoxyethan','Propan-1-amin','Cyclohexanol','4-Methylphenol'];
+const NEX=['2-Methylbutan','But-2-en','Propan-2-ol','Aceton','Essigsäure','Ethylacetat','Methoxyethan','Glycin','Milchsäure','Citronensäure','Ölsäure','Styrol'];
 $('nmEx').innerHTML=NEX.map(x=>`<button data-n="${x}">${x}</button>`).join('');
 $('nmEx').onclick=e=>{const b=e.target.closest('button');if(b){$('nmI').value=b.dataset.n;$('nmE').textContent=''}};
 $('bNm').onclick=()=>{$('nmE').textContent='';$('nmD').classList.add('show');setTimeout(()=>{try{$('nmI').focus()}catch(_){}},50)};
 $('nmX').onclick=()=>$('nmD').classList.remove('show');
 const nmGo=()=>{const v=$('nmI').value;const r=insertName(v);if(r.err){$('nmE').textContent=r.err;return}$('nmD').classList.remove('show');
-  const norm=t=>t.toLowerCase().replace(/\s/g,'');flash(r.name?(norm(r.name)===norm(v)?`${r.name} gezeichnet.`:`Gezeichnet. Systematischer Name: ${r.name}`):'Gezeichnet.')};
+  const norm=t=>t.toLowerCase().replace(/\s/g,'');flash(r.name?(norm(r.sys||r.name)===norm(v)?`${r.name} gezeichnet.`:`Gezeichnet: ${r.name}`):'Gezeichnet.')};
 $('nmGo').onclick=nmGo;$('nmI').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nmGo()}});
 let TK='name';const TKP={name:'Name, z. B. 2-Methylbutan',formula:'Summenformel, z. B. C2H6O',iso:'Summenformel, z. B. C4H10'};
 function tkUi(){document.querySelectorAll('#tkT button').forEach(b=>b.classList.toggle('on',b.dataset.k===TK));$('tkI').placeholder=TKP[TK];$('tkSL').style.display=TK==='name'?'':'none'}
