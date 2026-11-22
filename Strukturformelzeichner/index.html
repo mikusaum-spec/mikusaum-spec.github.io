@@ -421,7 +421,8 @@ function draw3(){const cv=$('c3');if(!cv||!M3)return;const dpr=window.devicePixe
   if(LP3&&ST3!=='space')lps.forEach(l=>{const q=pr(l.p);items.push({z:q.z,t:'l',q})});
   items.sort((u,v)=>u.z-v.z);
   for(const it of items){
-    if(it.t==='b'){const a=Q[it.i],b=Q[it.j],ca=COL3[atoms[it.i].el]||'#999',cb=COL3[atoms[it.j].el]||'#999',w=(ST3==='stick'?.28:.16)*Z3*(a.f+b.f)/2,dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
+    if(it.t==='b'){const pa=P[it.i],pb=P[it.j],dv=[pb[0]-pa[0],pb[1]-pa[1],pb[2]-pa[2]],dl=Math.hypot(...dv)||1,u=dv.map(x=>x/dl),rr=k=>Math.max(ST3==='stick'?.14:.12,(RAD3[atoms[k].el]||1)*rs)*.94,ra=Math.min(rr(it.i),dl*.45),rb=Math.min(rr(it.j),dl*.45);
+      const a=pr([pa[0]+u[0]*ra,pa[1]+u[1]*ra,pa[2]+u[2]*ra]),b=pr([pb[0]-u[0]*rb,pb[1]-u[1]*rb,pb[2]-u[2]*rb]),ca=COL3[atoms[it.i].el]||'#999',cb=COL3[atoms[it.j].el]||'#999',w=(ST3==='stick'?.28:.16)*Z3*(a.f+b.f)/2,dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1,nx=-dy/l,ny=dx/l;
       const offs=it.o===1||ST3==='stick'?[0]:it.o===2?[-.6,.6]:[-1.1,0,1.1],ww=it.o===1||ST3==='stick'?w:w*.6;g.lineCap='round';
       for(const o of offs){const ox=nx*o*w,oy=ny*o*w,mx=(a.x+b.x)/2+ox,my=(a.y+b.y)/2+oy;
         g.lineWidth=ww+1.6;g.strokeStyle='rgba(0,0,0,.35)';g.beginPath();g.moveTo(a.x+ox,a.y+oy);g.lineTo(b.x+ox,b.y+oy);g.stroke();
