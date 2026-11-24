@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lewis-Zeichner</title>
+<title>Strukturformelzeichner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -47,6 +47,12 @@ footer{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;padding:4px m
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .card p{margin:6px 0 12px;font-size:14px;color:var(--mut)}
 .mobOnly{display:none}
+.dd{display:inline-flex}.ddm{display:none;position:fixed;z-index:9;flex-direction:column;gap:4px;padding:6px;background:var(--btn);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgb(0 0 0 / .16);min-width:190px}
+.ddm.show{display:flex}.ddm button{text-align:left;justify-content:flex-start}
+body.mob #shBody .ddb{display:none}body.mob #shBody .dd{display:contents}
+body.mob #shBody .ddm{display:flex;position:static;flex-direction:row;flex-wrap:wrap;box-shadow:none;border:0;padding:0;background:none;min-width:0;width:100%}
+body.mob #shBody .ddm::before{content:attr(data-l);width:100%;font-size:13px;color:var(--mut);margin-top:6px}
+.help h3{font-size:16px;margin:14px 0 4px}.help ul{margin:0;padding-left:20px;font-size:14px;line-height:1.5}.help li{margin:2px 0}
 .v3{position:absolute;inset:0;background:#fff;display:none;z-index:3}.v3.show{display:block}
 .v3 canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
 .v3bar{position:absolute;top:8px;left:8px;right:8px;display:flex;flex-wrap:wrap;gap:4px;justify-content:center}.v3bar button{min-height:40px;font-size:14px;padding:0 10px}
@@ -75,45 +81,34 @@ body.mob #fo{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ell
 </style>
 </head>
 <body>
-<header><h1>Lewis-Zeichner</h1><span class="sub">Valenzstrichformeln mit freien Elektronenpaaren und VSEPR-Winkeln</span></header>
+<header><h1>Strukturformelzeichner</h1><span class="sub">Lewis-, Halbstruktur- und Skelettformeln mit VSEPR-Winkeln</span></header>
 <div class="bar" id="bar1">
   <div class="grp mobOnly"><button id="bMore">☰ Mehr</button></div>
-  <div class="grp"><button id="bU" aria-label="Rückgängig" title="Rückgängig">↶</button><button id="bR" aria-label="Wiederholen" title="Wiederholen">↷</button><button id="bF" title="Alles ins Bild holen">Einpassen</button></div>
+  <div class="grp"><button id="bU" aria-label="Rückgängig" title="Rückgängig">↶</button><button id="bR" aria-label="Wiederholen" title="Wiederholen">↷</button><button id="bF" title="Alles ins Bild holen">Einpassen</button><button id="bHelp" aria-label="Hilfe" title="Hilfe">?</button></div>
   <div class="grp" id="tools">
     <button data-t="draw" class="on">Zeichnen</button>
-    <button data-t="swap">Element tauschen</button>
-    <button data-t="move">Verschieben</button>
-    <button data-t="hand">Bindung drehen</button>
-    <button data-t="qp">Ladung +</button>
-    <button data-t="qm">Ladung −</button>
-    <button data-t="del">Löschen</button>
     <button data-t="sel">Auswahl</button>
-    <button data-t="arrow">Pfeil</button>
-    <button data-t="text">Text</button>
-    <button data-t="curve">Elektronenpfeil</button>
-    <button data-t="hb">H-Brücke</button>
-    <button data-t="stereo">Keil/Strich</button>
+    <button data-t="move">Verschieben</button>
+    <button data-t="del">Löschen</button>
+    <span class="dd"><button class="ddb" data-l="Bindung">Bindung ▾</button><div class="ddm" data-l="Bindung"><button data-t="hand">Bindung drehen</button><button data-t="stereo">Keil/Strich</button></div></span>
+    <span class="dd"><button class="ddb" data-l="Ladung">Ladung ▾</button><div class="ddm" data-l="Ladung"><button data-t="qp">Ladung +</button><button data-t="qm">Ladung −</button></div></span>
+    <span class="dd"><button class="ddb" data-l="Pfeile &amp; Text">Pfeile &amp; Text ▾</button><div class="ddm" data-l="Pfeile &amp; Text"><button data-t="arrow">Reaktionspfeil</button><button data-t="curve">Elektronenpfeil</button><button data-t="hb">H-Brücke</button><button data-t="text">Text</button></div></span>
   </div>
   <div class="grp" id="acts">
-    <button id="bH">H ergänzen</button>
-    <button id="bG">Gerade ausrichten</button>
-    <button id="bA">VSEPR-Winkel</button>
-    <button id="bB">Benzolring</button>
-    <button id="bC">Leeren</button>
     <span class="seg" id="bM"><button data-m="lewis">Lewis</button><button data-m="half">Halbstruktur</button><button data-m="skel">Skelett</button></span>
+    <button id="bH">H ergänzen</button>
+    <span class="dd"><button class="ddb">Anordnen ▾</button><div class="ddm" data-l="Anordnen"><button id="bG">Gerade ausrichten</button><button id="bA">VSEPR-Winkel</button></div></span>
+    <span class="dd"><button class="ddb">Einfügen ▾</button><div class="ddm" data-l="Einfügen"><button id="bNm">Name → Molekül</button><button id="bB">Benzolring</button></div></span>
     <button id="bN">IUPAC-Name</button>
-    <button id="bP" class="on">PNG / SVG</button>
     <button id="b3">3D-Ansicht</button>
-    <button id="bNm">Name → Molekül</button>
     <button id="bTk">Aufgabe</button>
-    <button id="bS">Speichern</button>
-    <button id="bO">Öffnen</button><input type="file" id="fi" accept=".json,application/json" hidden>
+    <span class="dd"><button class="ddb on">Datei ▾</button><div class="ddm" data-l="Datei"><button id="bP">Bild exportieren (PNG / SVG)</button><button id="bS">Speichern</button><button id="bO">Öffnen</button><button id="bC">Neues Blatt</button></div></span><input type="file" id="fi" accept=".json,application/json" hidden>
   </div>
 </div>
 <div class="bar pal" id="pal"></div>
 <div class="task" id="task"></div>
 <main class="board"><svg id="sv" aria-label="Zeichenfläche"></svg><div class="ctx" id="ctx"></div><div class="v3" id="v3"><canvas id="c3" aria-label="3D-Modell"></canvas>
-  <div class="v3bar"><span class="seg" id="v3s"><button data-s="ball" class="on">Kugel-Stab</button><button data-s="space">Kalotte</button><button data-s="stick">Stäbe</button></span><button id="v3l" class="on">Elektronenpaare</button><button id="v3r">Drehen ▶</button><button id="v3p">Bild speichern</button><button id="v3x" class="on">Schließen</button></div>
+  <div class="v3bar"><button id="v3x" class="on">✕ Schließen</button><span class="seg" id="v3s"><button data-s="ball" class="on">Kugel-Stab</button><button data-s="space">Kalotte</button><button data-s="stick">Stäbe</button></span><button id="v3l" class="on">Elektronenpaare</button><button id="v3r">Drehen ▶</button><button id="v3p">Bild speichern</button></div>
   <div class="v3i" id="v3i"></div></div><div class="hint" id="hint"></div></main>
 <footer id="foot">
   <span id="fo"></span><span id="pr"></span><span id="tn"></span>
@@ -150,6 +145,27 @@ body.mob #fo{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ell
   <p id="tkE" class="msg"></p>
   <div class="row"><button id="tkGo" class="on">Hier starten</button><button id="tkL">Link für die Klasse erzeugen</button></div>
   <div id="tkLB" style="display:none"><input id="tkLink" class="inp" readonly><div class="row"><button id="tkCp">Link kopieren</button></div></div>
+</div></div>
+<div class="modal" id="hpD"><div class="card help">
+  <div class="row" style="justify-content:space-between"><b>So geht's</b><button id="hpX">Schließen</button></div>
+  <h3>Zeichnen</h3><ul>
+  <li>Element oben wählen, auf eine leere Stelle tippen: Atom setzen.</li>
+  <li>Auf ein Atom tippen: Nachbaratom anhängen (gleiches Element) oder Atom ersetzen (anderes Element).</li>
+  <li>Von einem Atom wegziehen: Bindung zeichnen. Bindung antippen: einfach → doppelt → dreifach.</li>
+  <li><b>H ergänzen</b> füllt fehlende H-Atome auf. Rot markierte Atome erfüllen die Oktett- bzw. Duplettregel noch nicht.</li></ul>
+  <h3>Bearbeiten</h3><ul>
+  <li><b>Auswahl:</b> Molekül antippen oder Rahmen aufziehen, dann verschieben, drehen, duplizieren oder löschen.</li>
+  <li><b>Bindung ▾</b>: Molekülteil um eine Bindung drehen, Keil/Strich setzen. <b>Ladung ▾</b>: Ladungen setzen.</li>
+  <li><b>Pfeile &amp; Text ▾</b>: Reaktionspfeile, Elektronenpfeile (vom Elektronenpaar zum Ziel ziehen), H-Brücken, Beschriftungen.</li>
+  <li>↶ ↷ macht Schritte rückgängig.</li></ul>
+  <h3>Ansicht</h3><ul>
+  <li>Zwei Finger oder Mausrad: zoomen. <b>Einpassen</b> holt alles ins Bild.</li>
+  <li><b>Lewis | Halbstruktur | Skelett</b> wechselt die Formelart.</li>
+  <li><b>Anordnen ▾</b>: im 90°-Raster ausrichten (mehrfach tippen: weitere Anordnungen) oder nach VSEPR-Winkeln.</li>
+  <li><b>IUPAC-Name</b> zeigt Namen an, <b>3D-Ansicht</b> zeigt das räumliche Modell.</li></ul>
+  <h3>Aufgaben und Dateien</h3><ul>
+  <li><b>Aufgabe</b>: Molekül zum Namen, zur Summenformel oder Isomere suchen – mit Prüfen-Knopf und Link für die Klasse.</li>
+  <li><b>Datei ▾</b>: Bild als PNG/SVG exportieren, Zeichnung speichern und öffnen, neues Blatt.</li></ul>
 </div></div>
 <div class="modal" id="md"><div class="card">
   <div class="row" style="justify-content:space-between"><b>PNG-Export</b><button id="mx">Schließen</button></div>
@@ -602,7 +618,7 @@ function status(probs,tet){const cs=comps();$('fo').textContent=cs.length?cs.sli
   else{pr.className='';pr.textContent='✓ Oktett- und Duplettregel überall erfüllt'}
   $('tn').textContent=tet&&O.ang?'* Tetraeder: räumlich 109,5°, in der Ebene als Kreuz gezeichnet':''}
 
-let hf=null;function setHint(){$('hint').textContent=HINTS[tool]+(exNote?' · Beispiel: H₂O und CO₂ – „Leeren“ startet neu':'');clearTimeout(hf);if(document.body.classList.contains('mob'))hf=setTimeout(()=>{$('hint').textContent=''},5000)}
+let hf=null;function setHint(){$('hint').textContent=HINTS[tool]+(exNote?' · Beispiel: H₂O und CO₂ – „Datei ▾ → Neues Blatt“ startet neu':'');clearTimeout(hf);if(document.body.classList.contains('mob'))hf=setTimeout(()=>{$('hint').textContent=''},5000)}
 function flash(m){$('hint').textContent=m;clearTimeout(ht);ht=setTimeout(setHint,2500)}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({S,O,sel}))}catch(_){}}
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.S&&Array.isArray(d.S.atoms)){S=d.S;S.items=S.items||[];Object.assign(O,d.O||{});if(EL[d.sel])sel=d.sel;return true}}catch(_){}return false}
@@ -809,8 +825,15 @@ $('mt').onclick=()=>{O.tr=!O.tr;$('mt').textContent='Hintergrund: '+(O.tr?'trans
 $('mx').onclick=()=>$('md').classList.remove('show');
 $('md').onclick=e=>{if(e.target===$('md'))$('md').classList.remove('show')};
 
-function setTool(t){tool=t;if(t!=='sel')selClear();RB=null;ARP=null;CUP=null;HBP=null;document.querySelectorAll('#tools button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));setHint();render()}
-document.querySelectorAll('#tools button').forEach(b=>b.onclick=()=>setTool(b.dataset.t));
+function setTool(t){tool=t;if(t!=='sel')selClear();RB=null;ARP=null;CUP=null;HBP=null;document.querySelectorAll('#tools button[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('#tools .dd').forEach(d=>{const act=d.querySelector(`[data-t="${t}"]`),bb=d.querySelector('.ddb');bb.classList.toggle('on',!!act);bb.textContent=(act?act.textContent:bb.dataset.l)+' ▾'});setHint();render()}
+document.querySelectorAll('#tools button[data-t]').forEach(b=>b.onclick=()=>setTool(b.dataset.t));
+function ddClose(){document.querySelectorAll('.ddm.show').forEach(m=>m.classList.remove('show'))}
+document.querySelectorAll('.ddb').forEach(b=>b.onclick=e=>{e.stopPropagation();const m=b.nextElementSibling,open=m.classList.contains('show');ddClose();if(open)return;
+  const r=b.getBoundingClientRect();m.classList.add('show');const w=m.offsetWidth;m.style.left=Math.max(6,Math.min(innerWidth-w-6,r.left))+'px';m.style.top=(r.bottom+4)+'px'});
+document.querySelectorAll('.ddm').forEach(m=>m.addEventListener('click',()=>setTimeout(ddClose,0)));
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.dd'))ddClose()});
+document.querySelectorAll('.bar').forEach(b=>b.addEventListener('scroll',ddClose,{passive:true}));window.addEventListener('resize',ddClose);
+window.addEventListener('scroll',ddClose,true);
 function pal(){$('pal').innerHTML='<span class="lab">Element</span>'+PAL.map(e=>`<button data-e="${e}" class="${MET.has(e)?'m ':''}${e===sel?'on':''}">${e}</button>`).join('');
   $('pal').querySelectorAll('button').forEach(b=>b.onclick=()=>{sel=b.dataset.e;if(tool!=='draw'&&tool!=='swap')setTool('draw');pal();save()})}
 function opts(){$('oL').textContent='Paare: '+(O.lp==='bar'?'Striche':'Punkte');$('oW').classList.toggle('on',O.ang);$('oO').classList.toggle('on',O.chk);$('oF').classList.toggle('on',O.col);$('oD').classList.toggle('on',O.dp);$('oT').textContent='Tetraeder: '+(O.tw?'Keil-Strich':'Kreuz');$('oT').classList.toggle('on',O.tw);$('oS').classList.toggle('on',O.sc);$('bN').classList.toggle('on',O.nm);document.querySelectorAll('#bM button').forEach(x=>x.classList.toggle('on',x.dataset.m===O.mode));$('mt').textContent='Hintergrund: '+(O.tr?'transparent':'weiß')}
@@ -829,12 +852,12 @@ $('bA').onclick=()=>{if(!S.atoms.length)return;snap();vsepr();O.ang=true;opts();
 let gS=null;
 $('bG').onclick=()=>{if(!S.atoms.length)return;if(skel()){snap();skelApply();commit();flash('Zickzack neu angeordnet.');return}const cur=JSON.stringify(S),v=gS&&gS.after===cur?gS.v+1:0;snap();const g=gridLayout(v);O.ang=false;opts();commit();gS={after:JSON.stringify(S),v};
   flash((g.n>1?`Anordnung ${v%g.n+1} von ${g.n} – nochmal tippen für die nächste. `:'Ausgerichtet. ')+(g.tight?'Eine Bindung zum Ast ist länger, sonst hätten die H-Atome keinen Platz.':g.skipped?'Ringe bleiben unverändert.':''))};
-$('bC').onclick=()=>{if(!S.atoms.length&&!S.items.length)return;snap();selClear();S={atoms:[],bonds:[],items:[],n:S.n};commit();flash('Blatt geleert – mit ↶ zurückholen.')};
+$('bC').onclick=()=>{if(!S.atoms.length&&!S.items.length)return;snap();selClear();S={atoms:[],bonds:[],items:[],n:S.n};commit();flash('Neues Blatt – mit ↶ zurückholen.')};
 document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(e.target.closest&&e.target.closest('input')){if(k==='enter'&&EDIT&&e.target.id!=='nmI'&&e.target.id!=='tkI'){e.preventDefault();edOk()}if(k==='escape')closeEd();return}if(k==='escape'&&EDIT){closeEd();return}
   if((e.ctrlKey||e.metaKey)&&k==='z'){e.preventDefault();e.shiftKey?redo():undo();return}
   if((e.ctrlKey||e.metaKey)&&k==='y'){e.preventDefault();redo();return}
   if(e.ctrlKey||e.metaKey||e.altKey)return;const m={h:'H',c:'C',n:'N',o:'O',s:'S',p:'P',f:'F',b:'B',i:'I'}[k];if(m){sel=m;pal();save()}
-  if(k==='escape'){$('md').classList.remove('show');if($('v3').classList.contains('show'))close3()}});
+  if(k==='escape'){ddClose();$('hpD').classList.remove('show');$('md').classList.remove('show');if($('v3').classList.contains('show'))close3()}});
 window.addEventListener('resize',render);
 const mq=matchMedia('(max-width: 700px), (max-height: 520px)');
 function layoutMode(){const m=mq.matches;document.body.classList.toggle('mob',m);if(m){$('shBody').appendChild($('acts'));$('shBody').appendChild($('opts'))}else{$('sh').classList.remove('show');$('bar1').appendChild($('acts'));$('foot').appendChild($('opts'))}render()}
@@ -842,6 +865,7 @@ mq.addEventListener?mq.addEventListener('change',layoutMode):mq.addListener(layo
 $('bMore').onclick=()=>$('sh').classList.add('show');$('shx').onclick=()=>$('sh').classList.remove('show');$('sh').onclick=e=>{if(e.target===$('sh'))$('sh').classList.remove('show')};
 $('acts').addEventListener('click',e=>{if(e.target.closest('button')&&document.body.classList.contains('mob'))$('sh').classList.remove('show')});
 $('bF').onclick=fitView;
+$('bHelp').onclick=()=>$('hpD').classList.add('show');$('hpX').onclick=()=>$('hpD').classList.remove('show');$('hpD').onclick=e=>{if(e.target===$('hpD'))$('hpD').classList.remove('show')};
 $('b3').onclick=open3;$('v3x').onclick=close3;
 $('v3l').onclick=()=>{LP3=!LP3;v3ui();draw3()};
 $('v3r').onclick=()=>{ROT3=!ROT3;v3ui();cancelAnimationFrame(raf3);draw3()};
