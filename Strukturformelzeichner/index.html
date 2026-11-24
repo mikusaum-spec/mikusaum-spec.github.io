@@ -638,7 +638,7 @@ function gridComp(comp,long,op={}){const DIR={0:[1,0],90:[0,1],180:[-1,0],270:[0
   const free=(i,j)=>!atomC.has(key(i,j))&&!bondC.has(key(i,j));
   const pathFree=(i,j,d,st)=>{for(let m=1;m<=st;m++)if(!free(i+DIR[d][0]*m,j+DIR[d][1]*m))return false;return true};
   const put=(k,i,j,d,st)=>{for(let m=1;m<st;m++)bondC.add(key(i+DIR[d][0]*m,j+DIR[d][1]*m));const p=[i+DIR[d][0]*st,j+DIR[d][1]*st];pos.set(k.id,p);atomC.add(key(p[0],p[1]))};
-  const place=(a,k,st0)=>{const[i,j]=pos.get(a.id);let w=ang(old.get(a.id),old.get(k.id));if(op.fx)w=nrm(180-w);if(op.fy)w=nrm(-w);const order=[0,90,180,270].sort((x,y)=>adiff(x,w)-adiff(y,w));
+  const place=(a,k,st0)=>{const[i,j]=pos.get(a.id);let w=ang(old.get(a.id),old.get(k.id));if(op.fx)w=nrm(180-w);if(op.fy)w=nrm(-w);const lpA=a.el!=='H'&&info(a).k>0,used=lpA?nb(a).filter(n=>pos.has(n.o.id)&&n.o!==k).map(n=>{const q=pos.get(n.o.id);return nrm(Math.atan2(q[1]-j,q[0]-i)*180/Math.PI)}):[],opp=d=>used.some(u=>adiff(u,d)>179);const order=[0,90,180,270].sort((x,y)=>(opp(x)-opp(y))||(adiff(x,w)-adiff(y,w)));
     let d=order.find(d=>pathFree(i,j,d,st0));if(d!==undefined){put(k,i,j,d,st0);return true}
     for(let st=st0+1;st<8;st++){d=order.find(d=>pathFree(i,j,d,st));if(d!==undefined){put(k,i,j,d,st);return false}}
     put(k,i,j,order[0],st0);return false};
@@ -665,7 +665,7 @@ function gridLayout(v=0,only){for(const b of S.bonds)if(!only||only.has(b.a))del
 /* Skelettformel: Zickzack-Anordnung der Nicht-H-Atome (120°), Dreifachbindungen linear */
 function spread(d,k){if(!k)return[];if(!d.length)return[...Array(k)].map((_,i)=>nrm(-90+i*360/k));const s=[...d].sort((x,y)=>x-y),g=s.map((v,i)=>({s:v,g:(i+1<s.length?s[i+1]:s[0]+360)-v,c:0}));
   for(let i=0;i<k;i++){let bi=0,bv=-1;g.forEach((x,j)=>{const v=x.g/(x.c+1);if(v>bv+1e-6||(Math.abs(v-bv)<=1e-6&&x.g>g[bi].g)){bv=v;bi=j}});g[bi].c++}const o=[];g.forEach(x=>{for(let j=1;j<=x.c;j++)o.push(nrm(x.s+x.g*j/(x.c+1)))});return o}
-function placeH(a){const hs=nb(a).filter(n=>n.o.el==='H'&&nb(n.o).length===1);if(!hs.length)return;const dirs=spread(nb(a).filter(n=>!hs.some(h=>h.o===n.o)).map(n=>ang(a,n.o)),hs.length);hs.forEach((n,i)=>{const p=pol(a,dirs[i],L);n.o.x=p.x;n.o.y=p.y})}
+function placeH(a){const hs=nb(a).filter(n=>n.o.el==='H'&&nb(n.o).length===1);if(!hs.length)return;const I=info(a);if(I.k&&I.n+I.k<=4){const fx=nb(a).filter(n=>!hs.some(h=>h.o===n.o)).map(n=>ang(a,n.o)),b=fit(fx,hs.map(n=>ang(a,n.o)),I.n,I.k);hs.forEach((n,i)=>{const d=b.pf[i]??freeDir(a),p=pol(a,d,L);n.o.x=p.x;n.o.y=p.y});return}const dirs=spread(nb(a).filter(n=>!hs.some(h=>h.o===n.o)).map(n=>ang(a,n.o)),hs.length);hs.forEach((n,i)=>{const p=pol(a,dirs[i],L);n.o.x=p.x;n.o.y=p.y})}
 function placeHAll(){S.atoms.filter(a=>a.el!=='H').forEach(placeH)}
 function skelApply(only){const ring=ringSet();
   for(const comp of comps()){if(only&&!comp.some(a=>only.has(a.id)))continue;const hv=comp.filter(a=>a.el!=='H');if(comp.some(a=>ring.has(a.id))){hv.forEach(placeH);continue}if(hv.length<2)continue;
@@ -822,7 +822,7 @@ $('oS').onclick=()=>{O.sc=!O.sc;opts();save();render();if(O.sc)flash('* markiert
 $('oD').onclick=()=>{O.dp=!O.dp;opts();save();render();if(O.dp)flash('Partialladungen ab ΔEN ≥ 0,4 (Pauling-Werte).')};
 $('oF').onclick=()=>{O.col=!O.col;opts();save();render()};
 const MSG={lewis:'Lewis-Formel mit allen Atomen und Elektronenpaaren.',half:'Halbstrukturformel: H-Atome in Gruppen zusammengefasst, freie Elektronenpaare ausgeblendet.',skel:'Skelettformel: C-Atome als Ecken der Zickzacklinie, H an C weggelassen.'};
-document.querySelectorAll('#bM button').forEach(x=>x.onclick=()=>{const m=x.dataset.m;if(m===O.mode)return;gS=null;snap();const wasSkel=skel();O.mode=m;if(m==='skel')skelApply();else if(wasSkel){placeHAll();gridLayout(0)}opts();commit();flash(MSG[m])});
+document.querySelectorAll('#bM button').forEach(x=>x.onclick=()=>{const m=x.dataset.m;if(m===O.mode)return;gS=null;snap();const wasSkel=skel(),was=O.mode;O.mode=m;if(m==='skel')skelApply();else if(wasSkel){placeHAll();gridLayout(0)}else if(was==='half'){const grid=S.bonds.every(b=>{const d=ang(A(b.a),A(b.b))%90;return d<1||d>89});if(grid)gridLayout(0);else placeHAll()}opts();commit();flash(MSG[m])});
 $('bN').onclick=()=>{O.nm=!O.nm;opts();save();render()};
 $('bU').onclick=undo;$('bR').onclick=redo;$('bH').onclick=addH;$('bB').onclick=benz;$('bP').onclick=png;
 $('bA').onclick=()=>{if(!S.atoms.length)return;snap();vsepr();O.ang=true;opts();commit()};
