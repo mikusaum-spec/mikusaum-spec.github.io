@@ -96,7 +96,7 @@ body.mob #fo{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ell
   </div>
   <div class="grp" id="acts">
     <span class="seg" id="bM"><button data-m="lewis">Lewis</button><button data-m="half">Halbstruktur</button><button data-m="skel">Skelett</button></span>
-    <button id="bH">H ergänzen</button>
+    <span class="dd"><button class="ddb">Ergänzen ▾</button><div class="ddm" data-l="Ergänzen"><button id="bH">H-Atome ergänzen</button><button id="bQ">Formalladungen bestimmen</button></div></span>
     <span class="dd"><button class="ddb">Anordnen ▾</button><div class="ddm" data-l="Anordnen"><button id="bG">Gerade ausrichten</button><button id="bA">VSEPR-Winkel</button></div></span>
     <span class="dd"><button class="ddb">Einfügen ▾</button><div class="ddm" data-l="Einfügen"><button id="bNm">Name → Molekül</button><button id="bB">Benzolring</button></div></span>
     <button id="bN">IUPAC-Name</button>
@@ -153,6 +153,9 @@ body.mob #fo{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ell
   <li>Auf ein Atom tippen: Nachbaratom anhängen (gleiches Element) oder Atom ersetzen (anderes Element).</li>
   <li>Von einem Atom wegziehen: Bindung zeichnen. Bindung antippen: einfach → doppelt → dreifach.</li>
   <li><b>H ergänzen</b> füllt fehlende H-Atome auf. Rot markierte Atome erfüllen die Oktett- bzw. Duplettregel noch nicht.</li></ul>
+  <h3>Formalladungen</h3><ul>
+  <li><b>Ergänzen ▾ → Formalladungen bestimmen</b> setzt für jedes Atom die Formalladung so, dass die Oktett- bzw. Duplettregel erfüllt ist: FL = Valenzelektronen − nichtbindende Elektronen − Bindungen (z. B. N in NH₄⁺: 5 − 0 − 4 = +1).</li>
+  <li>Bei C mit drei Bindungen (Carbokation oder Carbanion) entscheidest du selbst mit <b>Ladung ▾</b>.</li></ul>
   <h3>Bearbeiten</h3><ul>
   <li><b>Auswahl:</b> Molekül antippen oder Rahmen aufziehen, dann verschieben, drehen, duplizieren oder löschen.</li>
   <li><b>Bindung ▾</b>: Molekülteil um eine Bindung drehen, Keil/Strich setzen. <b>Ladung ▾</b>: Ladungen setzen.</li>
@@ -208,7 +211,14 @@ function lpDirs(a,I){const k=I.k;if(!k)return[];const d=I.ns.map(n=>ang(a,n.o)).
   const gaps=d.map((v,i)=>({s:v,g:(i+1<d.length?d[i+1]:d[0]+360)-v,c:0}));
   for(let i=0;i<k;i++){let bi=0,bv=-1;gaps.forEach((g,j)=>{const v=g.g/(g.c+1);if(v>bv+1e-6){bv=v;bi=j}});gaps[bi].c++}
   const out=[];gaps.forEach(g=>{for(let j=1;j<=g.c;j++)out.push(nrm(g.s+g.g*j/(g.c+1)))});return out}
-function check(a,I){if(I.f<0)return'zu viele Bindungen';if(MET.has(a.el))return null;const e=2*I.bs+I.f;
+/* Formalladung nach Oktett-/Duplettregel: FL = Valenzelektronen − nichtbindende Elektronen − Bindungen */
+function fcFor(a){if(MET.has(a.el))return null;const I=info(a),V=EL[a.el][0],bs=I.bs;
+  if(a.el==='H')return bs===1?0:null;if(a.el==='B'||a.el==='Al')return bs>=3?3-bs:null;
+  if(bs>4)return Math.min(0,V-bs);if(a.el==='C'&&bs<3)return null;if(a.el==='C'&&bs===3&&I.n>=2)return a.q||null;
+  if(EXP.has(a.el)&&I.ns.some(n=>n.b.o>1)&&V-bs>=0&&(V-bs)%2===0&&V+bs-8>0)return 0;
+  const q=V+bs-8;return Math.abs(q)>3?null:q}
+function check(a,I){const r=check0(a,I);if(!r||r.startsWith('nur'))return r;const q=fcFor(a);return q!=null&&q!==a.q?`${r} – Formalladung ${q===0?'0':(q>0?'+':'−')+Math.abs(q)}?`:r}
+function check0(a,I){if(I.f<0)return'zu viele Bindungen';if(MET.has(a.el))return null;const e=2*I.bs+I.f;
   if(a.el==='H')return e===2?null:'kein Duplett';if(e===8)return null;if(e>8)return EXP.has(a.el)?null:'mehr als 8 Elektronen';return'nur '+e+' Valenzelektronen (Oktett unvollständig)'}
 function brHash(st,fr,dep,seen){if(dep<=0)return st.el;const ch=nb(st).filter(n=>n.o.id!==fr&&!seen.has(n.o.id)).map(n=>{const s2=new Set(seen);s2.add(st.id);return n.b.o+brHash(n.o,st.id,dep-1,s2)}).sort();return st.el+'('+ch.join(',')+')'}
 function isStereo(a){if(a.el!=='C')return false;const ns=nb(a);if(ns.length!==4||ns.some(n=>n.b.o!==1))return false;const hs=ns.map(n=>brHash(n.o,a.id,7,new Set([a.id])));return new Set(hs).size===4}
@@ -714,6 +724,9 @@ function vsepr(only){if(!O.tw){tidy(only);return}const ring=ringSet();
   for(const c of comps()){if(only&&!c.some(a=>only.has(a.id)))continue;const ids=new Set(c.map(a=>a.id)),hv=c.filter(a=>a.el!=='H');
     if(c.some(a=>ring.has(a.id))||hv.length<2)tidy(ids);else skelApply(ids);wedgeify(ids)}}
 function want(a){if(a.el==='H'||MET.has(a.el))return 0;if(a.el==='C')return 4-Math.abs(a.q);if(a.el==='B')return 3-a.q;return 8-EL[a.el][0]+a.q}
+function setFC(){const ch=[],amb=[];snap();for(const a of S.atoms){const q=fcFor(a);if(q==null){if(a.el!=='H'&&!MET.has(a.el)&&check(a,info(a)))amb.push(a.el);continue}if(q!==a.q){ch.push(`${a.el} ${q>0?'+':q<0?'−':''}${Math.abs(q)||'0'}`);a.q=q}}
+  if(!ch.length){U.pop();flash(amb.length?`Keine eindeutige Formalladung bei ${[...new Set(amb)].join(', ')} – erst H-Atome ergänzen bzw. Ladung (C⁺/C⁻) selbst setzen.`:'Alle Formalladungen stimmen bereits.');return}
+  commit();flash(`Formalladungen gesetzt: ${ch.slice(0,6).join(', ')}${ch.length>6?' …':''}. FL = Valenzelektronen − nichtbindende Elektronen − Bindungen.${amb.length?' Bei C mit drei Bindungen die Ladung selbst setzen.':''}`)}
 function addH(){snap();let any=false;for(const a of[...S.atoms]){let m=want(a)-info(a).bs;for(;m>0;m--){attach(a,'H');any=true}}if(!any){U.pop();flash('Alle Atome sind bereits abgesättigt.');return}commit()}
 function benz(){snap();const r=sv.getBoundingClientRect();let cx=(r.width/2-V.x)/V.s,cy=(r.height/2-V.y)/V.s;for(let i=0;i<12&&S.atoms.some(a=>Math.hypot(a.x-cx,a.y-cy)<L*2);i++)cx+=L*1.2;
   const at=[];for(let i=0;i<6;i++)at.push(addAtom('C',cx+L*Math.cos(rad(-90+60*i)),cy+L*Math.sin(rad(-90+60*i))));
@@ -847,7 +860,7 @@ $('oF').onclick=()=>{O.col=!O.col;opts();save();render()};
 const MSG={lewis:'Lewis-Formel mit allen Atomen und Elektronenpaaren.',half:'Halbstrukturformel: H-Atome in Gruppen zusammengefasst, freie Elektronenpaare ausgeblendet.',skel:'Skelettformel: C-Atome als Ecken der Zickzacklinie, H an C weggelassen.'};
 document.querySelectorAll('#bM button').forEach(x=>x.onclick=()=>{const m=x.dataset.m;if(m===O.mode)return;gS=null;snap();const wasSkel=skel(),was=O.mode;O.mode=m;if(m==='skel')skelApply();else if(wasSkel){placeHAll();gridLayout(0)}else if(was==='half'){const grid=S.bonds.every(b=>{const d=ang(A(b.a),A(b.b))%90;return d<1||d>89});if(grid)gridLayout(0);else placeHAll()}opts();commit();flash(MSG[m])});
 $('bN').onclick=()=>{O.nm=!O.nm;opts();save();render()};
-$('bU').onclick=undo;$('bR').onclick=redo;$('bH').onclick=addH;$('bB').onclick=benz;$('bP').onclick=png;
+$('bU').onclick=undo;$('bR').onclick=redo;$('bH').onclick=addH;$('bQ').onclick=setFC;$('bB').onclick=benz;$('bP').onclick=png;
 $('bA').onclick=()=>{if(!S.atoms.length)return;snap();vsepr();O.ang=true;opts();commit()};
 let gS=null;
 $('bG').onclick=()=>{if(!S.atoms.length)return;if(skel()){snap();skelApply();commit();flash('Zickzack neu angeordnet.');return}const cur=JSON.stringify(S),v=gS&&gS.after===cur?gS.v+1:0;snap();const g=gridLayout(v);O.ang=false;opts();commit();gS={after:JSON.stringify(S),v};
